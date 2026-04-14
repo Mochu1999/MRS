@@ -1,6 +1,7 @@
+@echo off
 rem This .bat loops through the specified subfolders to clean build files, it ignores source code and resources.
 rem It deletes Visual Studio solutions. Solutions are meant to be later created with createSolutions.bat
-@echo off
+
 echo CLEANING ALL PROJECT SUBDIRECTORIES:
 
 rem Iterates through directories /d (not files). %%D is the current subfolder, (*) everything in %%D

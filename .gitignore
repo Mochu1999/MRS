@@ -8,7 +8,8 @@ Framework/**
 
 # Allow project dirs
 !Framework/Resources/**
-# Except the heavy folder
+!Framework/Documentation/**
+# Except for the heavy folder
 Framework/Resources/Heavy/**
 
 # Allow content inside those dirs
