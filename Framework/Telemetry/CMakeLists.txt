@@ -10,8 +10,8 @@ set(CMAKE_SUPPRESS_REGENERATION ON)
 
 # Collect source files
 #createSolutions.bat must be run again to view newly created or moved elements
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS ../Sources/*.cpp) #compiled
-file(GLOB_RECURSE HDR_FILES CONFIGURE_DEPENDS ../Sources/*.h ../Sources/*.hpp) #files not directly compiled
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS ../Source/*.cpp) #compiled
+file(GLOB_RECURSE HDR_FILES CONFIGURE_DEPENDS ../Source/*.h ../Source/*.hpp) #files not directly compiled
 file(GLOB_RECURSE RES_FILES CONFIGURE_DEPENDS ../Resources/*) #files not compiled
 #These are in the project directoty folder, containing main.cpp and specific source files
 file(GLOB LOCAL_SRC CONFIGURE_DEPENDS *.cpp)
@@ -38,14 +38,14 @@ set_target_properties(Telemetry PROPERTIES MSVC_RUNTIME_LIBRARY "$<$<CONFIG:Debu
 set_target_properties(Telemetry PROPERTIES COMPILE_DEFINITIONS "_DEBUG;_CONSOLE;GLEW_STATIC")
 
 target_include_directories(Telemetry PRIVATE
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Sources"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Sources/Core"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Sources/Composites"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Sources/Stability"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Sources/Deprecated"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Sources/Composites/Autopilot"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Sources/Composites/Telemetry"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Sources/BasicsRendering"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../Source"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Core"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Composites"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Stability"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Deprecated"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Composites/Autopilot"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Composites/Telemetry"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/BasicsRendering"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Resources/External/Includes"
 )
 
