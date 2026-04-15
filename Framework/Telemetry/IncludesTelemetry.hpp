@@ -4,10 +4,9 @@
 #include "Shader.hpp"
 #include "Time.hpp"
 #include "Camera.hpp"
-#include "BinariesManager.hpp"
 #include "KeyMouseImputs.hpp"
 #include "FilesManagement.hpp"
-#include "Settings.hpp"
+#include "SettingsTelemetry.hpp"
 
 
 #include "Lines3D.hpp"
@@ -21,10 +20,6 @@
 #include "Text.hpp"
 
 
-
-#include "auxiliary_elements.hpp"
-#include "AuxSquare.hpp"
-#include "Arrows.hpp"
 #include "Globe.hpp"
 
 #include "Delaunay2D.hpp"
@@ -32,6 +27,8 @@
 #include "Graphics.hpp"
 #include "Autopilot.hpp"
 #include "Axis.hpp"
-#include "Light.hpp"
+#include "Lourdes.hpp"
 #include "Overlay2D.hpp"
 #include "ProgressBar.hpp"
+
+#include "Telemetry.hpp"

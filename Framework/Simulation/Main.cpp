@@ -4,7 +4,6 @@
 int main(void)
 {
 	GlobalVariables gv;
-	gv.program = offshoreProgram;
 
 	GLFWwindow* window = initialize();
 

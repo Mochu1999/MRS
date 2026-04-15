@@ -10,13 +10,11 @@
 */
 
 
-
 struct Camera {
 
 	float translationSpeed = 0.20f, rotationSpeed = 0.05f;
 
 	GLFWwindow* window;
-	Shader& shader3D, shader2D, shader2D_Instanced, shaderText;
 	GlobalVariables& gv;
 
 	float fov = 45.0f * PI / 180;
@@ -41,8 +39,8 @@ struct Camera {
 	float scale = 1;
 
 
-	Camera(GLFWwindow* window_, Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, GlobalVariables& gv_)
-		:window(window_), shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), gv(gv_) 
+	Camera(GLFWwindow* window_, GlobalVariables& gv_)
+		:window(window_), gv(gv_) 
 	{
 		orthoMatrix = createOrthoMatrix();
 		perspectiveMatrix = createPerspectiveMatrix();
@@ -56,29 +54,8 @@ struct Camera {
 		
 
 		updateCamera();
-
-
-		//Locations initializers
-		{
-			//3D
-			shader3D.bind();
-			shader3D.setUniform("u_Perspective", perspectiveMatrix);
-			shader3D.setUniform("u_Model3D", identityMatrix);
-
-			//2D
-			shader2D.bind();
-			shader2D.setUniform("u_OrthoProjection", orthoMatrix);
-			shader2D.setUniform("u_Model", identityMatrix);
-
-
-			//2D_Instanced
-			shader2D_Instanced.bind();
-			shader2D_Instanced.setUniform("u_OrthoProjection", orthoMatrix);
-
-			//Text
-			shaderText.bind();
-			shaderText.setUniform("u_OrthoProjection", orthoMatrix);
-		}
+		
+		
 	}
 
 	p3 cursorToXZPlane();
@@ -123,3 +100,5 @@ struct Camera {
 std::array<float, 16> create2DModelMatrix(const p2 translation, float angleDeg, float scale);
 
 std::array<float, 16> create2DModelMatrix(const p2 translation, float angleDeg, p2 scale);
+
+void cameraLocationsInitialization(Shader& shader3D, Shader& shader2D, Shader& shader2D_Instanced, Shader& shaderText, Camera& camera);

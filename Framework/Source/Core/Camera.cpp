@@ -174,21 +174,6 @@ void Camera::updateCamera() {
 		
 	}
 
-	if (gv.program == openCascade)
-	{
-		if (gv.isMmbPressed)
-		{
-			//cameraPos -= right * (currentMiddleMPosVariation.x * 0.05);
-			//cameraPos -= forward * (currentMiddleMPosVariation.y * 0.05);
-			//gv.totalMiddleMPosVariation.y = 10;
-
-			////translate3DModelMatrix(gv.modelMatrixOCC, gv.totalMiddleMPosVariation);
-			////cameraPos += gv.totalMiddleMPosVariation;
-
-			//gv.LastMMPos = gv.mPos;
-		}
-
-	}
 
 	//The quaternion method is intentionally incomplete. The true method would calculate the f and u for pitch and f and r for yaw
 	// But instead of calculating everything there we are only calculating f and here forcing right to be with respect of the referenceUp
@@ -201,12 +186,8 @@ void Camera::updateCamera() {
 	vpMatrix = multiplyMatrices(perspectiveMatrix, viewMatrix);
 
 
-	shader3D.bind();
-	shader3D.setUniform("u_CamPos", cameraPos);
-	shader3D.setUniform("u_View", viewMatrix);
+	
 
-
-	//print(cursorToXZPlane());
 	
 }
 
@@ -561,4 +542,30 @@ std::array<float, 16> create2DModelMatrix(const p2 translation, float angleDeg, 
 	modelMatrix[13] = translation.y;
 
 	return modelMatrix;
+}
+
+void cameraLocationsInitialization(Shader& shader3D, Shader& shader2D, Shader& shader2D_Instanced, Shader& shaderText, Camera& camera)
+{
+	//3D
+	shader3D.bind();
+	shader3D.setUniform("u_Perspective", camera.perspectiveMatrix);
+	shader3D.setUniform("u_Model3D", identityMatrix);
+
+	shader3D.setUniform("u_CamPos", camera.cameraPos);
+	//Sun position for telemetry
+	shader3D.setUniform("u_lightPos", p3{ 30,25,40 });
+
+	//2D
+	shader2D.bind();
+	shader2D.setUniform("u_OrthoProjection", camera.orthoMatrix);
+	shader2D.setUniform("u_Model", identityMatrix);
+
+
+	//2D_Instanced
+	shader2D_Instanced.bind();
+	shader2D_Instanced.setUniform("u_OrthoProjection", camera.orthoMatrix);
+
+	//Text
+	shaderText.bind();
+	shaderText.setUniform("u_OrthoProjection", camera.orthoMatrix);
 }

@@ -2,7 +2,7 @@
 
 #include "Globe.hpp"
 #include "Autopilot.hpp"
-#include "Light.hpp"
+#include "Lourdes.hpp"
 #include "Common.hpp"
 #include "Camera.hpp"
 
@@ -16,9 +16,9 @@ struct AllPointers {
 	Camera* camera;
 	GlobalVariables* gv;
 	Autopilot* autopilot;
-	Light* ship;
+	Lourdes* ship;
 
-	AllPointers(Camera* camera_, GlobalVariables* gv_, Autopilot* autopilot_, Light* ship_)
+	AllPointers(Camera* camera_, GlobalVariables* gv_, Autopilot* autopilot_, Lourdes* ship_)
 		:camera(camera_), autopilot(autopilot_), gv(gv_), ship(ship_) {
 	}
 };
@@ -32,7 +32,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
 	Autopilot* autopilot = allPointers->autopilot;
-	Light* ship = allPointers->ship;
+	Lourdes* ship = allPointers->ship;
 	GlobalVariables* gv = allPointers->gv;
 
 
@@ -45,7 +45,6 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			{
 			case GLFW_KEY_1:
 				gv->program = telemetry;
-				ship->activateLight();
 
 				break;
 			case GLFW_KEY_2:
@@ -54,7 +53,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 				break;
 			case GLFW_KEY_3:
 				//gv->program = solarProgram;
-				//solar->activateLight();
+				//solar->activateLourdes();
 
 				break;
 			case GLFW_KEY_4:
