@@ -432,9 +432,11 @@ struct SweepTrAux {
 
 		for (int k = chain[currentChain].size() - 3; k >= 0; k--)
 		{
-			if (crossProduct(sPoints[backIndex].point,
+			if (/*crossProduct(sPoints[backIndex].point,
 				sPoints[PenultimateIndex].point,
-				sPoints[chain[currentChain][k]].point) <= 0)
+				sPoints[chain[currentChain][k]].point) */
+				cross2(sPoints[PenultimateIndex].point - sPoints[backIndex].point,
+					sPoints[chain[currentChain][k]].point - sPoints[backIndex].point) <= 0)
 				//<0 because order is clockwise (result still cc), =0 bc the area can be 0 in collinear and need to erase
 			{
 				indices.insert(indices.end(), { chain[currentChain][k],PenultimateIndex,backIndex });
@@ -461,9 +463,11 @@ struct SweepTrAux {
 
 			for (size_t k = 2; k < chain[currentChain].size(); k++)
 			{
-				if (crossProduct(sPoints[frontIndex].point,
+				if (/*crossProduct(sPoints[frontIndex].point,
 					sPoints[secondIndex].point,
-					sPoints[chain[currentChain][k]].point) > 0)
+					sPoints[chain[currentChain][k]].point)*/
+					cross2(sPoints[secondIndex].point - sPoints[frontIndex].point,
+						sPoints[chain[currentChain][k]].point - sPoints[frontIndex].point) > 0)
 				{
 					indices.insert(indices.end()
 						, { frontIndex,secondIndex,chain[currentChain][k] });

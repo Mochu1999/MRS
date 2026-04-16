@@ -1,5 +1,9 @@
 #pragma once
+#include "Variables.hpp"
 
+//--- --- ---
+//prints
+//--- --- ---
 
 // General print template for all types
 template<typename T>
@@ -97,3 +101,47 @@ void print_(const string& name, const vector<T>& items) {
 void print_(const std::string& name, const std::array<float, 16>& matrix);
 
 #define print(var) print_(#var, var)
+
+
+
+
+
+
+
+
+
+//--- --- ---
+//Quaternions
+//--- --- ---
+
+std::array<float, 4> createQuaternion(float angle, const p3& axis);
+
+std::array<float, 4> inverseQuaternion(const std::array<float, 4>& q);
+
+std::array<float, 4> multiplyQuaternions(const std::array<float, 4>& a, const std::array<float, 4>& b);
+
+// q * p * q^-1
+void rotatePoint(p3& point, const float& angle, const p3& axis);
+
+void rotate3D(std::vector<p3>& vertices, const p3& centroid, float angleX, float angleY, float angleZ);
+void rotate3D(std::vector<p3>& vertices, float angleX, float angleY, float angleZ);
+
+// Normalizes the quaternion [w, x, y, z] in-place
+void normalizeQuaternion(std::array<float, 4>& q);
+
+
+
+
+//--- --- ---
+//
+//--- --- ---
+
+float isRightOfLine(p2& A, p2& B, p2& P);
+
+float isBelowTriangle(const p3& a, const p3& b, const p3& c, const p3& p);
+
+//Computes the intersection between 2 edges AB and CD
+bool calculateIntersectionPoints(const p2 A, const p2 B, const p2 C, const p2 D, p2& i);
+
+//Numerically Stable Quadratic Formula
+void stableQuadraticSolver(float A, float B, float C, float& s0, float& s1);

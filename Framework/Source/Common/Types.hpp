@@ -278,7 +278,23 @@ float magnitude3(const vec3<T>& v) {
 	return sqrt(magnitudeSquared);
 }
 
+template<typename T>
+vec3<T> centroid(const vec3<T>& p1, const vec3<T>& p2, const vec3<T>& p3) {
+	return (p1 + p2 + p3) * 0.33333; //inv3
+}
+
+template<typename T>
+vec3<T> normal(const vec3<T>& p1, const vec3<T>& p2, const vec3<T>& p3) {
+	return normalize3(cross3(p2 - p1, p3 - p1));
+}
+
+
 // --- --- ---
 //  matrix4x4
 // --- --- ---
 using matrix4x4 = std::array<float, 16>;
+
+matrix4x4 multiplyMatrices(const matrix4x4& a, const matrix4x4& b);
+matrix4x4 invertMatrix(const matrix4x4& m);
+
+std::array<float, 4> multiplyMatVec(const matrix4x4& m, const std::array<float, 4>& v);

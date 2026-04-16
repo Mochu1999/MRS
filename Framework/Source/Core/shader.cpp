@@ -119,7 +119,29 @@ void Shader::unbind() {
 }
 
 
+void getCursorPos(GLFWwindow* window) {
 
+	double intermX, intermY;
+
+	glfwGetCursorPos(window, &intermX, &intermY);
+
+	cursor = { static_cast<float>(intermX), static_cast<float>(windowHeight - intermY) };
+
+}
+void opaque() {
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+}
+
+
+void transparent() {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//deactivates the depth buffer, if activated the objects behind it won't be rendered
+	//, irrelevant if there aren't multiple layers of transparent
+	glDepthMask(GL_FALSE);
+}
 
 
 // to not render what is not visible to the camera:
