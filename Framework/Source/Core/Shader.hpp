@@ -2,14 +2,10 @@
 
 #include "Common.hpp"
 
-//Había un void bind() const {} que hay que reexplorar
 
 
 
-// to not render what is not visible to the camera:
-//glEnable(GL_CULL_FACE);       // Enable face culling
-//glCullFace(GL_BACK);          // Cull back faces
-//glFrontFace(GL_CCW);          // Counter-clockwise winding is front-facing
+
 
 
 struct ShaderProgramSource {

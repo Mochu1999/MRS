@@ -16,13 +16,9 @@ int main(void)
 	Shader shader2D("resources/shaders/shader2D.shader");
 	Shader shader2D_Instanced("resources/shaders/shader2D_Instanced.shader");
 	Shader shaderText("resources/shaders/shaderText.shader");
-	//remove shaders from camera
 	Camera camera(window, gv);
 	cameraLocationsInitialization(shader3D, shader2D, shader2D_Instanced, shaderText, camera);
 
-
-	//Autopilot won't be needed for the first iteration but it will be needed in next iterations
-	Autopilot autopilot(shader2D, shaderText, shader2D_Instanced, gv, tm);
 
 	Lourdes lourdes(shader3D, camera, gv);
 
@@ -31,9 +27,9 @@ int main(void)
 
 
 
-	Settings settings(camera, gv, autopilot);
+	Settings settings(camera, gv);
 
-	AllPointers allPointers(&camera, &gv, &autopilot, &lourdes);
+	AllPointers allPointers(&camera, &gv, &lourdes);
 	glfwSetWindowUserPointer(window, &allPointers);
 	glfwSetKeyCallback(window, keyboardEventCallback);
 	glfwSetMouseButtonCallback(window, mouseEventCallback);
@@ -41,9 +37,7 @@ int main(void)
 
 
 	int counter = 0;
-	//return 0;
-	//system("cls");
-	camera.forward = { 1,0,0 };
+
 	while (!glfwWindowShouldClose(window))
 	{
 		getPos(window, gv.mPos);
@@ -59,25 +53,19 @@ int main(void)
 			shaderText.setUniform("u_Color", 1.0f, 1.0f, 1.0f);
 
 			lourdes.draw();
-
-
-
-
 			telemetry.update();
 
 
 
-			keyboardRealTimePolls(window, gv, camera, autopilot);
+			keyboardRealTimePolls(window, gv, camera);
 			camera.updateCamera();
 			//updating shader location
 			shader3D.bind();
 			shader3D.setUniform("u_View", camera.viewMatrix);
 
 
-			//break;
 
 		}
-		//isRunning = false;
 
 
 		glfwSwapBuffers(window);

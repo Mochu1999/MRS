@@ -130,7 +130,7 @@ struct Sphere {
 		indices.reserve(indices.size() + secondTrIndices.size());
 		indices.insert(indices.end(), secondTrIndices.begin(), secondTrIndices.end());
 
-
+		isBufferUpdated = true;
 
 	}
 
@@ -176,7 +176,6 @@ struct Sphere {
 	void draw() {
 
 		glBindVertexArray(vertexArray);
-
 		if (isBufferUpdated)
 		{
 			currentPositionsDataSize = positions.size() * sizeof(p3);

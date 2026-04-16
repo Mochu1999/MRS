@@ -1,5 +1,5 @@
 #pragma once
-#include "TelemetryUI.hpp"
+#include "UI.hpp"
 
 struct Telemetry
 {
@@ -15,7 +15,7 @@ struct Telemetry
 	Axis axis;
 
 	Lourdes& lourdes;
-	TelemetryUI ui;
+	UI ui;
 	
 	Telemetry(Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, GlobalVariables& gv_, TimeStruct& tm_, Lourdes& lourdes_)
 		:shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), camera(camera_), gv(gv_), tm(tm_), lourdes(lourdes_)

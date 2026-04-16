@@ -114,19 +114,17 @@ struct Settings
 	p3& cameraPos;
 	p3& forward;
 	GlobalVariables& gv;
-	Autopilot& autopilot;
 
 	enum Variables
 	{
 		CameraPos,
 		Forward,
 		Program,
-		totalXpixels,
 		TotalMiddleMPosVariation
 	};
 
-	Settings(Camera& camera, GlobalVariables& gv_, Autopilot& autopilot_) 
-		: cameraPos(camera.cameraPos), forward(camera.forward), gv(gv_), autopilot(autopilot_)
+	Settings(Camera& camera, GlobalVariables& gv_) 
+		: cameraPos(camera.cameraPos), forward(camera.forward), gv(gv_)
 	{
 		read();
 		reset();
@@ -150,11 +148,6 @@ struct Settings
 			var = Program;
 			outFile.write(reinterpret_cast<const char*>(&var), sizeof(var));
 			outFile.write(reinterpret_cast<const char*>(&gv.program), sizeof(gv.program));
-
-			var = totalXpixels;
-			outFile.write(reinterpret_cast<const char*>(&var), sizeof(var));
-			outFile.write(reinterpret_cast<const char*>(&autopilot.world.totalXpixels), sizeof(autopilot.world.totalXpixels));
-
 
 			var = TotalMiddleMPosVariation;
 			outFile.write(reinterpret_cast<const char*>(&var), sizeof(var));
@@ -186,10 +179,6 @@ struct Settings
 				case Program:
 					inFile.read(reinterpret_cast<char*>(&gv.program), sizeof(gv.program));
 					break;
-				case totalXpixels:
-					inFile.read(reinterpret_cast<char*>(&autopilot.world.totalXpixels), sizeof(autopilot.world.totalXpixels));
-					autopilot.world.updateCamera(); //if we end reducir all thise, just autopilot.update() at the end of read()
-					break;
 				case TotalMiddleMPosVariation:
 					inFile.read(reinterpret_cast<char*>(&gv.totalMiddleMPosVariation), sizeof(gv.totalMiddleMPosVariation));
 					break;
@@ -213,7 +202,6 @@ struct Settings
 	{
 		print(cameraPos);
 		print(forward);
-		print(autopilot.world.totalXpixels);
 		print(gv.program);
 		print(gv.totalMiddleMPosVariation);
 	}

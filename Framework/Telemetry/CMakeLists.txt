@@ -43,8 +43,7 @@ target_include_directories(Telemetry PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Composites"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Stability"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Deprecated"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Composites/Autopilot"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Composites/Telemetry"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Common"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/BasicsRendering"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Resources/External/Includes"
 )

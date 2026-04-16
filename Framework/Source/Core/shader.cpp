@@ -122,7 +122,10 @@ void Shader::unbind() {
 
 
 
-
+// to not render what is not visible to the camera:
+//glEnable(GL_CULL_FACE);       // Enable face culling
+//glCullFace(GL_BACK);          // Cull back faces
+//glFrontFace(GL_CCW);          // Counter-clockwise winding is front-facing
 
 
 //General window, where you don't specify anything

@@ -15,11 +15,10 @@ int keyCounter = 5;
 struct AllPointers {
 	Camera* camera;
 	GlobalVariables* gv;
-	Autopilot* autopilot;
 	Lourdes* ship;
 
-	AllPointers(Camera* camera_, GlobalVariables* gv_, Autopilot* autopilot_, Lourdes* ship_)
-		:camera(camera_), autopilot(autopilot_), gv(gv_), ship(ship_) {
+	AllPointers(Camera* camera_, GlobalVariables* gv_, Lourdes* ship_)
+		:camera(camera_), gv(gv_), ship(ship_) {
 	}
 };
 
@@ -31,7 +30,6 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
-	Autopilot* autopilot = allPointers->autopilot;
 	Lourdes* ship = allPointers->ship;
 	GlobalVariables* gv = allPointers->gv;
 
@@ -91,13 +89,6 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 					break;*/
 			case GLFW_KEY_Q:
-				if (gv->program == 1)
-				{
-					if (autopilot->ui.show)
-						autopilot->ui.show = 0;
-					else
-						autopilot->ui.show = 1;
-				}
 				break;
 
 				//cameraModes //updateCamera in camera.cpp also need to be updated if ths is to change
@@ -127,7 +118,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 				}
 				break;
-			
+
 			}
 
 		}
@@ -138,7 +129,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 
 //keys functions gets triggered once per frame
-void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& camera, Autopilot& autopilot) {
+void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& camera) {
 
 	//The rest of the logic is in updateCamera
 
@@ -182,20 +173,6 @@ void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& came
 
 
 	}
-	else if (gv.program == MRS)
-	{
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			autopilot.world.translationFactor -= {0, 10};
-
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			autopilot.world.translationFactor += {0, 10};
-
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			autopilot.world.translationFactor += {10, 0};
-
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			autopilot.world.translationFactor -= {10, 0};
-	}
 }
 
 
@@ -210,14 +187,13 @@ void getPos(GLFWwindow* window, p2& mPos) {
 void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	GlobalVariables* gv = allPointers->gv;
-	Autopilot* autopilot = allPointers->autopilot;
 	Camera* camera = allPointers->camera;
 
 	//LEFT
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
 		gv->isLmbPressed = 1;
-		
+
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
@@ -250,43 +226,17 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
 	GlobalVariables* gv = allPointers->gv;
-	Autopilot* autopilot = allPointers->autopilot;
 
 
 	if (yoffset > 0)
 	{
-		if (gv->program == MRS)
-		{
-			autopilot->world.totalXpixels *= 1.15;
-			autopilot->world.updateCamera();
+		camera->cameraPos = camera->cameraPos + camera->forward * camera->translationSpeed * scrollTranslationSpeedFactor;
 
-			//// --- keep current center fixed across zoom ---
-			//p2 screenCenter = { windowWidth * 0.5f,
-			//					windowHeight * 0.5f };
-			//p2 worldAtCenter = (screenCenter - autopilot->world.translationFactor) / autopilot->world.scalingFactor;
-
-			//autopilot->world.totalXpixels *= 1.15f;
-			//autopilot->world.updateCamera(); // recomputes scale & centers by design
-
-			//// restore so the same world point remains at screen center
-			//autopilot->world.translationFactor = screenCenter - worldAtCenter * autopilot->world.scalingFactor;
-		}
-		else if (gv->program == telemetry || gv->program == openCascade || gv->program == offshoreProgram)
-		{
-			camera->cameraPos = camera->cameraPos + camera->forward * camera->translationSpeed * scrollTranslationSpeedFactor;
-		}
 	}
 	else if (yoffset < 0)
 	{
-		if (gv->program == MRS)
-		{
-			autopilot->world.totalXpixels /= 1.15;
-			autopilot->world.updateCamera();
-		}
-		else if (gv->program == telemetry || gv->program == openCascade || gv->program == offshoreProgram)
-		{
-			camera->cameraPos = camera->cameraPos - camera->forward * camera->translationSpeed * scrollTranslationSpeedFactor;
-		}
+		camera->cameraPos = camera->cameraPos - camera->forward * camera->translationSpeed * scrollTranslationSpeedFactor;
+
 	}
 
 }

@@ -10,18 +10,7 @@ p2 windowTotal = { windowWidth,windowHeight };
 p2 windowCenter = { windowWidth * 0.5f, windowHeight * 0.5f };
 matrix4x4 identityMatrix = { 1, 0, 0, 0, 0, 1, 0, 0,0, 0, 1, 0, 0, 0, 0, 1 };
 
-// 1/sqrt(x)
-float fastInverseSqrt(float number) {
-	long i;
-	float x2, y;
-	x2 = number * 0.5F;
-	y = number;
-	std::memcpy(&i, &y, sizeof(i)); // Safer type-punning
-	i = 0x5f3759df - (i >> 1);
-	std::memcpy(&y, &i, sizeof(y)); // Safer type-punning
-	y = y * (1.5f - (x2 * y * y));
-	return y;
-}
+
 
 void getCursorPos(GLFWwindow* window) {
 
