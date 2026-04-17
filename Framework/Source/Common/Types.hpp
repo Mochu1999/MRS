@@ -280,7 +280,7 @@ float magnitude3(const vec3<T>& v) {
 
 template<typename T>
 vec3<T> centroid(const vec3<T>& p1, const vec3<T>& p2, const vec3<T>& p3) {
-	return (p1 + p2 + p3) * 0.33333; //inv3
+	return (p1 + p2 + p3) * inv3;
 }
 
 template<typename T>

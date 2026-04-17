@@ -1,42 +1,34 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <iostream>
-using namespace std;
-#include <fstream>
-#include <sstream>
-#include <string>
-
-#include <cmath>
-#include <numeric> 
-#include <algorithm>
-
-#include <array>
-#include <vector>
-#include <unordered_set>
-#include <set>
-#include <unordered_map>
-#include <map>
-#include <list>
-#include <deque>
-
-#include <functional>
-#include <random>
-#include <iomanip>
-
-#include <filesystem>
-namespace fs = std::filesystem;
-
-
 //Functions that do not require any custom type from Types
 
-#include <cstring>
+//Making use of inline to not force the use of a .cpp
 
 // 1/sqrt(x)
-float fastInverseSqrt(float number);
+inline float fastInverseSqrt(float number) {
+	long i;
+	float x2, y;
+	x2 = number * 0.5F;
+	y = number;
+	std::memcpy(&i, &y, sizeof(i)); // Safer type-punning
+	i = 0x5f3759df - (i >> 1);
+	std::memcpy(&y, &i, sizeof(y)); // Safer type-punning
+	y = y * (1.5f - (x2 * y * y));
+	return y;
+}
 
-float radians(float input);
-float degrees(float input);
-string formatFloat(float value);
+inline float radians(float input) {
+	return input * PI * inv180;
+}
+
+
+inline float degrees(float input) {
+	return input * 180 * invPI;
+}
+
+inline std::string formatFloat(float value)
+{
+	std::ostringstream oss;
+	oss << std::fixed << std::setprecision(2) << value;
+	return oss.str();
+}

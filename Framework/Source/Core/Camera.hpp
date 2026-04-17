@@ -12,10 +12,12 @@
 
 struct Camera {
 
+	enum CameraModes { drag, FPS, centered };
+	CameraModes cameraMode = centered;
+
 	float translationSpeed = 0.20f, rotationSpeed = 0.05f;
 
 	GLFWwindow* window;
-	GlobalVariables& gv;
 
 	float fov = 45.0f * PI / 180;
 	float aspectRatio = windowWidth / windowHeight;
@@ -39,8 +41,8 @@ struct Camera {
 	float scale = 1;
 
 
-	Camera(GLFWwindow* window_, GlobalVariables& gv_)
-		:window(window_), gv(gv_) 
+	Camera(GLFWwindow* window_)
+		:window(window_)
 	{
 		orthoMatrix = createOrthoMatrix();
 		perspectiveMatrix = createPerspectiveMatrix();

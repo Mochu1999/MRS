@@ -1,3 +1,4 @@
+#include"Common.hpp"
 #include "Shader.hpp"
 
 
@@ -245,7 +246,7 @@ GLFWwindow* initialize(float windowWidth_, float windowHeight_, const char* wind
 
 
 
-void clearScreen(GlobalVariables gv)
+void clearScreen()
 {
 	opaque();
 	glClearColor(40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);

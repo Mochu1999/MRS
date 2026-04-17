@@ -1,10 +1,10 @@
+
+
+#include "Common.hpp"
 #include "IncludesTelemetry.hpp"
-
-
 
 int main(void)
 {
-	GlobalVariables gv;
 
 	GLFWwindow* window = initialize();
 
@@ -16,36 +16,35 @@ int main(void)
 	Shader shader2D("resources/shaders/shader2D.shader");
 	Shader shader2D_Instanced("resources/shaders/shader2D_Instanced.shader");
 	Shader shaderText("resources/shaders/shaderText.shader");
-	Camera camera(window, gv);
+	Camera camera(window);
 	cameraLocationsInitialization(shader3D, shader2D, shader2D_Instanced, shaderText, camera);
 
 
-	Lourdes lourdes(shader3D, camera, gv);
+	Lourdes lourdes(shader3D, camera);
 
-	Telemetry telemetry(shader3D, shader2D, shader2D_Instanced, shaderText, camera, gv, tm, lourdes);
-
-
+	Telemetry telemetry(shader3D, shader2D, shader2D_Instanced, shaderText, camera, tm, lourdes);
 
 
-	Settings settings(camera, gv);
 
-	AllPointers allPointers(&camera, &gv, &lourdes);
+
+	Settings settings(camera);
+
+	AllPointers allPointers(&camera, &lourdes);
 	glfwSetWindowUserPointer(window, &allPointers);
 	glfwSetKeyCallback(window, keyboardEventCallback);
 	glfwSetMouseButtonCallback(window, mouseEventCallback);
 	glfwSetScrollCallback(window, scrollCallback);
 
 
-	int counter = 0;
 
 	while (!glfwWindowShouldClose(window))
 	{
-		getPos(window, gv.mPos);
-		if (gv.isRunning)
+		getPos(window, mPos);
+		if (isRunning)
 		{
 			tm.update();
 
-			clearScreen(gv);
+			clearScreen();
 
 
 			transparent();
@@ -57,7 +56,7 @@ int main(void)
 
 
 
-			keyboardRealTimePolls(window, gv, camera);
+			keyboardRealTimePolls(window, camera);
 			camera.updateCamera();
 			//updating shader location
 			shader3D.bind();

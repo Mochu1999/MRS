@@ -7,7 +7,6 @@ struct UI
 	Shader& shader2D_Instanced;
 	Shader& shaderText;
 	Camera& camera;
-	GlobalVariables& gv;
 	TimeStruct& tm;
 
 	Lines2D centerCross;
@@ -21,9 +20,9 @@ struct UI
 
 	Lourdes& lourdes;
 
-	UI(Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, GlobalVariables& gv_
+	UI(Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_
 		, TimeStruct& tm_, Lourdes& lourdes_)
-		:shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), camera(camera_), gv(gv_)
+		:shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), camera(camera_)
 		, tm(tm_), lourdes(lourdes_)
 		/*, overlay(shader2D, camera)
 		, graphic(shader2D, shader2D_Instanced, shaderText, camera, tm, "A*cos(x)", { 1400,100 }, graf1Val)
@@ -31,8 +30,8 @@ struct UI
 		, pb(shader2D, shader2D_Instanced, shaderText, camera, tm, p2{ 1350,700 }, "Battery", pbValue)*/
 	{
 		centerCross.addSet({
-				{gv.centerWindow.x - 20,gv.centerWindow.y},{gv.centerWindow.x + 20,gv.centerWindow.y},
-			{gv.centerWindow.x,gv.centerWindow.y - 20},{gv.centerWindow.x,gv.centerWindow.y + 20} });
+				{ centerWindow.x - 20, centerWindow.y},{ centerWindow.x + 20, centerWindow.y},
+			{ centerWindow.x, centerWindow.y - 20},{ centerWindow.x, centerWindow.y + 20} });
 		centerCross.indices = { 0,1,2,3 };
 	}
 

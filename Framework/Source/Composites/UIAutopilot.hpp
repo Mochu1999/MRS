@@ -44,8 +44,8 @@ struct UIAutopilot
 		, meteoDateText("resources/Glyphs/Helvetica/Helvetica.otf", 36)
 		, circleFinish(5000, 100)
 	{
-		dataBoxOutline.addSet(createRoundedSquare({ 80,370 }, 600,380 , 30));
-		dataBox.addSet(createRoundedSquare({ 80,370 }, 600,380 , 30));
+		dataBoxOutline.addSet(createRoundedSquare({ 80,370 }, 600, 380, 30));
+		dataBox.addSet(createRoundedSquare({ 80,370 }, 600, 380, 30));
 
 
 
@@ -85,9 +85,9 @@ struct UIAutopilot
 		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
 		world.mercator.draw();
 
-		shader2D.setUniform("u_Color", 1,0,0,1);
+		shader2D.setUniform("u_Color", 1, 0, 0, 1);
 		world.mercatorSafe.draw();
-		
+
 
 		glLineWidth(3);
 		world.frame.draw();
@@ -173,7 +173,7 @@ struct UIAutopilot
 		shaderText.bind();
 		meteoDateText.addDynamicText({ {{620,900},meteo.currentTimeString} });
 		meteoDateText.draw();
-		
+
 	}
 
 	void drawData()
@@ -199,28 +199,28 @@ struct UIAutopilot
 			});
 		shaderText.setUniform("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
 		dataText.draw();
-		
-		
+
+
 	}
 
 	void drawMouseCoords()
 	{
-		p2 cursorVal = mercatorToLonLat((gv.mPos - world.translationFactor) / world.scalingFactor);
+		p2 cursorVal = mercatorToLonLat((mPos - world.translationFactor) / world.scalingFactor);
 
 		if (show)
 		{
 			shader2D.bind();
-			mapModel2DMatrix = create2DModelMatrix(gv.mPos, 0, 1);
+			mapModel2DMatrix = create2DModelMatrix(mPos, 0, 1);
 			shader2D.setUniform("u_Model", identityMatrix);
 
 			shader2D.setUniform("u_Color", 40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
 			mouseCoordsBox.clear();
 			//mouseCoordsBox should be static and moved with the modelMatrix, now it is getting recreated each frame
-			mouseCoordsBox.addSet(createRoundedSquare({ gv.mPos.x - 4,gv.mPos.y - 10 }, 270,42, 10));
+			mouseCoordsBox.addSet(createRoundedSquare({ mPos.x - 4, mPos.y - 10 }, 270, 42, 10));
 			mouseCoordsBox.draw();
 
 			shaderText.bind();
-			mouseCoordsText.addDynamicText({ {gv.mPos, lonLatToString(cursorVal)} });
+			mouseCoordsText.addDynamicText({ { mPos, lonLatToString(cursorVal)} });
 			mouseCoordsText.draw();
 		}
 	}

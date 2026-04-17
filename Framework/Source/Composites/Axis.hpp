@@ -4,11 +4,10 @@
 
 struct Axis {
 	Shader& shader3D;
-	GlobalVariables& gv;
 
 	Lines3D xLine, yLine, zLine, xLine2, zLine2,extra;
 
-	Axis(Shader& shader3D_, GlobalVariables& gv_) :shader3D(shader3D_), gv(gv_)
+	Axis(Shader& shader3D_) :shader3D(shader3D_)
 	{
 		xLine.addSet({ {-10000,0,0},{10000,0,0} });
 		yLine.addSet({ {0,-10000,0},{0,10000,0} });

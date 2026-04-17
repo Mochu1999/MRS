@@ -1,3 +1,4 @@
+#include"Common.hpp"
 #include "Polygons.hpp"
 
 void Polygons::genBuffers() {

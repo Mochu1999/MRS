@@ -7,18 +7,14 @@
 #include "Camera.hpp"
 
 
-//Only have a single KeyMouseInputs included, the functions names are repeated!
-
-int keyCounter = 5;
 
 //Pointers can be re-seated while references cannot. But we are not re seating anything so whatever
 struct AllPointers {
 	Camera* camera;
-	GlobalVariables* gv;
 	Lourdes* ship;
 
-	AllPointers(Camera* camera_, GlobalVariables* gv_, Lourdes* ship_)
-		:camera(camera_), gv(gv_), ship(ship_) {
+	AllPointers(Camera* camera_, Lourdes* ship_)
+		:camera(camera_), ship(ship_) {
 	}
 };
 
@@ -31,7 +27,6 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
 	Lourdes* ship = allPointers->ship;
-	GlobalVariables* gv = allPointers->gv;
 
 
 	if (action == GLFW_PRESS)
@@ -42,36 +37,8 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			switch (key)
 			{
 			case GLFW_KEY_1:
-				gv->program = telemetry;
 
-				break;
-			case GLFW_KEY_2:
-				gv->program = MRS;
 
-				break;
-			case GLFW_KEY_3:
-				//gv->program = solarProgram;
-				//solar->activateLourdes();
-
-				break;
-			case GLFW_KEY_4:
-				gv->program = openCascade;
-
-				break;
-			case GLFW_KEY_5:
-				gv->program = offshoreProgram;
-
-				break;
-			case GLFW_KEY_O: //changing autopilots
-				if (gv->program == MRS)
-				{
-
-				}
-				break;
-			case GLFW_KEY_S:
-				if (gv->program == MRS)
-				{
-				}
 				break;
 			}
 
@@ -81,8 +48,8 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			switch (key)
 			{
 			case GLFW_KEY_P:
-				gv->isRunning = !gv->isRunning;
-				print(gv->isRunning);
+				isRunning = !isRunning;
+				print(isRunning);
 				break;
 				/*case GLFW_KEY_C:
 					keyCounter++;
@@ -93,30 +60,22 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 				//cameraModes //updateCamera in camera.cpp also need to be updated if ths is to change
 			case GLFW_KEY_X:
-				if (gv->program == telemetry || gv->program == openCascade
-					|| gv->program == offshoreProgram)
-				{
-					gv->cameraMode = drag;
-					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-				}
+				camera->cameraMode = camera->drag;
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 				break;
 			case GLFW_KEY_C:
-				if (gv->program == telemetry || gv->program == openCascade
-					|| gv->program == offshoreProgram)
-				{
-					gv->cameraMode = FPS;
-					gv->LastLMPos = gv->mPos;
-					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-				}
+
+				camera->cameraMode = camera->FPS;
+				LastLMPos = mPos;
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 				break;
 			case GLFW_KEY_V:
-				if (gv->program == telemetry || gv->program == openCascade
-					|| gv->program == offshoreProgram)
-				{
-					gv->cameraMode = centered;
-					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-				}
+				camera->cameraMode = camera->centered;
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+
 				break;
 
 			}
@@ -129,50 +88,49 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 
 //keys functions gets triggered once per frame
-void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& camera) {
+void keyboardRealTimePolls(GLFWwindow* window, Camera& camera) {
 
 	//The rest of the logic is in updateCamera
 
 	// Rotation
-	if (gv.program == telemetry || gv.program == openCascade || gv.program == offshoreProgram)
+
+	if (camera.cameraMode == camera.drag || camera.cameraMode == camera.FPS)
 	{
-		if (gv.cameraMode == drag || gv.cameraMode == FPS)
-		{
-			if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-				camera.calculateForward(camera.forward, camera.rotationSpeed, camera.right);
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+			camera.calculateForward(camera.forward, camera.rotationSpeed, camera.right);
 
-			if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-				camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.right);
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+			camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.right);
 
-			if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-				camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.up);
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+			camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.up);
 
-			if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-				camera.calculateForward(camera.forward, camera.rotationSpeed, camera.up);
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+			camera.calculateForward(camera.forward, camera.rotationSpeed, camera.up);
 
 
-			//translation
-			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-				camera.cameraPos = camera.cameraPos + camera.forward * camera.translationSpeed;
+		//translation
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			camera.cameraPos = camera.cameraPos + camera.forward * camera.translationSpeed;
 
-			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-				camera.cameraPos = camera.cameraPos - camera.forward * camera.translationSpeed;
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			camera.cameraPos = camera.cameraPos - camera.forward * camera.translationSpeed;
 
-			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-				camera.cameraPos = camera.cameraPos - camera.right * camera.translationSpeed;
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			camera.cameraPos = camera.cameraPos - camera.right * camera.translationSpeed;
 
-			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-				camera.cameraPos = camera.cameraPos + camera.right * camera.translationSpeed;
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			camera.cameraPos = camera.cameraPos + camera.right * camera.translationSpeed;
 
-			if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-				camera.cameraPos.y += camera.translationSpeed;
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+			camera.cameraPos.y += camera.translationSpeed;
 
-			if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-				camera.cameraPos.y -= camera.translationSpeed;
-		}
-
-
+		if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+			camera.cameraPos.y -= camera.translationSpeed;
 	}
+
+
+
 }
 
 
@@ -186,18 +144,17 @@ void getPos(GLFWwindow* window, p2& mPos) {
 
 void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
-	GlobalVariables* gv = allPointers->gv;
 	Camera* camera = allPointers->camera;
 
 	//LEFT
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
-		gv->isLmbPressed = 1;
+		isLmbPressed = 1;
 
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
-		gv->isLmbPressed = 0;
+		isLmbPressed = 0;
 	}
 
 	//RIGHT
@@ -210,12 +167,11 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 	//MIDDLE
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
 	{
-		gv->isMmbPressed = 1;
-		gv->LastMMPos = gv->mPos;
+		isMmbPressed = 1;
 	}
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
 	{
-		gv->isMmbPressed = 0;
+		isMmbPressed = 0;
 	}
 }
 
@@ -225,7 +181,6 @@ float scrollTranslationSpeedFactor = 20;
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
-	GlobalVariables* gv = allPointers->gv;
 
 
 	if (yoffset > 0)

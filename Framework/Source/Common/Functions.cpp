@@ -1,4 +1,5 @@
-﻿#include "Functions.hpp"
+﻿#include "Common.hpp"
+#include "Functions.hpp"
 
 void print_(const std::string& name, const matrix4x4& matrix)
 {

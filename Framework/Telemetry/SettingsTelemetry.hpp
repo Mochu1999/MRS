@@ -106,28 +106,24 @@ namespace fs = std::filesystem;
 
 
 //Old settings
-//NOW THIS IS ONLY FOR GENERAL, THE IDEA IS TO REMAKE THE STRUCTURE
 struct Settings
 {
 	std::string settingsPath = "Resources/Settings/Settings.bin";
 
 	p3& cameraPos;
 	p3& forward;
-	GlobalVariables& gv;
 
 	enum Variables
 	{
 		CameraPos,
 		Forward,
-		Program,
-		TotalMiddleMPosVariation
 	};
 
-	Settings(Camera& camera, GlobalVariables& gv_) 
-		: cameraPos(camera.cameraPos), forward(camera.forward), gv(gv_)
+	Settings(Camera& camera) 
+		: cameraPos(camera.cameraPos), forward(camera.forward)
 	{
 		read();
-		reset();
+		//reset();
 		//printVars();
 	}
 
@@ -144,14 +140,6 @@ struct Settings
 			var = Forward;
 			outFile.write(reinterpret_cast<const char*>(&var), sizeof(var));
 			outFile.write(reinterpret_cast<const char*>(&forward), sizeof(forward));
-
-			var = Program;
-			outFile.write(reinterpret_cast<const char*>(&var), sizeof(var));
-			outFile.write(reinterpret_cast<const char*>(&gv.program), sizeof(gv.program));
-
-			var = TotalMiddleMPosVariation;
-			outFile.write(reinterpret_cast<const char*>(&var), sizeof(var));
-			outFile.write(reinterpret_cast<const char*>(&gv.totalMiddleMPosVariation), sizeof(gv.totalMiddleMPosVariation));
 		}
 		outFile.close();
 	}
@@ -176,13 +164,6 @@ struct Settings
 				case Forward:
 					inFile.read(reinterpret_cast<char*>(&forward), sizeof(forward));
 					break;
-				case Program:
-					inFile.read(reinterpret_cast<char*>(&gv.program), sizeof(gv.program));
-					break;
-				case TotalMiddleMPosVariation:
-					inFile.read(reinterpret_cast<char*>(&gv.totalMiddleMPosVariation), sizeof(gv.totalMiddleMPosVariation));
-					break;
-
 
 				default:
 					std::cerr << "Unknown variable in settings file." << std::endl;
@@ -202,14 +183,10 @@ struct Settings
 	{
 		print(cameraPos);
 		print(forward);
-		print(gv.program);
-		print(gv.totalMiddleMPosVariation);
 	}
 	void reset()
 	{
-		/*cameraPos = { 0,0,0 };
-		forward = { 1,0,0 };
-		autopilot.totalXpixels = 6000;*/
-		gv.totalMiddleMPosVariation = { 0,0,0 };
+		cameraPos = { 10,0,0 };
+		forward = { -1,0,0 };
 	}
 };

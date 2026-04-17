@@ -17,7 +17,7 @@ struct TimeCounter {
 	void endCounter() {
 		lastTime = high_resolution_clock::now();
 		endTime = duration_cast<duration<double>>(lastTime - currentTime).count();
-		cout << "Elapsed time: " << endTime << "s" << endl;
+		std::cout << "Elapsed time: " << endTime << "s" << endl;
 	}
 
 

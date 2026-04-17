@@ -1,4 +1,5 @@
-﻿#include "Camera.hpp"
+﻿#include"Common.hpp"
+#include "Camera.hpp"
 
 std::array<float, 16> Camera::createScalingMatrix(float scaleX, float scaleY, float scaleZ) {
 	std::array<float, 16> scalingMatrix = { 0 };
@@ -31,7 +32,7 @@ array<float, 16> Camera::createOrthoMatrix() {
 	return orthoMatrix;
 }
 
-array<float, 16> Camera::createPerspectiveMatrix() 
+array<float, 16> Camera::createPerspectiveMatrix()
 {
 	float nearZ = 0.1f;
 	float farZ = 500000.0f;
@@ -106,73 +107,70 @@ void Camera::calculateForward(p3& forward, const float rotationSpeed, const p3& 
 
 void Camera::updateCamera() {
 
-	p2 currentMPosVariation = gv.LastLMPos - gv.mPos;
-	p2 currentMiddleMPosVariation = gv.LastMMPos - gv.mPos;
+	p2 currentMPosVariation = LastLMPos - mPos;
 
 
-	if (gv.program == telemetry  || gv.program == openCascade || gv.program == offshoreProgram)
+	if (cameraMode == drag && isLmbPressed)
 	{
-		if (gv.cameraMode == drag && gv.isLmbPressed)
-		{
-			calculateForward(forward, currentMPosVariation.y * 0.001, right);
+		calculateForward(forward, currentMPosVariation.y * 0.001, right);
 
-			right = normalize3(cross3(forward, { 0,1,0 }));
-			up = cross3(right, forward);
+		right = normalize3(cross3(forward, { 0,1,0 }));
+		up = cross3(right, forward);
 
-			viewMatrix = createViewMatrix(right, up, forward, cameraPos);
+		viewMatrix = createViewMatrix(right, up, forward, cameraPos);
 
-			calculateForward(forward, -currentMPosVariation.x * 0.001, up);
+		calculateForward(forward, -currentMPosVariation.x * 0.001, up);
 
-			gv.LastLMPos = gv.mPos;
-		}
-		else if (gv.cameraMode == FPS)
-		{
-			calculateForward(forward, -currentMPosVariation.y * 0.003, right);
-
-			right = normalize3(cross3(forward, { 0,1,0 }));
-			up = cross3(right, forward);
-
-			viewMatrix = createViewMatrix(right, up, forward, cameraPos);
-
-			calculateForward(forward, currentMPosVariation.x * 0.003, up);
-
-			gv.LastLMPos = gv.mPos;
-		}
-		else if (gv.cameraMode == centered)
-		{
-
-			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			{
-				rotatePoint(cameraPos, centeredAngleRotation, { 0, 1, 0 });
-				//rotate3D( cameraPos , 0, centeredAngleRotation, 0);
-			}
-			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			{
-				rotatePoint(cameraPos, -centeredAngleRotation, { 0, 1, 0 });
-
-			}
-			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			{
-				rotatePoint(cameraPos, -centeredAngleRotation, right);
-
-				if (up.y <= 0.1 && cameraPos.y > 0)
-					rotatePoint(cameraPos, centeredAngleRotation, right);
-			}
-			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			{
-				rotatePoint(cameraPos, centeredAngleRotation, right);
-
-				if (up.y <= 0.1 && cameraPos.y < 0)
-					rotatePoint(cameraPos, -centeredAngleRotation, right);
-			}
-
-
-
-			forward = -normalize3(cameraPos);
-		}
-
-		
+		LastLMPos = mPos;
 	}
+	else if (cameraMode == FPS)
+	{
+		calculateForward(forward, -currentMPosVariation.y * 0.003, right);
+
+		right = normalize3(cross3(forward, { 0,1,0 }));
+		up = cross3(right, forward);
+
+		viewMatrix = createViewMatrix(right, up, forward, cameraPos);
+
+		calculateForward(forward, currentMPosVariation.x * 0.003, up);
+
+		LastLMPos = mPos;
+	}
+	else if (cameraMode == centered)
+	{
+
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			rotatePoint(cameraPos, centeredAngleRotation, { 0, 1, 0 });
+			//rotate3D( cameraPos , 0, centeredAngleRotation, 0);
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			rotatePoint(cameraPos, -centeredAngleRotation, { 0, 1, 0 });
+
+		}
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			rotatePoint(cameraPos, -centeredAngleRotation, right);
+
+			if (up.y <= 0.1 && cameraPos.y > 0)
+				rotatePoint(cameraPos, centeredAngleRotation, right);
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			rotatePoint(cameraPos, centeredAngleRotation, right);
+
+			if (up.y <= 0.1 && cameraPos.y < 0)
+				rotatePoint(cameraPos, -centeredAngleRotation, right);
+		}
+
+
+
+		forward = -normalize3(cameraPos);
+	}
+
+
+
 
 
 	//The quaternion method is intentionally incomplete. The true method would calculate the f and u for pitch and f and r for yaw
@@ -186,9 +184,9 @@ void Camera::updateCamera() {
 	vpMatrix = multiplyMatrices(perspectiveMatrix, viewMatrix);
 
 
-	
 
-	
+
+
 }
 
 
@@ -424,8 +422,8 @@ p3 Camera::cursorToXZPlane()
 	matrix4x4 invVP = invertMatrix(vpMatrix);
 
 	// Step 1: Cursor to NDC, Normalized‑Device Coordinates [–1 … +1]
-	float ndcX = 2.0f * gv.mPos.x / windowWidth - 1.0f;
-	float ndcY = 2.0f * gv.mPos.y / windowHeight - 1.0f;
+	float ndcX = 2.0f * mPos.x / windowWidth - 1.0f;
+	float ndcY = 2.0f * mPos.y / windowHeight - 1.0f;
 
 	/*print(ndcX);
 	print(ndcY);*/

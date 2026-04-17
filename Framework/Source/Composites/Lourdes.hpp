@@ -4,13 +4,13 @@
 
 float c = 1;
 float graf1Val = 0;
-float cosPlot(float& c) 
+float cosPlot(float& c)
 {
 	c += 2.5;
 	return (1 * c * c / 10000) * cos(radians(c));
 }
 
-struct Lourdes 
+struct Lourdes
 {
 
 	Shader& shader3D;
@@ -37,7 +37,7 @@ struct Lourdes
 
 	p3 lightPos = { 30,25,40 };
 
-	Lourdes(Shader& shader3D_, Camera& camera_, GlobalVariables gv) :shader3D(shader3D_), camera(camera_), light(3)
+	Lourdes(Shader& shader3D_, Camera& camera_) :shader3D(shader3D_), camera(camera_), light(3)
 	{
 
 		casco1.addPolyhedra("casco1.bin");
@@ -83,16 +83,14 @@ struct Lourdes
 		water.indices = { 0,1,2 ,1,3,2 };
 		water.normals = { {0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0} };*/
 
-		
+
 		light.addSet(lightPos);
-		if (gv.program == telemetry)
-		{
-			shader3D.bind();
-			shader3D.setUniform("u_lightPos", lightPos);
-		}
+		shader3D.bind();
+		shader3D.setUniform("u_lightPos", lightPos);
+
 	}
 
-	void draw() 
+	void draw()
 	{
 		shader3D.bind();
 		shader3D.setUniform("u_Model", identityMatrix);
@@ -331,7 +329,7 @@ struct Lourdes
 		water.indices = { 0,1,2 ,3,4,5 };
 		water.normals = { {0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0} };
 		//creo que no puedes hacer esto porque el buffer de indices se espera menor, si aun con esas no sale aumentar buffer normals a 6 elementos
-		
+
 
 
 	}

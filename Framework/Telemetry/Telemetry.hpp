@@ -9,7 +9,6 @@ struct Telemetry
 	Shader& shaderText;
 	Camera& camera;
 	TimeStruct& tm;
-	GlobalVariables& gv;
 	
 
 	Axis axis;
@@ -17,10 +16,10 @@ struct Telemetry
 	Lourdes& lourdes;
 	UI ui;
 	
-	Telemetry(Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, GlobalVariables& gv_, TimeStruct& tm_, Lourdes& lourdes_)
-		:shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), camera(camera_), gv(gv_), tm(tm_), lourdes(lourdes_)
-		, axis(shader3D, gv)
-		,ui(shader3D, shader2D, shader2D_Instanced, shaderText,camera, gv,tm, lourdes)
+	Telemetry(Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, TimeStruct& tm_, Lourdes& lourdes_)
+		:shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), camera(camera_), tm(tm_), lourdes(lourdes_)
+		, axis(shader3D)
+		,ui(shader3D, shader2D, shader2D_Instanced, shaderText,camera,tm, lourdes)
 		
 	{
 
