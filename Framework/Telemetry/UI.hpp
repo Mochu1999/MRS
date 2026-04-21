@@ -10,10 +10,10 @@ struct UI
 	TimeStruct& tm;
 
 	Lines2D centerCross;
-	/*Overlay2D overlay;
-	Graphic graphic;
-	Graphic graphic2;
-	ProgressBar pb;*/
+	Overlay2D overlay;
+	Plot graphic;
+	Plot graphic2;
+	ProgressBar pb;
 
 
 	float pbValue = 0.5f;
@@ -24,10 +24,10 @@ struct UI
 		, TimeStruct& tm_, Lourdes& lourdes_)
 		:shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), camera(camera_)
 		, tm(tm_), lourdes(lourdes_)
-		/*, overlay(shader2D, camera)
+		, overlay(shader2D, camera)
 		, graphic(shader2D, shader2D_Instanced, shaderText, camera, tm, "A*cos(x)", { 1400,100 }, graf1Val)
 		, graphic2(shader2D, shader2D_Instanced, shaderText, camera, tm, "rudderAngle", { 1400,400 }, lourdes_.rudderAngle)
-		, pb(shader2D, shader2D_Instanced, shaderText, camera, tm, p2{ 1350,700 }, "Battery", pbValue)*/
+		, pb(shader2D, shader2D_Instanced, shaderText, camera, tm, p2{ 1350,700 }, "Battery", pbValue)
 	{
 		centerCross.addSet({
 				{ centerWindow.x - 20, centerWindow.y},{ centerWindow.x + 20, centerWindow.y},
@@ -38,27 +38,27 @@ struct UI
 	void draw()
 	{
 		shader3D.bind();
-		//shader3D.setUniform("u_Model", identityMatrix);
+		shader3D.setUniform("u_Model", identityMatrix);
 		shader3D.setUniform("u_fragmentMode", 1);
 
-		//opaque();
+		opaque();
 
-		//shader2D.bind();
+		shader2D.bind();
 
-		//overlay.draw();
+		overlay.draw();
 
-		//graf1Val = cosPlot(c);
-		//graphic.draw();
-		//graphic2.draw();
-		//pb.draw();
+		graf1Val = cosPlot(c);
+		graphic.draw();
+		graphic2.draw();
+		pb.draw();
 
-		/*transparent();
+		transparent();
 		shader2D.bind();
 		shader2D.setUniform("u_Model", identityMatrix);
 		shader2D.setUniform("u_Color", 1, 1, 1, 0.5);
 		glLineWidth(2);
 		centerCross.draw();
 		glLineWidth(1);
-		opaque();*/
+		opaque();
 	}
 };

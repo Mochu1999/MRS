@@ -4,9 +4,7 @@
 // , and the includes of custom headers: SimpleFunctions, Types, Variables and Functions
 
 
-//Setting here all includes for easier iteration. The idiomatic choice would be to include just what's needed in each .cpp
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+//Setting here the most used C++ backend includes for easier iteration. The idiomatic choice would be to include just what's needed in each .cpp
 
 #include <iostream>
 using namespace std;

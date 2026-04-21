@@ -1,4 +1,4 @@
-#include"Common.hpp"
+#include "Graphics.hpp"
 #include "Text.hpp"
 
 //initializes the library and loads the font face

@@ -7,7 +7,7 @@
 
 
 
-struct Graphic {
+struct Plot {
 
 	Shader& shader2D;
 	Shader& shader2D_Instanced;
@@ -43,7 +43,7 @@ struct Graphic {
 	float currentX = 0;
 	float& currentY;
 
-	Graphic(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, TimeStruct& tm_
+	Plot(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, TimeStruct& tm_
 		, string name_, p2 gridCorner_,float& currentY_)
 		: shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), tm(tm_)
 		, camera(camera_), text("resources/Glyphs/Helvetica/Helvetica.otf", 16),

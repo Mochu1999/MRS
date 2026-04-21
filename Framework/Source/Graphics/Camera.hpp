@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "Common.hpp"
-#include "Shader.hpp"
 /*
 0  4  8  12
 1  5  9  13
@@ -103,4 +101,3 @@ std::array<float, 16> create2DModelMatrix(const p2 translation, float angleDeg, 
 
 std::array<float, 16> create2DModelMatrix(const p2 translation, float angleDeg, p2 scale);
 
-void cameraLocationsInitialization(Shader& shader3D, Shader& shader2D, Shader& shader2D_Instanced, Shader& shaderText, Camera& camera);
