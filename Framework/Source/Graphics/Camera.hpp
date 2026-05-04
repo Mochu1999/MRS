@@ -9,35 +9,30 @@
 
 
 struct Camera {
+	std::array<float, 16> perspectiveMatrix, viewMatrix, vpMatrix, orthoMatrix;
+
+	p3 cameraPos;
+
+	p3 forward = normalize3(p3{ 0.148691,-0.742031,-0.651083 });
+	p3 right; //0 because are gettin recalculated anyways
+	p3 up;
 
 	enum CameraModes { drag, FPS, centered };
 	CameraModes cameraMode = centered;
 
 	float translationSpeed = 0.20f, rotationSpeed = 0.05f;
 
-	GLFWwindow* window;
 
 	float fov = 45.0f * PI / 180;
 	float aspectRatio = windowWidth / windowHeight;
 	
-
 	float centeredAngleRotation = 0.1;
-	float centeredRadius = 0;
 
-
-	std::array<float, 16> perspectiveMatrix, viewMatrix, vpMatrix, orthoMatrix;
-	
-
-	p3 cameraPos;
-
-	//p3 forward = { 0.0f,-1.0f,0.0f }; //cuando dejó esto de funcionar?
-	p3 forward = normalize3(p3{ 0.148691,-0.742031,-0.651083 });
-	p3 right; //0 because are gettin recalculated anyways
-	p3 up;
 
 	p3 translation;
 	float scale = 1;
 
+	GLFWwindow* window;
 
 	Camera(GLFWwindow* window_)
 		:window(window_)
@@ -45,17 +40,7 @@ struct Camera {
 		orthoMatrix = createOrthoMatrix();
 		perspectiveMatrix = createPerspectiveMatrix();
 
-		p3 objPos = { 5.0f, 2.0f, 1.0f };
-		float angle = 3.14159f * 0.25f; // 45 degrees in radians
-		p3 rotAxis = { 0.0f, 1.0f, 0.0f }; // Y axis
-
-		//modelMatrix = create3DModelMatrix(objPos, angle, rotAxis);
-
-		
-
 		updateCamera();
-		
-		
 	}
 
 	p3 cursorToXZPlane();

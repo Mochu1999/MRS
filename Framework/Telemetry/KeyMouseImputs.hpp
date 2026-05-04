@@ -128,6 +128,10 @@ void keyboardRealTimePolls(GLFWwindow* window, Camera& camera) {
 		if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
 			camera.cameraPos.y -= camera.translationSpeed;
 	}
+	if (camera.cameraMode == camera.centered)
+	{
+
+	}
 
 
 
