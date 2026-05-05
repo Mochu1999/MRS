@@ -18,15 +18,15 @@ struct UI
 
 	float pbValue = 0.5f;
 
-	Lourdes& lourdes;
+	LourdesGraphic& lourdesGraphic;
 
 	UI(Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_
-		, TimeStruct& tm_, Lourdes& lourdes_)
+		, TimeStruct& tm_, LourdesGraphic& lourdesGraphic_)
 		:shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), camera(camera_)
-		, tm(tm_), lourdes(lourdes_)
+		, tm(tm_), lourdesGraphic(lourdesGraphic_)
 		, overlay(shader2D, camera)
 		, graphic(shader2D, shader2D_Instanced, shaderText, camera, tm, "A*cos(x)", { 1400,100 }, graf1Val)
-		, graphic2(shader2D, shader2D_Instanced, shaderText, camera, tm, "rudderAngle", { 1400,400 }, lourdes_.rudderAngle)
+		, graphic2(shader2D, shader2D_Instanced, shaderText, camera, tm, "rudderAngle", { 1400,400 }, lourdesGraphic_.rudderAngle)
 		, pb(shader2D, shader2D_Instanced, shaderText, camera, tm, p2{ 1350,700 }, "Battery", pbValue)
 	{
 		centerCross.addSet({

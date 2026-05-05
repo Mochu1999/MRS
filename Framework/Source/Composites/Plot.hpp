@@ -2,7 +2,7 @@
 #include "Common.hpp"
 #include "Circles.hpp"
 #include "Lines2D_Instanced.hpp"
-#include "Lourdes.hpp"
+#include "LourdesGraphic.hpp"
 #include "Text.hpp"
 
 

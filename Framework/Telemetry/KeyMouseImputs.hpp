@@ -2,7 +2,7 @@
 
 #include "Globe.hpp"
 #include "Autopilot.hpp"
-#include "Lourdes.hpp"
+#include "LourdesGraphic.hpp"
 #include "Common.hpp"
 #include "Camera.hpp"
 
@@ -11,9 +11,9 @@
 //Pointers can be re-seated while references cannot. But we are not re seating anything so whatever
 struct AllPointers {
 	Camera* camera;
-	Lourdes* ship;
+	LourdesGraphic* ship;
 
-	AllPointers(Camera* camera_, Lourdes* ship_)
+	AllPointers(Camera* camera_, LourdesGraphic* ship_)
 		:camera(camera_), ship(ship_) {
 	}
 };
@@ -26,7 +26,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
-	Lourdes* ship = allPointers->ship;
+	LourdesGraphic* ship = allPointers->ship;
 
 
 	if (action == GLFW_PRESS)

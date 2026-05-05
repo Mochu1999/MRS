@@ -10,7 +10,7 @@ float cosPlot(float& c)
 	return (1 * c * c / 10000) * cos(radians(c));
 }
 
-struct Lourdes
+struct LourdesGraphic
 {
 
 	Shader& shader3D;
@@ -37,7 +37,7 @@ struct Lourdes
 
 	p3 lightPos = { 30,25,40 };
 
-	Lourdes(Shader& shader3D_, Camera& camera_) :shader3D(shader3D_), camera(camera_), light(3)
+	LourdesGraphic(Shader& shader3D_, Camera& camera_) :shader3D(shader3D_), camera(camera_), light(3)
 	{
 
 		casco1.addPolyhedra("casco1.bin");

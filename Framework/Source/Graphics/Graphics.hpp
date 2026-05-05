@@ -9,3 +9,4 @@
 
 
 void cameraLocationsInitialization(Shader& shader3D, Shader& shader2D, Shader& shader2D_Instanced, Shader& shaderText, Camera& camera);
+

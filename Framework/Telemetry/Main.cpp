@@ -3,46 +3,18 @@
 #include "Common.hpp"
 #include "Graphics.hpp"
 
-
-
-//#include "IncludesTelemetry.hpp"
 #include "Time.hpp"
-#include "KeyMouseImputs.hpp"
-#include "FilesManagement.hpp"
-#include "SettingsTelemetry.hpp"
-
-
-#include "Lines3D.hpp"
-#include "Lines2D.hpp"
-#include "Lines2D_Instanced.hpp"
-#include "Circles.hpp"
-#include "Polygons.hpp"
-#include "Polygons2D.hpp"
-#include "Spheres.hpp"
-#include "Polyhedra.hpp"
-#include "Text.hpp"
-
-
-#include "Globe.hpp"
-
-#include "Delaunay2D.hpp"
-
-#include "Plot.hpp"
-#include "Autopilot.hpp"
 #include "Axis.hpp"
-#include "Lourdes.hpp"
-#include "Overlay2D.hpp"
-#include "ProgressBar.hpp"
+#include "SettingsTelemetry.hpp"
+#include "KeyMouseImputs.hpp"
 
+#include "IncludesTelemetry.hpp"
+#include "LourdesGraphic.hpp"
 #include "Telemetry.hpp"
 
 int main(void)
 {
 	GLFWwindow* window = initialize();
-
-
-
-	TimeStruct tm;
 
 	Shader shader3D("resources/shaders/shader3D.shader");
 	Shader shader2D("resources/shaders/shader2D.shader");
@@ -52,17 +24,16 @@ int main(void)
 	cameraLocationsInitialization(shader3D, shader2D, shader2D_Instanced, shaderText, camera);
 
 
+	TimeStruct tm;
 
-	Lourdes lourdes(shader3D, camera);
-
-	Telemetry telemetry(shader3D, shader2D, shader2D_Instanced, shaderText, camera, tm, lourdes);
-
+	LourdesGraphic lourdesGraphic(shader3D, camera);
+	Telemetry telemetry(shader3D, shader2D, shader2D_Instanced, shaderText, camera, tm, lourdesGraphic);
 
 
 
 	Settings settings(camera);
 
-	AllPointers allPointers(&camera, &lourdes);
+	AllPointers allPointers(&camera, &lourdesGraphic);
 	glfwSetWindowUserPointer(window, &allPointers);
 	glfwSetKeyCallback(window, keyboardEventCallback);
 	glfwSetMouseButtonCallback(window, mouseEventCallback);
@@ -82,9 +53,8 @@ int main(void)
 			clearScreen();
 
 
-			
 
-			lourdes.draw();
+			lourdesGraphic.draw();
 			telemetry.update();
 
 
@@ -95,14 +65,9 @@ int main(void)
 			shader3D.bind();
 			shader3D.setUniform("u_View", camera.viewMatrix);
 
-
-
 		}
-
-
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-
 	}
 	settings.write();
 	glfwDestroyWindow(window);
