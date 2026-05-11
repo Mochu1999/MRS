@@ -1,5 +1,4 @@
 #include "Graphics.hpp"
-#include "Text.hpp"
 
 //initializes the library and loads the font face
 void Text::initializeFreeType(const std::string& fontPath, const int fontPixelSize) {

@@ -8,7 +8,10 @@
 #include "SettingsTelemetry.hpp"
 #include "KeyMouseImputs.hpp"
 
-#include "IncludesTelemetry.hpp"
+#include "Globe.hpp"
+#include "Plot.hpp"
+#include "Overlay2D.hpp"
+#include "ProgressBar.hpp"
 #include "LourdesGraphic.hpp"
 #include "Telemetry.hpp"
 
@@ -18,16 +21,21 @@ int main(void)
 
 	Shader shader3D("resources/shaders/shader3D.shader");
 	Shader shader2D("resources/shaders/shader2D.shader");
-	Shader shader2D_Instanced("resources/shaders/shader2D_Instanced.shader");
+	Shader shader2DInstanced("resources/shaders/shader2DInstanced.shader");
 	Shader shaderText("resources/shaders/shaderText.shader");
 	Camera camera(window);
-	cameraLocationsInitialization(shader3D, shader2D, shader2D_Instanced, shaderText, camera);
+	initializeCameraLocations(shader3D, shader2D, shader2DInstanced, shaderText, camera);
 
-
+	
 	TimeStruct tm;
 
 	LourdesGraphic lourdesGraphic(shader3D, camera);
-	Telemetry telemetry(shader3D, shader2D, shader2D_Instanced, shaderText, camera, tm, lourdesGraphic);
+	Telemetry telemetry(shader3D, shader2D, shader2DInstanced, shaderText, camera, tm, lourdesGraphic);
+	
+	Lines2DInstanced lines;
+	lines.addInitialSet({ {0,0},{300,0}, {300,100}, {0,100}, {0,0} });
+	lines.addInstances({ { { 1,1 },0, {100,100} } });
+	lines.addMoreInstances({ {{1,1},radians(30),{100,100} }, { { 2,0.2 },radians(-90),{500,800}} });
 
 
 
@@ -52,19 +60,18 @@ int main(void)
 
 			clearScreen();
 
-
+			shader2DInstanced.bind();
+			shader2DInstanced.setUniform("u_Color", 1, 1, 1, 1);
+			lines.draw();
 
 			lourdesGraphic.draw();
 			telemetry.update();
 
 
-
 			keyboardRealTimePolls(window, camera);
 			camera.updateCamera();
-			//updating shader location
-			shader3D.bind();
-			shader3D.setUniform("u_View", camera.viewMatrix);
 
+			updateCameraLocations(shader3D, camera);
 		}
 		glfwSwapBuffers(window);
 		glfwPollEvents();

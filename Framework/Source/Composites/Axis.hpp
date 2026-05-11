@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Spheres.hpp"
 
 struct Axis {
 	Shader& shader3D;
 
-	Lines3D xLine, yLine, zLine, xLine2, zLine2,extra;
+	Lines3D xLine, yLine, zLine, xLine2, zLine2;
 
 	Axis(Shader& shader3D_) :shader3D(shader3D_)
 	{
@@ -14,13 +13,6 @@ struct Axis {
 		zLine.addSet({ {0,0,-10000},{0,0,10000} });
 		xLine2.addSet({ {0,0,0},{5,0,0} });
 		zLine2.addSet({ {0,0,0},{0,0,5} });
-		extra.addSet({ {0,0,0},{5.76847,5.76847,5.76847} },2);
-
-
-
-
-
-
 	}
 	void draw() 
 	{
@@ -45,7 +37,7 @@ struct Axis {
 		shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
 
 	}
-	//deprecated?
+
 	void draw(matrix4x4& modelMatrix)
 	{
 		shader3D.bind();

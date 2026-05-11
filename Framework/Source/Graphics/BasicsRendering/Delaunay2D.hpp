@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Common.hpp"
 
 
 //std::vector<p> generateRandomPoints(int n) {
@@ -78,7 +77,7 @@ struct Triangle {
 };
 
 
-Triangle createSuperTriangle(const std::vector<p2>& points) {
+inline Triangle createSuperTriangle(const std::vector<p2>& points) {
 
 
 	// Finding the bounding box
@@ -124,7 +123,7 @@ Triangle createSuperTriangle(const std::vector<p2>& points) {
 // From the badTriangles we find the outer edges, that is the edge/s of the triangle that wont be deleted and that will be paired with the current point
 //  to form new triangles. When the process is finished, then we find the lid indices to triangulate the sphere in another function call, 
 // and lastly, we remove the supertriangle and it's edges
-std::vector<Triangle> bowyerWatson(std::vector<p2>& points, std::vector<unsigned int>& lidIndices) {
+inline std::vector<Triangle> bowyerWatson(std::vector<p2>& points, std::vector<unsigned int>& lidIndices) {
 
     Triangle superTriangle = createSuperTriangle(points);
 
@@ -224,7 +223,7 @@ std::vector<Triangle> bowyerWatson(std::vector<p2>& points, std::vector<unsigned
 }
 
 
-std::vector<Triangle> bowyerWatson(std::vector<p2>& points) {
+inline std::vector<Triangle> bowyerWatson(std::vector<p2>& points) {
 
 	Triangle superTriangle = createSuperTriangle(points);
 
@@ -291,7 +290,7 @@ std::vector<Triangle> bowyerWatson(std::vector<p2>& points) {
 
 //Generates the indices for the delaunay. It takes the points, and in order, assigns a index for each one in a map,
 //  then it traverses the triangles, filling the indices vector with the index of each point
-std::vector<unsigned int> generateMeshIndices(std::vector<p2>& points, std::vector<Triangle>& triangles) {
+inline std::vector<unsigned int> generateMeshIndices(std::vector<p2>& points, std::vector<Triangle>& triangles) {
 	std::vector<unsigned int> indices;
 	std::unordered_map<p2, unsigned int, p_HashMultiplicative> umap;
 	
@@ -317,7 +316,7 @@ std::vector<unsigned int> generateMeshIndices(std::vector<p2>& points, std::vect
 	return indices;
 }
 //inserts the positions into a map, then locates quickly the indices of the triangle
-std::vector<unsigned int> generateTrIndices(std::vector<p2>& points, std::vector<Triangle>& triangles) {
+inline std::vector<unsigned int> generateTrIndices(std::vector<p2>& points, std::vector<Triangle>& triangles) {
 	std::vector<unsigned int> indices;
 	std::unordered_map<p2, unsigned int, p_HashMultiplicative> umap;
 
@@ -342,9 +341,9 @@ std::vector<unsigned int> generateTrIndices(std::vector<p2>& points, std::vector
 
 
 
-//oye haz esto en templates y ponlo en common
+//haz esto en templates y ponlo en common
 //converts a p3 into a p2 without y value
-vector<p2> p3ToP2(vector<p3>& input) {
+inline vector<p2> p3ToP2(vector<p3>& input) {
 	vector<p2> output;
 	output.reserve(input.size());
 	for (const auto& i : input)
@@ -355,7 +354,7 @@ vector<p2> p3ToP2(vector<p3>& input) {
 
 }
 
-vector<p3> p2ToP3(const vector<p2>& input) {
+inline vector<p3> p2ToP3(const vector<p2>& input) {
 	vector<p3> output;
 	output.reserve(input.size());
 	for (const auto& i : input)

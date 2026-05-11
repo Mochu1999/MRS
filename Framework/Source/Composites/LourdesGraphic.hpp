@@ -133,22 +133,22 @@ struct LourdesGraphic
 		shader3D.setUniform("u_fragmentMode", 0); //illumination
 
 		shader3D.setUniform("u_Color", 0.0f / 255.0f, 127.0f / 255.0f, 0.0f / 255.0f, 1.0f);
-		casco1.stlDraw();
-		casco2.stlDraw();
+		casco1.draw();
+		casco2.draw();
 
 		shader3D.setUniform("u_Color", 137.0f / 255.0f, 18.0f / 255.0f, 18.0f / 255.0f, 1.0f);
-		tapa1.stlDraw();
-		tapa2.stlDraw();
+		tapa1.draw();
+		tapa2.draw();
 
 		shader3D.setUniform("u_Color", 0.0f / 255.0f, 63.0f / 255.0f, 200.0f / 255.0f, 1.0f);
-		caja.stlDraw();
+		caja.draw();
 
 		shader3D.setUniform("u_Color", 113.0f / 255.0f, 10.0f / 255.0f, 87.0f / 255.0f, 1.0f);
-		arbots.stlDraw();
+		arbots.draw();
 
 		shader3D.setUniform("u_Color", 255 / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f);
-		aux.stlDraw();
-		mecha.stlDraw();
+		aux.draw();
+		mecha.draw();
 
 
 
@@ -163,13 +163,13 @@ struct LourdesGraphic
 
 
 			shader3D.setUniform("u_Color", 113.0f / 255.0f, 10.0f / 255.0f, 87.0f / 255.0f, 1.0f);
-			timon.stlDraw();
+			timon.draw();
 
 			shader3D.setUniform("u_Color", 0.0f / 255.0f, 63.0f / 255.0f, 200.0f / 255.0f, 1.0f);
-			motor.stlDraw();
+			motor.draw();
 
 			shader3D.setUniform("u_Color", 137.0f / 255.0f, 18.0f / 255.0f, 18.0f / 255.0f, 1.0f);
-			tapa3.stlDraw();
+			tapa3.draw();
 
 			camera.rotate3DModelMatrix(propellerMatrix, propellerAngle, { 1,0,0 });
 			rp = multiplyMatrices(rudderMatrix, propellerMatrix);
@@ -180,7 +180,7 @@ struct LourdesGraphic
 			camera.translate3DModelMatrix(rp, propellerTranslation + shipHeave);
 			shader3D.setUniform("u_Model", rp);
 			shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1);
-			helice.stlDraw();
+			helice.draw();
 
 			camera.rotate3DModelMatrix(foilAftMatrix, foilAftAngle, { 0,0,1 });
 			rf = multiplyMatrices(rudderMatrix, foilAftMatrix);
@@ -191,7 +191,7 @@ struct LourdesGraphic
 			shader3D.setUniform("u_Model", rf);
 
 			shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
-			foilPopa.stlDraw();
+			foilPopa.draw();
 
 
 
@@ -207,23 +207,23 @@ struct LourdesGraphic
 		camera.translate3DModelMatrix(foilStarboardMatrix, foilStarboardTranslation + shipHeave);
 		shader3D.setUniform("u_Model", foilStarboardMatrix);
 		shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
-		foilEstribor.stlDraw();
+		foilEstribor.draw();
 
 		camera.rotate3DModelMatrix(foilPortMatrix, foilPortAngle, { 0,0,1 });
 		p3 foilPortTranslation = { 1.640,-1.089, -0.35 };
 		camera.translate3DModelMatrix(foilPortMatrix, foilPortTranslation + shipHeave);
 		shader3D.setUniform("u_Model", foilPortMatrix);
 		shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
-		foildBabor.stlDraw();
+		foildBabor.draw();
 
 
 		camera.translate3DModelMatrix(shipModel3DMatrix, shipHeave);
 		shader3D.setUniform("u_Model", shipModel3DMatrix);
 		transparent();
 		shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 0.5f);
-		solar1.stlDraw();
+		solar1.draw();
 		shader3D.setUniform("u_Color", 0 / 255.0f, 0 / 255.0f, 0 / 255.0f, 1.0f);
-		solar2.stlDraw();
+		solar2.draw();
 
 
 		shader3D.setUniform("u_Model", identityMatrix);
@@ -232,7 +232,7 @@ struct LourdesGraphic
 
 		shader3D.setUniform("u_Color", 40.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 0.15f);
 		shader3D.setUniform("u_Color", 40.0f / 255.0f, 189.9f / 255.0f, 255.0f / 255.0f, 0.2);
-		water.stlDraw();
+		water.draw();
 
 		opaque();
 
@@ -383,22 +383,22 @@ struct Lourdes
 		shader3D.setUniform("u_fragmentMode", 0); //illumination
 
 		shader3D.setUniform("u_Color", 0.0f / 255.0f, 127.0f / 255.0f, 0.0f / 255.0f, 1.0f);
-		casco1.stlDraw();
-		casco2.stlDraw();
+		casco1.draw();
+		casco2.draw();
 
 		shader3D.setUniform("u_Color", 137.0f / 255.0f, 18.0f / 255.0f, 18.0f / 255.0f, 1.0f);
-		tapa1.stlDraw();
-		tapa2.stlDraw();
+		tapa1.draw();
+		tapa2.draw();
 
 		shader3D.setUniform("u_Color", 0.0f / 255.0f, 63.0f / 255.0f, 200.0f / 255.0f, 1.0f);
-		caja.stlDraw();
+		caja.draw();
 
 		shader3D.setUniform("u_Color", 113.0f / 255.0f, 10.0f / 255.0f, 87.0f / 255.0f, 1.0f);
-		arbots.stlDraw();
+		arbots.draw();
 
 		shader3D.setUniform("u_Color", 255 / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f);
-		aux.stlDraw();
-		mecha.stlDraw();
+		aux.draw();
+		mecha.draw();
 
 
 
@@ -413,13 +413,13 @@ struct Lourdes
 
 
 			shader3D.setUniform("u_Color", 113.0f / 255.0f, 10.0f / 255.0f, 87.0f / 255.0f, 1.0f);
-			timon.stlDraw();
+			timon.draw();
 
 			shader3D.setUniform("u_Color", 0.0f / 255.0f, 63.0f / 255.0f, 200.0f / 255.0f, 1.0f);
-			motor.stlDraw();
+			motor.draw();
 
 			shader3D.setUniform("u_Color", 137.0f / 255.0f, 18.0f / 255.0f, 18.0f / 255.0f, 1.0f);
-			tapa3.stlDraw();
+			tapa3.draw();
 
 			camera.rotate3DModelMatrix(propellerMatrix, propellerAngle, { 1,0,0 });
 			rp = multiplyMatrices(rudderMatrix, propellerMatrix);
@@ -428,7 +428,7 @@ struct Lourdes
 			camera.translate3DModelMatrix(rp, propellerTranslation + shipHeave);
 			shader3D.setUniform("u_Model", rp);
 			shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1);
-			helice.stlDraw();
+			helice.draw();
 
 			camera.rotate3DModelMatrix(foilAftMatrix, foilAftAngle, { 0,0,1 });
 			rf = multiplyMatrices(rudderMatrix, foilAftMatrix);
@@ -437,7 +437,7 @@ struct Lourdes
 			shader3D.setUniform("u_Model", rf);
 
 			shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
-			foilPopa.stlDraw();
+			foilPopa.draw();
 
 
 
@@ -453,23 +453,23 @@ struct Lourdes
 		camera.translate3DModelMatrix(foilStarboardMatrix, foilStarboardTranslation + shipHeave);
 		shader3D.setUniform("u_Model", foilStarboardMatrix);
 		shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
-		foilEstribor.stlDraw();
+		foilEstribor.draw();
 
 		camera.rotate3DModelMatrix(foilPortMatrix, foilPortAngle, { 0,0,1 });
 		p3 foilPortTranslation = { 1.640,-1.089, -0.35 };
 		camera.translate3DModelMatrix(foilPortMatrix, foilPortTranslation + shipHeave);
 		shader3D.setUniform("u_Model", foilPortMatrix);
 		shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
-		foildBabor.stlDraw();
+		foildBabor.draw();
 
 
 		camera.translate3DModelMatrix(shipModel3DMatrix, shipHeave);
 		shader3D.setUniform("u_Model", shipModel3DMatrix);
 		transparent();
 		shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 0.5f);
-		solar1.stlDraw();
+		solar1.draw();
 		shader3D.setUniform("u_Color", 0 / 255.0f, 0 / 255.0f, 0 / 255.0f, 1.0f);
-		solar2.stlDraw();
+		solar2.draw();
 
 
 		shader3D.setUniform("u_Model", identityMatrix);
@@ -478,7 +478,7 @@ struct Lourdes
 
 		shader3D.setUniform("u_Color", 40.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 0.15f);
 		shader3D.setUniform("u_Color", 40.0f / 255.0f, 189.9f / 255.0f, 255.0f / 255.0f, 0.2);
-		water.stlDraw();
+		water.draw();
 
 		opaque();
 

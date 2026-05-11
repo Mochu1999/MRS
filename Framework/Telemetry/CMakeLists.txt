@@ -45,7 +45,7 @@ target_include_directories(Telemetry PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Deprecated"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Common"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Graphics"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/BasicsRendering"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../Source/Graphics/BasicsRendering"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Resources/External/Includes"
 )
 

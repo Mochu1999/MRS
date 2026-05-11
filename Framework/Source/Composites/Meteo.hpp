@@ -97,7 +97,7 @@ struct Meteo
 			float angle = atan2(windVec.y, windVec.x);
 
 			currentLonLats.push_back(point.lonLat);
-			currentInstancing.push_back({ point.lonLat, angle, {5000 * point.speed, 5000 * point.speed} });
+			currentInstancing.push_back({ {5000 * point.speed, 5000 * point.speed}, angle, point.lonLat });
 		}
 		arrows.update(currentInstancing);
 

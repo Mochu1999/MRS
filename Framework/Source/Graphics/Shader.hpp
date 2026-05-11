@@ -21,6 +21,7 @@ struct Shader
 		ShaderProgramSource source = parseShader(filepath);
 		id = createShader(source.VertexSource, source.FragmentSource);
 	}
+
 	~Shader();
 
 	//Converts a .shader text into 2 separate strings

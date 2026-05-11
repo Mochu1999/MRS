@@ -3,7 +3,6 @@
 //pocketGrib
 
 #include "FilesManagement.hpp"
-#include "Circles.hpp"
 #include "Text.hpp"
 #include "Pathfinding.hpp"
 #include "ShipAutopilot.hpp"
@@ -16,7 +15,7 @@ struct Autopilot
 {
 
 	TimeStruct& tm;
-	Shader& shader2D, shaderText, shader2D_Instanced;
+	Shader& shader2D, shaderText, shader2DInstanced;
 	GlobalVariables& gv;
 
 	World world;
@@ -26,12 +25,12 @@ struct Autopilot
 
 
 
-	Autopilot(Shader& shader2D_, Shader& shaderText_, Shader& shader2D_Instanced_, GlobalVariables& gv_, TimeStruct& tm_)
-		:shader2D(shader2D_), shaderText(shaderText_), shader2D_Instanced(shader2D_Instanced_), tm(tm_)
+	Autopilot(Shader& shader2D_, Shader& shaderText_, Shader& shader2DInstanced_, GlobalVariables& gv_, TimeStruct& tm_)
+		:shader2D(shader2D_), shaderText(shaderText_), shader2DInstanced(shader2DInstanced_), tm(tm_)
 		, gv(gv_)
 		, meteo(tm)
 		, ship(tm, world.scalingFactor, world.translationFactor)
-		, ui(shader2D, shader2D_Instanced, shaderText, gv, world, ship, meteo)
+		, ui(shader2D, shader2DInstanced, shaderText, gv, world, ship, meteo)
 	{
 		
 

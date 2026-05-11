@@ -120,7 +120,7 @@ void getCursorPos(GLFWwindow* window) {
 
 	glfwGetCursorPos(window, &intermX, &intermY);
 
-	cursor = { static_cast<float>(intermX), static_cast<float>(windowHeight - intermY) };
+	mPos = { static_cast<float>(intermX), static_cast<float>(windowHeight - intermY) };
 
 }
 void opaque() {

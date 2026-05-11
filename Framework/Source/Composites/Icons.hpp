@@ -1,9 +1,6 @@
 #pragma once
-#include "Lines2D_Instanced.hpp"
 struct IconLight 
 {
-
-
 	Polyhedra interm;
 	Polygons2D mainHull, sideHull1, sideHull2, aux1, aux2, aux3;
 	Lines2D auxa, auxb;
@@ -11,23 +8,23 @@ struct IconLight
 	IconLight()
 	{
 
-		readSTL(interm, "mainHull.stl");
+		/*stlToBinary(interm, "mainHull.stl");
 		polyhedraTo2D(interm, mainHull);
 
-		readSTL(interm, "sideHull1.stl");
+		stlToBinary(interm, "sideHull1.stl");
 		polyhedraTo2D(interm, sideHull1);
 
-		readSTL(interm, "sideHull2.stl");
+		stlToBinary(interm, "sideHull2.stl");
 		polyhedraTo2D(interm, sideHull2);
 
-		readSTL(interm, "aux1.stl");
+		stlToBinary(interm, "aux1.stl");
 		polyhedraTo2D(interm, aux1);
 
-		readSTL(interm, "aux2.stl");
+		stlToBinary(interm, "aux2.stl");
 		polyhedraTo2D(interm, aux2);
 
-		readSTL(interm, "aux3.stl");
-		polyhedraTo2D(interm, aux3);
+		stlToBinary(interm, "aux3.stl");
+		polyhedraTo2D(interm, aux3);*/
 
 
 		auxa.addSet({ {-5,0},{5,0} });
@@ -46,7 +43,7 @@ struct IconLight
 
 struct ArrowsMeteo
 {
-	Lines2D_Instanced lines;
+	Lines2DInstanced lines;
 	
 	//Normalized arrow
 	vector<p2> positions = { {0,0},{0,-0.019},{0.88,-0.019},{0.714,-0.145},{0.742,-0.175},{1,0}
@@ -57,15 +54,15 @@ struct ArrowsMeteo
 	ArrowsMeteo()
 	{
 
-		lines.addSet(positions);
-		lines.addInstances({ { {100,100},0,{50,50} } });
+		lines.addInitialSet(positions);
+		lines.addInstances({ {  { 50,50 },0,{100,100} } });
 
 	}
 
 	void update(const vector<InstanceAttributes>& currentInstancing)
 	{
 		lines.clear();
-		lines.addSet(positions);
+		lines.addInitialSet(positions);
 		lines.addInstances(currentInstancing);
 	}
 

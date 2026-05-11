@@ -1,106 +1,45 @@
-#pragma once
+#include "Graphics.hpp"
 
-#include "Common.hpp"
-#include "Lines2D.hpp"
-#include "Polygons2D.hpp"
+vector<p2> createRectanglePositions(const p2 corner1, const p2 corner2)
+{
+	vector<p2> positions;
 
+	float xMin = min(corner1.x, corner2.x);
+	float xMax = max(corner1.x, corner2.x);
+	float yMin = min(corner1.y, corner2.y);
+	float yMax = max(corner1.y, corner2.y);
 
-struct Circles {
+	vector<p2> positions_ = { p2{ xMin,yMin }, p2{ xMax,yMin }, p2{xMax,yMax },p2{xMin,yMax}, p2{ xMin,yMin } };
+	positions.insert(positions.end(), positions_.begin(), positions_.end());
 
+	return positions;
+}
 
-	int r;
-	int segments;
+vector<p2> createCirclePositions(const int r, const p2 center, int segments)
+{
+	vector<p2> positions;
 
-	float angleSegment; //theta increased by each segments
+	if (segments == 0)
+		segments = r * 3;
 
-	Lines2D circunference;
-	Polygons2D interior;
-
-	Circles(int r_, int segments_ = 0) :r(r_) {
-
-		/*if (segments_ != 0)
-			segments = segments_;
-		else
-			segments = r_ * 3;*/
-
-		if (segments_ == 0)
-			segments = r_ * 3;
-		else
-			segments = segments_;
+	//angle between points in radians
+	float angleSegment = 2 * PI / segments;
+	float theta;
 
 
-		angleSegment = 2 * PI / segments; //angle bewteern points in radians
+	positions.reserve(segments + 1);
 
-
-
+	//starts in 0º,
+	for (int i = 0; i < segments + 1; i++)
+	{
+		theta = (angleSegment * i);
+		positions.push_back(p2{ center.x + r * cos(theta), center.y + r * sin(theta) });
 	}
 
-
-	void addSet(vector<p2> centerPositions) {
-
-		//creates positions
-		for (p2 center : centerPositions)
-		{
-			createCircle(center);
-		}
-
-	}
-
-	void addSet(p2 centerPosition) {
-
-
-		createCircle(centerPosition);
-
-
-	}
-
-	//creates positions and indices of a single circle for both objects
-	void createCircle(const p2& center) {
-		//interts the center, then each segment point and then the second point to close the triangles
-
-		float theta;
-
-		vector<p2> newPositions;
-		newPositions.reserve(segments + 1);
-
-		//starts in 0º,
-		for (int i = 0; i < segments + 1; i++)
-		{
-			theta = (angleSegment * i);
-			newPositions.push_back(p2{ center.x + r * cos(theta), center.y + r * sin(theta) });
-		}
-
-
-		circunference.addSet(newPositions);
-		interior.addSet(newPositions);
-
-
-	}
-
-	void clear() {
-		circunference.clear();
-		interior.clear();
-	}
-
-
-
-
-	void drawInterior() {
-
-		interior.draw();
-
-	}
-	void drawCircunference() {
-		circunference.draw();
-
-	}
-
-
-};
-
-//input in radians. It goes from angle1 to angle2, so angle2 is ensured to be ahead. 
-// You can specify the number of segments or let it create it based on some arbitrary algorithm
-vector<p2> createArc(p2 center, float r, float angle1, float angle2, int segments = 0) {
+	return positions;
+}
+vector<p2> createArc(p2 center, float r, float angle1, float angle2, int segments = 0)
+{
 
 	vector<p2> positions;
 	positions.reserve(segments + 1);
@@ -156,7 +95,8 @@ vector<p2> createRoundedSquare(p2 startingPos, float width, float height, float 
 	return positions;
 }
 
-vector<p2> createRoundedSquare(p2 startingPos, p2 endingPos, float radius) {
+vector<p2> createRoundedSquare(p2 startingPos, p2 endingPos, float radius)
+{
 	vector<p2> positions;
 
 	float width = endingPos.x - startingPos.x;
@@ -182,3 +122,12 @@ vector<p2> createRoundedSquare(p2 startingPos, p2 endingPos, float radius) {
 
 	return positions;
 }
+
+
+
+
+
+
+
+
+

@@ -1,10 +1,13 @@
 #pragma once
 
+
+//Common functions 
+
 //--- --- ---
-//prints
+//Custom print functions
 //--- --- ---
 
-// General print template for all types
+//T
 template<typename T>
 void print_(const string& name, const T& item) {
 	stringstream ss;
@@ -12,7 +15,7 @@ void print_(const string& name, const T& item) {
 	cout << ss.str() << endl << endl;
 }
 
-// Overload for vec2<T>
+//vec2<T>
 template<typename T>
 void print_(const string& name, const vec2<T>& items) {
 	stringstream ss;
@@ -20,8 +23,6 @@ void print_(const string& name, const vec2<T>& items) {
 	ss << "{" << items.x << "," << items.y << "}";
 	cout << ss.str() << endl << endl;
 }
-
-
 
 //vector<vec2<T>>
 template<typename T>
@@ -47,7 +48,6 @@ void print_(const string& name, const vec3<T>& items) {
 
 	cout << ss.str() << endl << endl;
 }
-
 
 //vector<vec3<T>>
 template<typename T>
@@ -100,10 +100,6 @@ void print_(const string& name, const vector<T>& items) {
 void print_(const std::string& name, const std::array<float, 16>& matrix);
 
 #define print(var) print_(#var, var)
-
-
-
-
 
 
 

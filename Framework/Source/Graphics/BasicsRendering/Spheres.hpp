@@ -1,11 +1,8 @@
 #pragma once
 
-#include "Common.hpp"
-#include "Delaunay2D.hpp"
-#include "Lines3d.hpp"
 
 //Creates the points of a Fibonacci Sphere with n points and a defined radius
-std::vector<p3> addFibSphere(int n, float radius) {
+inline std::vector<p3> addFibSphere(int n, float radius) {
 	std::vector<p3> points;
 	points.reserve(n);
 
@@ -31,7 +28,7 @@ std::vector<p3> addFibSphere(int n, float radius) {
 	return points;
 }
 
-std::vector<p2> stereographicProjection(const std::vector<p3>& positions) {
+inline std::vector<p2> stereographicProjection(const std::vector<p3>& positions) {
 	std::vector<p2> projectedPoints;
 	projectedPoints.reserve(positions.size());
 

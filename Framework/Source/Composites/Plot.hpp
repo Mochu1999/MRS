@@ -1,7 +1,6 @@
 #pragma once
 #include "Common.hpp"
-#include "Circles.hpp"
-#include "Lines2D_Instanced.hpp"
+#include "Lines2DInstanced.hpp"
 #include "LourdesGraphic.hpp"
 #include "Text.hpp"
 
@@ -10,15 +9,15 @@
 struct Plot {
 
 	Shader& shader2D;
-	Shader& shader2D_Instanced;
+	Shader& shader2DInstanced;
 	Shader& shaderText;
 
 	TimeStruct& tm;
 
 	Camera& camera;
 
-	Lines2D_Instanced gridStatic;
-	Lines2D_Instanced gridDynamic, currentXgrid;
+	Lines2DInstanced gridStatic;
+	Lines2DInstanced gridDynamic, currentXgrid;
 
 	Lines2D frame;
 	Lines2D data;
@@ -43,21 +42,21 @@ struct Plot {
 	float currentX = 0;
 	float& currentY;
 
-	Plot(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, TimeStruct& tm_
+	Plot(Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Camera& camera_, TimeStruct& tm_
 		, string name_, p2 gridCorner_,float& currentY_)
-		: shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), tm(tm_)
+		: shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), tm(tm_)
 		, camera(camera_), text("resources/Glyphs/Helvetica/Helvetica.otf", 16),
 		name(name_), gridCorner(gridCorner_), currentY(currentY_)
 	{
-		gridStatic.addSet({ {0,0},{1,0} });
-		gridDynamic.addSet({ {0,0},{1,0} });
-		currentXgrid.addSet({ {0,0},{1,0} });
+		gridStatic.addInitialSet({ {0,0},{1,0} });
+		gridDynamic.addInitialSet({ {0,0},{1,0} });
+		currentXgrid.addInitialSet({ {0,0},{1,0} });
 
-		gridStatic.addInstances({ //why do I have the scale as a feature if I am using the model matrix for it
+		gridStatic.addInstances({
 			//horizontal
-			{ {0, 0},  0, {1, 1} },
+			{  { 1, 1 },  0, {0, 0} },
 			//vertical
-			{ {0, 0},  radians(90), {1, 1} },
+			{  { 1, 1 },  radians(90), {0, 0} },
 			});
 
 		frame.addSet(createRoundedSquare({ gridCorner.x - 50,gridCorner.y - 50 }, 500,300, 25));
@@ -148,9 +147,9 @@ struct Plot {
 		for (size_t i = 0; i < verticalAuxGridValues.size(); i++)
 		{
 			auxGridLines.push_back(
-				{ { gridCorner.x - maxDataX + verticalAuxGridValues[i] * 50,gridCorner.y},radians(90) ,{gridHeight,1} });
+				{  { gridHeight,1 },radians(90) , { gridCorner.x - maxDataX + verticalAuxGridValues[i] * 50,gridCorner.y} });
 
-			auxGridLines.push_back({ { 100, 0 }, radians(90), { 1, 1 } });
+			auxGridLines.push_back({  { 1, 1 }, radians(90), { 100, 0 } });
 		}
 
 
@@ -205,29 +204,29 @@ struct Plot {
 		}
 
 
-		//LOS MODEL NO NECESITAN SER ACTUALIZADOS CADA FRAME,HACER CONDICIONAL
-
-
 		//Grid
 		{
-			shader2D_Instanced.bind();
+			shader2DInstanced.bind();
 
+			///////////////////////////////////////////////
+			//Here's the only case where the model matrix is used in Lines2DInstanced.
+			//Study if it can be avoided, if so, u_Model in the shader can be eliminated
 			graphicModel2DMatrix = create2DModelMatrix(gridCorner, 0, { gridWidth,gridHeight });
-			shader2D_Instanced.setUniform("u_Model", graphicModel2DMatrix);
+			shader2DInstanced.setUniform("u_Model", graphicModel2DMatrix);
 
 			shader2D.setUniform("u_Color", 1, 1, 1, 1);
 			gridStatic.draw();
 
-			shader2D_Instanced.setUniform("u_Model", identityMatrix);
+			shader2DInstanced.setUniform("u_Model", identityMatrix);
 
-			shader2D_Instanced.setUniform("u_Color", 0.5, 0.5, 0.5, 0.5);
+			shader2DInstanced.setUniform("u_Color", 0.5, 0.5, 0.5, 0.5);
 			gridDynamic.draw();
 
-			shader2D_Instanced.setUniform("u_Color", 1, 0, 0, 1);
+			shader2DInstanced.setUniform("u_Color", 1, 0, 0, 1);
 
 			currentXgrid.addInstances({
-				{ { gridCorner.x - maxDataX + currentX,gridCorner.y},radians(90) ,{(data.positions.back().y - minDataY) * scaleY,1} },
-				{{gridCorner.x,gridCorner.y + (data.positions.back().y - minDataY) * scaleY},0,{currentX - maxDataX,1}}
+				{  { (data.positions.back().y - minDataY)* scaleY,1 },radians(90) , { gridCorner.x - maxDataX + currentX,gridCorner.y}},
+				{ { currentX - maxDataX,1 },0,{gridCorner.x,gridCorner.y + (data.positions.back().y - minDataY) * scaleY}}
 				});
 			currentXgrid.draw();
 		}
@@ -239,7 +238,7 @@ struct Plot {
 			shader2D.bind();
 			shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
 			glLineWidth(3);
-			shader2D_Instanced.setUniform("u_Model", identityMatrix);
+			shader2DInstanced.setUniform("u_Model", identityMatrix);
 			frame.draw();
 			glLineWidth(1);
 		}
@@ -247,9 +246,9 @@ struct Plot {
 
 		//Data
 		{
-			shader2D_Instanced.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
+			shader2DInstanced.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
 			graphicModel2DMatrix = create2DModelMatrix(dataCorner, 0, { 1,scaleY });
-			shader2D_Instanced.setUniform("u_Model", graphicModel2DMatrix);
+			shader2DInstanced.setUniform("u_Model", graphicModel2DMatrix);
 			glEnable(GL_SCISSOR_TEST); //You'll need to try deque method just for potencial memory leaks
 			glScissor(gridCorner.x, 0, windowWidth, windowHeight);
 			data.draw();

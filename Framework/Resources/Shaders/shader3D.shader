@@ -1,18 +1,15 @@
 #shader vertex 
 #version 330 core
 
-// Assigns the slots in the Vertex Attribute Array where these attributes (position and normal) 
 layout(location = 0) in vec3 positions;
 layout(location = 1) in vec3 normals;
 
-
-//uniforms are universal variables that can be accessed from other shaders and in main without the use of a VAO
 uniform mat4 u_Model;
 uniform mat4 u_Perspective;
 uniform mat4 u_View;
 
 
-out vec3 fragNormals;  //Output that goes to the fragment shader
+out vec3 fragNormals;
 out vec3 fragPositions;
 
 

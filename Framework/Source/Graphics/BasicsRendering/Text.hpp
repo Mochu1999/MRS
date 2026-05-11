@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Common.hpp"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -228,11 +227,11 @@ struct Text {
 };
 
 template<typename T>
-T round2d(T number) {
+inline T round2d(T number) {
 	return round(number * 100.0) / 100.0;
 }
 
 template<typename T>
-T round1d(T number) {
+inline T round1d(T number) {
 	return round(number * 10.0) / 10.0;
 }

@@ -2,7 +2,6 @@
 
 //Custom types and their functions
 
-#include "SimpleFunctions.hpp"
 
 // --- --- ---
 //	  vec2
@@ -94,8 +93,6 @@ using ui2 = vec2<unsigned int>;
 
 //vec2 functions:
 
-
-
 //sum of products, is also equal to v1*v2*cos(theta)
 template<typename T>
 T dot2(const vec2<T>& v1, const vec2<T>& v2) {
@@ -156,6 +153,7 @@ struct pair_hash_multiplicative {
 		return h1 ^ (h2 * 0x9e3779b97f4a7c15ULL); // Using another large constant
 	}
 };
+
 
 
 

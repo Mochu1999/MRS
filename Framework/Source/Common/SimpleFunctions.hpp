@@ -2,7 +2,7 @@
 
 //Functions that do not require any custom type from Types
 
-//Making use of inline to not force the use of a .cpp
+//Making use of inline to not force the use of a .cpp for small definitions
 
 // 1/sqrt(x)
 inline float fastInverseSqrt(float number) {

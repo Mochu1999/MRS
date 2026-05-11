@@ -5,7 +5,7 @@
 struct ProgressBar {
 
 	Shader& shader2D;
-	Shader& shader2D_Instanced;
+	Shader& shader2DInstanced;
 	Shader& shaderText;
 
 	TimeStruct& tm;
@@ -27,9 +27,9 @@ struct ProgressBar {
 	float variation = 0.0005;
 	string title;
 
-	ProgressBar(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, TimeStruct& tm_
+	ProgressBar(Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Camera& camera_, TimeStruct& tm_
 		, p2 outerCorner_, string title_,float& percentage_)
-		: shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), tm(tm_)
+		: shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), tm(tm_)
 		, camera(camera_), text("resources/Glyphs/Helvetica/Helvetica.otf", 20), outerCorner(outerCorner_)
 		,title(title_), percentage(percentage_)
 	{
@@ -61,7 +61,7 @@ struct ProgressBar {
 		
 		transparent();
 		shader2D.bind();
-		shader2D_Instanced.setUniform("u_Model", identityMatrix);
+		shader2DInstanced.setUniform("u_Model", identityMatrix);
 
 		shader2D.setUniform("u_Color", 1, 1, 1, 1);
 		shader2D.setUniform("u_Color", 0.7, 0.7, 0.7, 1);

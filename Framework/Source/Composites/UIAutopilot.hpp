@@ -13,7 +13,7 @@
 struct UIAutopilot
 {
 	Shader& shader2D;
-	Shader& shader2D_Instanced;
+	Shader& shader2DInstanced;
 	Shader& shaderText;
 
 	GlobalVariables& gv;
@@ -34,15 +34,15 @@ struct UIAutopilot
 	Text dataText;
 	Text meteoDateText;
 
-	Circles circleFinish;
+	/*Circles circleFinish;*/
 
 
 
-	UIAutopilot(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, GlobalVariables& gv_, World& world_, ShipAutopilot& ship_, Meteo& meteo_)
-		:shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), gv(gv_), world(world_), ship(ship_), meteo(meteo_)
+	UIAutopilot(Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, GlobalVariables& gv_, World& world_, ShipAutopilot& ship_, Meteo& meteo_)
+		:shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), gv(gv_), world(world_), ship(ship_), meteo(meteo_)
 		, mouseCoordsText("resources/Glyphs/Helvetica/Helvetica.otf", 36), dataText("resources/Glyphs/Helvetica/Helvetica.otf", 36)
 		, meteoDateText("resources/Glyphs/Helvetica/Helvetica.otf", 36)
-		, circleFinish(5000, 100)
+		/*, circleFinish(5000, 100)*/
 	{
 		dataBoxOutline.addSet(createRoundedSquare({ 80,370 }, 600, 380, 30));
 		dataBox.addSet(createRoundedSquare({ 80,370 }, 600, 380, 30));
@@ -98,14 +98,12 @@ struct UIAutopilot
 	{
 		shader2D.bind();
 
-		circleFinish.clear();
-		circleFinish.addSet(lonLatToMercator(ship.pathWaypoints.front()));
-		//circleFinish.addSet(lonLatToMercator(ship.pathWaypoints));
-		circleFinish.addSet(lonLatToMercator(ship.pathWaypoints.back()));
-
-
-		shader2D.setUniform("u_Color", 1, 0, 0, 1);
-		circleFinish.drawInterior();
+		//circleFinish.clear();
+		//circleFinish.addSet(lonLatToMercator(ship.pathWaypoints.front()));
+		////circleFinish.addSet(lonLatToMercator(ship.pathWaypoints));
+		//circleFinish.addSet(lonLatToMercator(ship.pathWaypoints.back()));
+		//shader2D.setUniform("u_Color", 1, 0, 0, 1);
+		//circleFinish.drawInterior();
 
 		//The icon requires a different model matrix because it is naturally drawn at the origin instead of at it mercator points
 
@@ -162,11 +160,11 @@ struct UIAutopilot
 
 	void drawMeteo()
 	{
-		shader2D_Instanced.bind();
+		shader2DInstanced.bind();
 
 
-		shader2D_Instanced.setUniform("u_Model", mapModel2DMatrix);
-		shader2D_Instanced.setUniform("u_Color", 1, 1, 1, 1);
+		shader2DInstanced.setUniform("u_Model", mapModel2DMatrix);
+		shader2DInstanced.setUniform("u_Color", 1, 1, 1, 1);
 		meteo.arrows.lines.draw();
 
 

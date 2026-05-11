@@ -4,7 +4,7 @@ struct UI
 {
 	Shader& shader3D;
 	Shader& shader2D;
-	Shader& shader2D_Instanced;
+	Shader& shader2DInstanced;
 	Shader& shaderText;
 	Camera& camera;
 	TimeStruct& tm;
@@ -20,14 +20,14 @@ struct UI
 
 	LourdesGraphic& lourdesGraphic;
 
-	UI(Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_
+	UI(Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Camera& camera_
 		, TimeStruct& tm_, LourdesGraphic& lourdesGraphic_)
-		:shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), camera(camera_)
+		:shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), camera(camera_)
 		, tm(tm_), lourdesGraphic(lourdesGraphic_)
 		, overlay(shader2D, camera)
-		, graphic(shader2D, shader2D_Instanced, shaderText, camera, tm, "A*cos(x)", { 1400,100 }, graf1Val)
-		, graphic2(shader2D, shader2D_Instanced, shaderText, camera, tm, "rudderAngle", { 1400,400 }, lourdesGraphic_.rudderAngle)
-		, pb(shader2D, shader2D_Instanced, shaderText, camera, tm, p2{ 1350,700 }, "Battery", pbValue)
+		, graphic(shader2D, shader2DInstanced, shaderText, camera, tm, "A*cos(x)", { 1400,100 }, graf1Val)
+		, graphic2(shader2D, shader2DInstanced, shaderText, camera, tm, "rudderAngle", { 1400,400 }, lourdesGraphic_.rudderAngle)
+		, pb(shader2D, shader2DInstanced, shaderText, camera, tm, p2{ 1350,700 }, "Battery", pbValue)
 	{
 		centerCross.addSet({
 				{ centerWindow.x - 20, centerWindow.y},{ centerWindow.x + 20, centerWindow.y},

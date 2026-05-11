@@ -1,6 +1,4 @@
 #pragma once
-#include "Polygons.hpp"
-#include "Common.hpp"
 
 
 //saves positions with its indices
