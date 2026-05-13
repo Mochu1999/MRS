@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Spheres.hpp"
 
 float c = 1;
 float graf1Val = 0;

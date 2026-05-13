@@ -57,3 +57,16 @@ struct Lines2DInstanced
 
 	void clear();
 };
+
+/*usage example
+* 
+Lines2DInstanced lines;
+lines.addInitialSet({ {0,0},{300,0}, {300,100}, {0,100}, {0,0} });
+lines.addInstances({ { { 1,1 },0, {100,100} } });
+lines.addMoreInstances({ {{1,1},radians(30),{100,100} }, { { 2,0.2 },radians(-90),{500,800}} });
+
+shader2DInstanced.bind();
+shader2DInstanced.setUniform("u_Color", 1, 1, 1, 1);
+lines.draw();
+
+*/

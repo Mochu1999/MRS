@@ -41,7 +41,7 @@ void updateCameraLocations(Shader& shader3D, Camera& camera);
 void polyhedraToPolygon2D(Polyhedra polyhedra, Polygons2D& polygon);
 
 
-#include "Spheres.hpp"
+#include "Sphere.hpp"
 
 #include "Text.hpp"
 

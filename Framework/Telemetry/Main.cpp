@@ -32,11 +32,8 @@ int main(void)
 	LourdesGraphic lourdesGraphic(shader3D, camera);
 	Telemetry telemetry(shader3D, shader2D, shader2DInstanced, shaderText, camera, tm, lourdesGraphic);
 	
-	Lines2DInstanced lines;
-	lines.addInitialSet({ {0,0},{300,0}, {300,100}, {0,100}, {0,0} });
-	lines.addInstances({ { { 1,1 },0, {100,100} } });
-	lines.addMoreInstances({ {{1,1},radians(30),{100,100} }, { { 2,0.2 },radians(-90),{500,800}} });
-
+	Sphere sphere(10);
+	sphere.addSet({0,0,0});
 
 
 	Settings settings(camera);
@@ -60,13 +57,18 @@ int main(void)
 
 			clearScreen();
 
-			shader2DInstanced.bind();
-			shader2DInstanced.setUniform("u_Color", 1, 1, 1, 1);
-			lines.draw();
+			
 
 			lourdesGraphic.draw();
 			telemetry.update();
 
+			transparent();
+			shader3D.bind();
+			shader3D.setUniform("u_Color", 1, 0, 0, 1);
+			shader3D.setUniform("u_fragmentMode", 0);
+			
+
+			sphere.draw();
 
 			keyboardRealTimePolls(window, camera);
 			camera.updateCamera();

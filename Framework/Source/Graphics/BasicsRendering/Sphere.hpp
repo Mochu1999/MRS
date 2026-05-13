@@ -1,60 +1,30 @@
 #pragma once
 
 
-//Creates the points of a Fibonacci Sphere with n points and a defined radius
-inline std::vector<p3> addFibSphere(int n, float radius) {
-	std::vector<p3> points;
-	points.reserve(n);
 
-	//points are separated horizontally at an angle (the golden angle) from the previous point. 
-	const float goldenAngle = PI * (3.0 - std::sqrt(5.0));
-	float nInv = 1.0f / n;
 
-	for (int i = 0; i < n; ++i) {
-		float y = -1.0 + (2.0 * i + 1.0) * nInv; //Points are distributed vertically from -1 to 1, evenly spaced
+//Sets a 2D projection for tessellation
+//Input must come have a centered radius (like createFibSpherePositions' output)
+inline std::vector<p2> stereographicProjection(const std::vector<p3>& positions) 
+{
+	std::vector<p2> projectedPositions;
+	projectedPositions.reserve(positions.size());
 
-		// Calculate radius at this height to the vertical axis to ensure points lie on the sphere surface
-		float r = std::sqrt(1.0 - y * y);
+	for (const p3& point : positions) 
+	{
+		p3 normalizedPosition = normalize3(point);
 
-		float theta = goldenAngle * i;
+		float projectionScale = 2.0 / (1.0 + normalizedPosition.y);  // Standard stereographic projection formula
 
-		float x = r * std::cos(theta);
-		float z = r * std::sin(theta);
-
-		points.emplace_back(p3{ x * radius, y * radius, z * radius });
+		projectedPositions.emplace_back(p2{ projectionScale * normalizedPosition.x,projectionScale * normalizedPosition.z });
 	}
 
-
-	return points;
+	return projectedPositions;
 }
 
-inline std::vector<p2> stereographicProjection(const std::vector<p3>& positions) {
-	std::vector<p2> projectedPoints;
-	projectedPoints.reserve(positions.size());
+//Siguen habiendo bugs en las tapas
 
-	for (const auto& point : positions) {
-		// Normalize the point to the unit sphere
-		float distance = std::sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
-		float nx = point.x / distance;
-		float ny = point.y / distance;
-		float nz = point.z / distance;
-
-
-		float projectionScale = 2.0 / (1.0 + ny);  // Standard stereographic projection formula
-
-		p2 projectedPoint;
-		projectedPoint.x = projectionScale * nx;
-
-		projectedPoint.y = projectionScale * nz;
-
-		projectedPoints.emplace_back(projectedPoint);
-	}
-
-	return projectedPoints;
-}
-
-
-//If you want to draw the mesh lines instead of the triangles, it is currently using Lines3d for it
+//Only admits one sphere //// Class has excellent chances to get instancing integration in the future
 struct Sphere {
 	p3 center;
 	float radius;
@@ -98,10 +68,10 @@ struct Sphere {
 		}
 
 
-		model = addFibSphere(n, radius);
+		model = createFibSpherePositions(n);
 
 
-
+		//2D sphere for tessellation
 		std::vector<p2> projectedPoints = stereographicProjection(model);
 
 
@@ -131,6 +101,34 @@ struct Sphere {
 
 	}
 
+	//Creates the positions of a sphere of unit radius centered on O
+	std::vector<p3> createFibSpherePositions(int nPoints)
+	{
+		std::vector<p3> positions;
+		positions.reserve(nPoints); //number of points
+
+		//points are separated horizontally at an angle (the golden angle) from the previous point. 
+		const float goldenAngle = PI * (3.0 - std::sqrt(5.0));
+		float nInv = 1.0f / nPoints;
+
+		for (int i = 0; i < nPoints; ++i)
+		{
+			float y = -1.0 + (2.0 * i + 1.0) * nInv; //Points are distributed vertically from -1 to 1, evenly spaced
+
+			// Calculate radius at this height to the vertical axis to ensure points lie on the sphere surface
+			float r = std::sqrt(1.0 - y * y);
+
+			float theta = goldenAngle * i;
+
+			float x = r * std::cos(theta);
+			float z = r * std::sin(theta);
+
+			//scaled them to their real radius
+			positions.emplace_back(p3{ x, y , z });
+		}
+
+		return positions;
+	}
 
 	//able to be dynamic
 	void addSet(p3 center_) {
