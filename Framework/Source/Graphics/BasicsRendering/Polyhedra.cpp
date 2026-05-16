@@ -35,13 +35,13 @@ void Polyhedra::addPolyhedra(const std::string& localPath)
 	isBufferUpdated = true;
 }
 
-void Polyhedra::addPolyhedra(const vector<p3>& positions_, const vector<unsigned int>& indices_, const vector<p3>& normals_)
+void Polyhedra::addPolyhedra(const vector<p3>& positions_, const vector<p3>& normals_, const vector<unsigned int>& indices_)
 {
 	clear();
 
 	positions = positions_;
-	indices = indices_;
 	normals = normals_;
+	indices = indices_;
 
 	isBufferUpdated = true;
 }

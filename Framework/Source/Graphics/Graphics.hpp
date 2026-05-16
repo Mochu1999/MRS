@@ -1,7 +1,7 @@
 #pragma once
 
 //Header containing the low level logic for the Graphics Engine
-
+inline int counterA = 0;
 
 //Access to OpenGL and GLFW
 #include <GL/glew.h>
@@ -26,12 +26,15 @@ void updateCameraLocations(Shader& shader3D, Camera& camera);
 
 
 //Basic Rendering
+#include "DelaunayTriangulation.hpp"
+
 #include "RectanglesCircles.hpp"
 #include "Lines2D.hpp"
 #include "Lines2DInstanced.hpp"
 #include "Lines3D.hpp"
 
-#include "Delaunay2D.hpp"
+
+#include "Sphere.hpp"
 
 #include "Polygons2D.hpp"
 #include "Polygons3D.hpp"
@@ -40,8 +43,6 @@ void updateCameraLocations(Shader& shader3D, Camera& camera);
 #include "Polyhedra.hpp"
 void polyhedraToPolygon2D(Polyhedra polyhedra, Polygons2D& polygon);
 
-
-#include "Sphere.hpp"
-
 #include "Text.hpp"
 
+#include "SweepTriangulation.hpp"

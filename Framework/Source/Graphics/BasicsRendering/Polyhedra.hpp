@@ -2,12 +2,14 @@
 
 #include "FilesManagement.hpp"
 
+//TO DO: Instancing polyhedra
+
 //To have sharp illumination, you need to repeat positions to have different normals per vertex.
 //If you don't repeat positions you can only have one normal per vertex (soft illumination)
 
 //one object per polyhedra, no batches
 //Can directly read custom .bin models
-struct Polyhedra 
+struct Polyhedra
 {
 	vector<p3> positions;
 	vector<unsigned int> indices;
@@ -22,7 +24,7 @@ struct Polyhedra
 	bool isBufferUpdated = true;
 	GLenum usageHint = GL_STATIC_DRAW;
 
-	Polyhedra() 
+	Polyhedra()
 	{
 		genBuffers();
 	}
@@ -33,7 +35,14 @@ struct Polyhedra
 
 	void addPolyhedra(const std::string& localPath);
 
-	void addPolyhedra(const vector<p3>& positions_, const vector<unsigned int>& indices_, const vector<p3>& normals_);
+	void addPolyhedra(const vector<p3>& positions_, const vector<p3>& normals_, const vector<unsigned int>& indices_);
+
+	void addSphere(float r, p3 center, unsigned int nPositions = std::numeric_limits<unsigned int>::max())
+	{
+		createSphere(r, center, nPositions, positions, normals, indices);
+
+		isBufferUpdated = true;
+	}
 
 	void draw();
 

@@ -30,7 +30,7 @@ struct Telemetry
 	{
 		axis.draw();
 
-		ui.draw();
+		//ui.draw();
 
 		
 	}

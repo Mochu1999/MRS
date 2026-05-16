@@ -46,13 +46,26 @@ struct Lines2D
 
 	void createCircle(const int r, const vector<p2> centers, int segments = 0);
 
-
+	
 
 	void createIndices(const vector<p2>& items);
 
 	void draw();
 
 	void clear();
+
+	//to debug delaunay meshes. usage example in Delaunay
+	void addDelaunaySet(const vector<p2>& positions_, const vector<unsigned int>& indices_)
+	{
+		clear();
+		for (size_t i = 0; i < indices_.size(); i += 3)
+		{
+			p2 a = positions_[indices_[i]];
+			p2 b = positions_[indices_[i + 1]];
+			p2 c = positions_[indices_[i + 2]];
+			addSet(vector<p2>{a, b, c, a});
+		}
+	}
 };
 
 /*usage example

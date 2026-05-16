@@ -14,7 +14,8 @@ struct LourdesGraphic
 
 	Shader& shader3D;
 	Camera& camera;
-	Sphere light;
+	Polyhedra lightSphere;
+	//Polyhedra light;
 
 	std::array<float, 16> shipModel3DMatrix = identityMatrix;
 
@@ -36,7 +37,7 @@ struct LourdesGraphic
 
 	p3 lightPos = { 30,25,40 };
 
-	LourdesGraphic(Shader& shader3D_, Camera& camera_) :shader3D(shader3D_), camera(camera_), light(3)
+	LourdesGraphic(Shader& shader3D_, Camera& camera_) :shader3D(shader3D_), camera(camera_)
 	{
 
 		casco1.addPolyhedra("casco1.bin");
@@ -83,7 +84,8 @@ struct LourdesGraphic
 		water.normals = { {0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0} };*/
 
 
-		light.addSet(lightPos);
+		//light.addSphere(3,lightPos);
+		//lightSphere.addPolyhedra(light.positions, light.normals, light.indices);
 		shader3D.bind();
 		shader3D.setUniform("u_lightPos", lightPos);
 
@@ -94,7 +96,7 @@ struct LourdesGraphic
 		shader3D.bind();
 		shader3D.setUniform("u_Model", identityMatrix);
 		shader3D.setUniform("u_fragmentMode", 1);
-		light.draw();
+		lightSphere.draw();
 
 		opaque();
 

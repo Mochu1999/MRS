@@ -93,7 +93,9 @@ using ui2 = vec2<unsigned int>;
 
 //vec2 functions:
 
-//sum of products, is also equal to v1*v2*cos(theta)
+//sum of products, is also equal to |v1|*|v2|*cos(theta)
+//when v1 and v2 are the same vector v, cos=0, and so it's |v|^2
+//this is why when v1 and v2 are perpendicular the value is 0
 template<typename T>
 T dot2(const vec2<T>& v1, const vec2<T>& v2) {
 	return v1.x * v2.x + v1.y * v2.y;
