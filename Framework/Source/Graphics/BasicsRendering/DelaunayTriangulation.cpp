@@ -192,6 +192,28 @@ vector<Triangle> internalDelaunayTriangulationAlgorithm(std::vector<p2>& points,
 	return triangles;
 }
 
+std::vector<unsigned int> delaunayTriangulation(std::vector<p2>& points)
+{
+	//Englobes every point
+	Triangle superTriangle = createSuperTriangle(points);
+
+	//the logic of the algorithm is inside this function, it returns the points triangulated but with the superTriangle attached
+	std::vector<Triangle> triangles = internalDelaunayTriangulationAlgorithm(points, superTriangle);
+
+	//removing triangles that contain a point of superTriangle
+	for (auto it = triangles.begin(); it != triangles.end(); )
+	{
+		if (*it == superTriangle)
+			it = triangles.erase(it);
+		else
+			++it;
+	}
+
+
+	//and we return the indices of these triangles
+	return extractDelaunayIndices(points, triangles);
+}
+
 std::vector<unsigned int> extractLidIndices(std::vector<p2>& points, std::vector<Triangle>& triangles)
 {
 	std::vector<unsigned int> indices;
@@ -234,6 +256,60 @@ std::vector<unsigned int> extractLidIndices(std::vector<p2>& points, std::vector
 			addedIndices.insert(itC->second);
 		}
 	}
+
+	return indices;
+}
+
+
+std::vector<unsigned int> delaunayTriangulationWithLid(std::vector<p2>& points, vector<p3> positions)
+{
+	vector<unsigned int> indices;
+
+	Triangle superTriangle = createSuperTriangle(points);
+
+	std::vector<Triangle> triangles = internalDelaunayTriangulationAlgorithm(points, superTriangle);
+
+	//we remove triangles that touch superTriangle, but we keep them for the lid
+	vector<Triangle> lidTriangles;
+	for (auto it = triangles.begin(); it != triangles.end(); )
+	{
+		if (*it == superTriangle)
+		{
+			lidTriangles.push_back(*it);
+			it = triangles.erase(it);
+		}
+		else
+			++it;
+	}
+	//normal indices from triangles
+	indices = extractDelaunayIndices(points, triangles);
+
+
+	//returns the indices of the lidTriangles without the superTriangle vertices and no repeated vertex
+	vector<unsigned int> lidIndices = extractLidIndices(points, lidTriangles);
+
+	//we create a new vector of points for triangulation
+	//WE COULD USE POINTS, BUT DIRECT PROJECTION OF THE 3D POINTS CREATE A LITTLE LESS PROBLEMS THAN STEREOGRAPHIC
+	vector<p2> lidPoints;
+	for (size_t i = 0; i < lidIndices.size(); i++)
+	{
+		lidPoints.push_back(p2{ positions[lidIndices[i]].x,positions[lidIndices[i]].z });
+	}
+	//THE LID SHOULDN'T BE TRIANGULATED WITH DELAUNAY
+	vector<unsigned int> newIndices = delaunayTriangulation(lidPoints);
+
+	for (size_t i = 0; i < newIndices.size(); i++)
+	{
+		newIndices[i] = lidIndices[newIndices[i]];
+	}
+	//MAKING THEM CHANGE ORIENTATION DOENS'T CHANGE THE COLOR BUG PROBLEM
+	/*for (size_t i = 0; i < newIndices.size(); i += 3)
+	{
+		std::swap(newIndices[i + 1], newIndices[i + 2]);
+	}*/
+
+
+	indices.insert(indices.end(), newIndices.begin(), newIndices.end());
 
 	return indices;
 }

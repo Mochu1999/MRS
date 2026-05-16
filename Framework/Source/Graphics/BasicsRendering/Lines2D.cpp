@@ -135,7 +135,17 @@ void Lines2D::clear()
 }
 
 
-
+void Lines2D::addDelaunaySet(const vector<p2>& positions_, const vector<unsigned int>& indices_)
+{
+	clear();
+	for (size_t i = 0; i < indices_.size(); i += 3)
+	{
+		p2 a = positions_[indices_[i]];
+		p2 b = positions_[indices_[i + 1]];
+		p2 c = positions_[indices_[i + 2]];
+		addSet(vector<p2>{a, b, c, a});
+	}
+}
 
 
 

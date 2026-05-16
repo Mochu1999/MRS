@@ -1,5 +1,39 @@
 #pragma once
 
+/*usage example
+
+Polyhedra sphere;
+	sphere.addSphere(1, { 0,0,0 },1000);
+
+	vector<p2>points = createRandomPoints(150, { 100,100 }, { 600,600 });
+	std::vector<unsigned int> indices = delaunayTriangulation(points);
+
+	//debug points
+	Polygons2D circles;
+	circles.createCircle(7, points);
+
+	//debug triangles
+	Lines2D debugDelaunay;
+	debugDelaunay.addDelaunaySet(points, indices);
+
+	//draw
+	transparent();
+	shader3D.bind();
+	shader3D.setUniform("u_Color", 1, 0, 0, 1);
+	shader3D.setUniform("u_fragmentMode", 1);
+	sphere.draw();
+
+	shader2D.bind();
+	shader2D.setUniform("u_Color", 1, 0, 0, 1);
+	glLineWidth(2);
+	circles.draw();
+	debugDelaunay.draw();
+
+*/
+
+
+
+
 //Takes a 2D of points mesh and triangulates the mesh into triangle in a way that no
 // point falls inside the circumcircle (the circle surrounding a triangle) of any other triangle
 
@@ -60,81 +94,6 @@ std::vector<unsigned int> extractLidIndices(std::vector<p2>& points, std::vector
 vector<Triangle> internalDelaunayTriangulationAlgorithm(std::vector<p2>& points, Triangle& superTriangle);
 
 //case where I don't want to extract the lid
-inline std::vector<unsigned int> delaunayTriangulation(std::vector<p2>& points) 
-{
-	//Englobes every point
-	Triangle superTriangle = createSuperTriangle(points);
+std::vector<unsigned int> delaunayTriangulation(std::vector<p2>& points);
 
-	//the logic of the algorithm is inside this function, it returns the points triangulated but with the superTriangle attached
-	std::vector<Triangle> triangles = internalDelaunayTriangulationAlgorithm(points, superTriangle);
-
-	//removing triangles that contain a point of superTriangle
-	for (auto it = triangles.begin(); it != triangles.end(); )
-	{
-		if (*it == superTriangle)
-			it = triangles.erase(it);
-		else
-			++it;
-	}
-
-
-	//and we return the indices of these triangles
-	return extractDelaunayIndices(points, triangles);
-}
-
-
-
-
-
-inline std::vector<unsigned int> delaunayTriangulationWithLid(std::vector<p2>& points, vector<p3> positions)
-{
-	vector<unsigned int> indices;
-
-	Triangle superTriangle = createSuperTriangle(points);
-
-	std::vector<Triangle> triangles = internalDelaunayTriangulationAlgorithm(points, superTriangle);
-
-	//we remove triangles that touch superTriangle, but we keep them for the lid
-	vector<Triangle> lidTriangles;
-	for (auto it = triangles.begin(); it != triangles.end(); )
-	{
-		if (*it == superTriangle)
-		{
-			lidTriangles.push_back(*it);
-			it = triangles.erase(it);
-		}
-		else
-			++it;
-	}
-	//normal indices from triangles
-	indices = extractDelaunayIndices(points, triangles);
-
-
-	//returns the indices of the lidTriangles without the superTriangle vertices and no repeated vertex
-	vector<unsigned int> lidIndices = extractLidIndices(points, lidTriangles);
-
-	//we create a new vector of points for triangulation
-	//WE COULD USE POINTS, BUT DIRECT PROJECTION OF THE 3D POINTS CREATE A LITTLE LESS PROBLEMS THAN STEREOGRAPHIC
-	vector<p2> lidPoints;
-	for (size_t i = 0; i < lidIndices.size(); i++)
-	{
-		lidPoints.push_back(p2{ positions[lidIndices[i]].x,positions[lidIndices[i]].z });
-	}
-	//THE LID SHOULDN'T BE TRIANGULATED WITH DELAUNAY
-	vector<unsigned int> newIndices = delaunayTriangulation(lidPoints);
-
-	for (size_t i = 0; i < newIndices.size(); i++)
-	{
-		newIndices[i] = lidIndices[newIndices[i]];
-	}
-	//MAKING THEM CHANGE ORIENTATION DOENS'T CHANGE THE COLOR BUG PROBLEM
-	/*for (size_t i = 0; i < newIndices.size(); i += 3)
-	{
-		std::swap(newIndices[i + 1], newIndices[i + 2]);
-	}*/
-
-
-	indices.insert(indices.end(), newIndices.begin(), newIndices.end());
-
-	return indices;
-}
+std::vector<unsigned int> delaunayTriangulationWithLid(std::vector<p2>& points, vector<p3> positions);

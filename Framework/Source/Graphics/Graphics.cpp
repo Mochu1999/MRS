@@ -27,6 +27,7 @@ void initializeCameraLocations(Shader& shader3D, Shader& shader2D, Shader& shade
 	//Text
 	shaderText.bind();
 	shaderText.setUniform("u_OrthoProjection", camera.orthoMatrix);
+	shaderText.setUniform("u_Color", 1.0f, 1.0f, 1.0f);
 }
 
 void updateCameraLocations(Shader& shader3D, Camera& camera)

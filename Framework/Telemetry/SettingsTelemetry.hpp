@@ -1,10 +1,6 @@
 #pragma once
 
-#include <filesystem>
-namespace fs = std::filesystem;
-
 #include "Common.hpp"
-#include "Camera.hpp"
 
 
 
