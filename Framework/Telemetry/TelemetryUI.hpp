@@ -31,14 +31,14 @@ struct TelemetryUI
 
 	float pbValue = 0.5f;
 
-	
+	float borrar;
 
 	TelemetryUI(Telemetry& telemetry_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Camera& camera_)
 		:telemetry(telemetry_)
 		, shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), camera(camera_)
 		, axis(shader3D), lourdesGraphic(shader3D,camera)
 		, overlay(shader2D, camera)
-		, graphic(shader2D, shader2DInstanced, shaderText, camera, telemetry.tm, "A*cos(x)", { 1400,100 }, graf1Val)
+		, graphic(shader2D, shader2DInstanced, shaderText, camera, telemetry.tm, "A*cos(x)", { 1400,100 }, borrar)
 		, graphic2(shader2D, shader2DInstanced, shaderText, camera, telemetry.tm, "rudderAngle", { 1400,400 }, lourdesGraphic.rudderAngle)
 		, pb(shader2D, shader2DInstanced, shaderText, camera, telemetry.tm, p2{ 1350,700 }, "Battery", pbValue)
 	{
@@ -64,7 +64,7 @@ struct TelemetryUI
 
 		overlay.draw();
 
-		graf1Val = cosPlot(c);
+		//graf1Val = 0;// cosPlot(c);
 		graphic.draw();
 		graphic2.draw();
 		pb.draw();

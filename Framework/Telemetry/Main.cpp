@@ -8,18 +8,21 @@
 
 #include "Telemetry.hpp"
 #include "TelemetryUI.hpp"
+#include "TransmitterPC.hpp"
+
+
 
 int main(void)
 {
 	GLFWwindow* window = initialize();
 
+	//Unify in a single shader once only references of it exist only in UI
 	Shader shader3D("resources/shaders/shader3D.shader");
 	Shader shader2D("resources/shaders/shader2D.shader");
 	Shader shader2DInstanced("resources/shaders/shader2DInstanced.shader");
 	Shader shaderText("resources/shaders/shaderText.shader");
 	Camera camera(window);
 	initializeCameraLocations(shader3D, shader2D, shader2DInstanced, shaderText, camera);
-
 
 	
 	Telemetry telemetry;
@@ -29,10 +32,10 @@ int main(void)
 	Settings settings(camera);
 
 	AllPointers allPointers(&camera);
-	glfwSetWindowUserPointer(window, &allPointers);
-	glfwSetKeyCallback(window, keyboardEventCallback);
-	glfwSetMouseButtonCallback(window, mouseEventCallback);
-	glfwSetScrollCallback(window, scrollCallback);
+
+	glfwIput(window, &allPointers, keyboardEventCallback, mouseEventCallback, scrollCallback);
+	
+	
 
 	while (!glfwWindowShouldClose(window))
 	{

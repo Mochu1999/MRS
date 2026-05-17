@@ -102,7 +102,13 @@ GLFWwindow* initialize(float windowWidth_, float windowHeight_, const char* wind
 	return window;
 }
 
-
+void glfwIput(GLFWwindow* window, void* pointer, GLFWkeyfun callbackKey, GLFWmousebuttonfun callbackMouseButton, GLFWscrollfun callbackScroll)
+{
+	glfwSetWindowUserPointer(window, pointer);
+	glfwSetKeyCallback(window, callbackKey);
+	glfwSetMouseButtonCallback(window, callbackMouseButton);
+	glfwSetScrollCallback(window, callbackScroll);
+}
 
 void clearScreen()
 {
