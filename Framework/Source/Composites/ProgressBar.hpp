@@ -1,6 +1,5 @@
 
 #pragma once
-#include "Text.hpp"
 
 struct ProgressBar {
 

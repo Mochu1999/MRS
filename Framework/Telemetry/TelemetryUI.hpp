@@ -3,11 +3,13 @@
 #include "Telemetry.hpp"
 
 #include "Axis.hpp"
-#include "Plot.hpp"
 #include "Overlay2D.hpp"
+#include "Plot.hpp"
 #include "ProgressBar.hpp"
-#include "LourdesGraphic.hpp"
+#include "Lourdes3DModel.hpp"
 
+#include "WaterMRS.hpp"
+#include "SunMRS.hpp"
 
 struct TelemetryUI
 {
@@ -17,14 +19,16 @@ struct TelemetryUI
 	Shader& shaderText;
 	Camera& camera;
 
-	LourdesGraphic lourdesGraphic;
+	Telemetry& t;
 
-	Telemetry& telemetry;
+	Lourdes3DModel lourdesModel;
+	WaterMRS water;
+	SunMRS sun;
 
 	Lines2D centerCross;
 	Overlay2D overlay;
-	Plot graphic;
-	Plot graphic2;
+	Plot plot;
+	Plot plot2;
 	ProgressBar pb;
 
 	Axis axis;
@@ -33,51 +37,61 @@ struct TelemetryUI
 
 	float borrar;
 
+
+	std::array<float, 16> shipModelMatrix = identityMatrix;
+	std::array<float, 16> rudderMatrix, propellerMatrixf;
+
+
+
+
 	TelemetryUI(Telemetry& telemetry_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Camera& camera_)
-		:telemetry(telemetry_)
+		:t(telemetry_)
 		, shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), camera(camera_)
-		, axis(shader3D), lourdesGraphic(shader3D,camera)
-		, overlay(shader2D, camera)
-		, graphic(shader2D, shader2DInstanced, shaderText, camera, telemetry.tm, "A*cos(x)", { 1400,100 }, borrar)
-		, graphic2(shader2D, shader2DInstanced, shaderText, camera, telemetry.tm, "rudderAngle", { 1400,400 }, lourdesGraphic.rudderAngle)
-		, pb(shader2D, shader2DInstanced, shaderText, camera, telemetry.tm, p2{ 1350,700 }, "Battery", pbValue)
+		, plot(shader2D, shader2DInstanced, shaderText, camera, t.tm, "sailAngle", { 1400,100 }, t.sailAngle)
+		, plot2(shader2D, shader2DInstanced, shaderText, camera, t.tm, "rudderAngle", { 1400,400 }, t.rudderAngle)
+		, pb(shader2D, shader2DInstanced, shaderText, camera, t.tm, p2{ 1350,700 }, "Battery", pbValue)
 	{
+		updateSunLocation();
+
 		centerCross.addSet({
 				{ centerWindow.x - 20, centerWindow.y},{ centerWindow.x + 20, centerWindow.y},
-			{ centerWindow.x, centerWindow.y - 20},{ centerWindow.x, centerWindow.y + 20} });
+				{ centerWindow.x, centerWindow.y - 20},{ centerWindow.x, centerWindow.y + 20} });
 		centerCross.indices = { 0,1,2,3 };
 	}
 
 	void draw()
 	{
-		axis.draw();
+		drawAxis();
 
-		shader3D.bind();
-		shader3D.setUniform("u_Model", identityMatrix);
-		shader3D.setUniform("u_fragmentMode", 1);
+		drawLourdes();
+		drawWater();
+		drawSun();
 
-		lourdesGraphic.draw();
+		drawOverlay();
 
-		opaque();
 
-		shader2D.bind();
-
-		overlay.draw();
-
-		//graf1Val = 0;// cosPlot(c);
-		graphic.draw();
-		graphic2.draw();
+		plot.draw();
+		plot2.draw();
 		pb.draw();
 
-		transparent();
-		shader2D.bind();
-		shader2D.setUniform("u_Model", identityMatrix);
-		shader2D.setUniform("u_Color", 1, 1, 1, 0.5);
-		glLineWidth(2);
-		centerCross.draw();
-		glLineWidth(1);
-		opaque();
 
-		
+
+		drawCenterCross();
 	}
+
+	
+
+	void drawLourdes();
+
+	void drawAxis();
+
+	void drawWater();
+
+	void updateSunLocation();
+
+	void drawSun();
+
+	void drawCenterCross();
+
+	void drawOverlay();
 };

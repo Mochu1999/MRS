@@ -1,8 +1,4 @@
 #pragma once
-#include "Common.hpp"
-#include "Lines2DInstanced.hpp"
-#include "LourdesGraphic.hpp"
-#include "Text.hpp"
 
 
 
@@ -167,10 +163,6 @@ struct Plot {
 		updateDynamicGrid();
 
 	}
-
-	
-
-	
 
 	void pushData() {
 		

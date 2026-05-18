@@ -298,3 +298,22 @@ matrix4x4 multiplyMatrices(const matrix4x4& a, const matrix4x4& b);
 matrix4x4 invertMatrix(const matrix4x4& m);
 
 std::array<float, 4> multiplyMatVec(const matrix4x4& m, const std::array<float, 4>& v);
+
+
+// --- --- ---
+//  Interface
+// --- --- ---
+
+inline p3 p2ToP3Y(p2& coords2D)
+{
+	return { coords2D.x,0,coords2D.y };
+}
+inline vector<p3> p2ToP3Y(vector<p2>& coords2D)
+{
+	vector<p3> coords3D;
+	for (auto& coord : coords2D)
+	{
+		coords3D.push_back({ coord.x,0,coord.y });
+	}
+	return coords3D;
+}

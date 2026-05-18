@@ -20,7 +20,7 @@ vector<p2> createCirclePositions(const int r, const p2 center, int segments)
 	vector<p2> positions;
 
 	if (segments == 0)
-		segments = r * 3;
+		segments = r * 100;
 
 	//angle between points in radians
 	float angleSegment = 2 * PI / segments;

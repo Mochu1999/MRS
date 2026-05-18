@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-
+#include "Graphics.hpp"
 
 
 //Pointers can be re-seated while references cannot. But we are not re seating anything so whatever
@@ -16,7 +16,7 @@ struct AllPointers {
 //  for per-frame polling that updates each frame or based on deltaTime for smooth changes in a variable over frames
 
 
-void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+inline void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
@@ -81,7 +81,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 
 //keys functions gets triggered once per frame
-void keyboardRealTimePolls(GLFWwindow* window, Camera& camera) {
+inline void keyboardRealTimePolls(GLFWwindow* window, Camera& camera) {
 
 	//The rest of the logic is in updateCamera
 
@@ -132,14 +132,14 @@ void keyboardRealTimePolls(GLFWwindow* window, Camera& camera) {
 
 
 
-void getPos(GLFWwindow* window, p2& mPos) {
+inline void getPos(GLFWwindow* window, p2& mPos) {
 	double xpos1, ypos1;
 	glfwGetCursorPos(window, &xpos1, &ypos1);
 
 	mPos = { (float)xpos1,(float)(windowHeight - ypos1) };
 }
 
-void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
+inline void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
 
@@ -173,9 +173,9 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 }
 
 
-float scrollTranslationSpeedFactor = 20;
+inline float scrollTranslationSpeedFactor = 20;
 
-void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+inline void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
 

@@ -9,8 +9,7 @@ void initializeCameraLocations(Shader& shader3D, Shader& shader2D, Shader& shade
 	shader3D.setUniform("u_Model", identityMatrix);
 
 	shader3D.setUniform("u_CamPos", camera.cameraPos);
-	//Sun position for telemetry
-	shader3D.setUniform("u_lightPos", p3{ 30,25,40 });
+	shader3D.setUniform("u_fragmentMode", flatColor);
 
 	//2D
 	shader2D.bind();

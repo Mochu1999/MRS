@@ -32,11 +32,8 @@ int main(void)
 	Settings settings(camera);
 
 	AllPointers allPointers(&camera);
-
 	glfwIput(window, &allPointers, keyboardEventCallback, mouseEventCallback, scrollCallback);
 	
-	
-
 	while (!glfwWindowShouldClose(window))
 	{
 		getPos(window, mPos);
@@ -44,8 +41,9 @@ int main(void)
 		{
 			clearScreen();
 
-
+			//program's logic
 			telemetry.update();
+			//program's rendering
 			ui.draw();
 			
 

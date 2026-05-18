@@ -24,6 +24,15 @@ inline p2 LastLMPos = { 0,0 };
 inline bool isLmbPressed = 0;
 inline bool isMmbPressed = 0;
 
+// --- --- ---
+//Global enums
+// --- --- ---
+enum FragmentMode
+{
+    shadeColor = 0,
+    flatColor = 1
+};
+
 
 
 ////Removing variables from the struct to ease reference passings. To consider it for the final iteration
