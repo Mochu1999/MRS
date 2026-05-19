@@ -31,7 +31,7 @@ int main(void)
 
 	Settings settings(camera);
 
-	AllPointers allPointers(&camera);
+	AllPointers allPointers(&camera/*, &telemetry*/);
 	glfwIput(window, &allPointers, keyboardEventCallback, mouseEventCallback, scrollCallback);
 	
 	while (!glfwWindowShouldClose(window))
@@ -47,7 +47,7 @@ int main(void)
 			ui.draw();
 			
 
-			keyboardRealTimePolls(window, camera);
+			keyboardRealTimePolls(window/*, camera*/);
 			camera.updateCamera();
 
 			updateCameraLocations(shader3D, camera);
