@@ -22,6 +22,8 @@ No kerning, it can improve spacing between glyphs for specific pairs, like AA vs
 	//Falta poner texto estático, dinámico y multiples inputs en text to draw, texto en dpis, reserves
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
+//SACAR PATH Y FONT DE CONSTRUCTOR PARA MEJOR USO EN OTROS MÓDULOS
+
 struct Line {
 	p2 pos;
 	string text;

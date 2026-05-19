@@ -1,6 +1,75 @@
 #pragma once
 
+/*pb:
+float* percentage = NULL; //linked value from 0 to 1 that will be linked to the PB
+	string title;
 
+	//outer line
+	p2 outerCorner; //Bottom left corner where the outerRoundedSquare starts
+	p2 outerLength = { 500,50 };
+	Lines2D outerRoundedSquare;
+
+	//inner polygon
+	Polygons2D innerRoundedSquare;
+
+	//Title and percentage in text
+	Text text;
+	*/
+
+struct PlotTime
+{
+	//actual plotted value
+	float* currentY = NULL;
+	//time
+	float currentX = 0;
+
+	string title;
+
+	//outer rounded square
+	Lines2D frame;
+
+	//axis of the plot, line that shows your current value, dynamic lines that increase with the time
+	Lines2DInstanced axis, currentXgrid, gridDynamic;
+	p2 axisCorner;
+
+
+	float gridWidth = 400, gridHeight = 200;
+
+	PlotTime()
+	{
+		
+	}
+
+	void createPlot(float* currentY_, p2 axisCorner_, string title_)
+	{
+		currentY = currentY_;
+		axisCorner = axisCorner_;
+		title = title_;
+
+		frame.addSet(createRoundedSquare({ axisCorner.x - 50,axisCorner.y - 50 }, 500, 300, 25));
+
+		//initializing instancing lines
+		vector<p2> initialLine = { {0,0},{1,0} };
+		axis.addInitialSet(initialLine);
+		currentXgrid.addInitialSet(initialLine);
+		gridDynamic.addInitialSet(initialLine);
+
+		//axis
+		axis.addInstances({
+			//horizontal
+			{  { gridWidth, 1 },  0, axisCorner},
+			//vertical
+			{  { gridHeight, 1 },  radians(90), axisCorner },
+			});
+		//
+
+	}
+
+	void update()
+	{
+
+	}
+};
 
 struct Plot {
 
@@ -12,7 +81,7 @@ struct Plot {
 
 	Camera& camera;
 
-	Lines2DInstanced gridStatic;
+	Lines2DInstanced axis;
 	Lines2DInstanced gridDynamic, currentXgrid;
 
 	Lines2D frame;
@@ -21,41 +90,41 @@ struct Plot {
 	Text text;
 	vector<Line> lines;
 
-	string name;
+	string title;
 
 	std::array<float, 16> graphicModel2DMatrix;
 
 
-	unsigned int counterSecondsPlot = 0; //will be compared to the variables of the same name in tm to know when to update
+	unsigned int counterSecondsPlot = 0; //will be compared to the variables of the same title in tm to know when to update
 	unsigned int counterUpdatePlot = 0;
 
-	//OUTERCORNER ES DEL GRID, NO DEL FRAME
+
 	float counter = 0;
-	p2 gridCorner, dataCorner;
-	float minDataX = 0, maxDataX = 0, minDataY = 0, maxDataY = 0;
+	p2 axisCorner, dataCorner;
+	float minDataX = 0, maxDataX = 0, minDataY = -60, maxDataY = 60;
 	float scaleY = 40;
 	float gridWidth = 400, gridHeight = 200;
 	float currentX = 0;
 	float& currentY;
 
 	Plot(Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Camera& camera_, TimeStruct& tm_
-		, string name_, p2 gridCorner_,float& currentY_)
+		, string title_, p2 axisCorner_,float& currentY_)
 		: shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), tm(tm_)
 		, camera(camera_), text("resources/Glyphs/Helvetica/Helvetica.otf", 16),
-		name(name_), gridCorner(gridCorner_), currentY(currentY_)
+		title(title_), axisCorner(axisCorner_), currentY(currentY_)
 	{
-		gridStatic.addInitialSet({ {0,0},{1,0} });
+		axis.addInitialSet({ {0,0},{1,0} });
 		gridDynamic.addInitialSet({ {0,0},{1,0} });
 		currentXgrid.addInitialSet({ {0,0},{1,0} });
 
-		gridStatic.addInstances({
+		axis.addInstances({
 			//horizontal
 			{  { 1, 1 },  0, {0, 0} },
 			//vertical
 			{  { 1, 1 },  radians(90), {0, 0} },
 			});
 
-		frame.addSet(createRoundedSquare({ gridCorner.x - 50,gridCorner.y - 50 }, 500,300, 25));
+		frame.addSet(createRoundedSquare({ axisCorner.x - 50,axisCorner.y - 50 }, 500,300, 25));
 
 
 
@@ -81,27 +150,27 @@ struct Plot {
 
 		//VARIABLES LOCALES PARA COSAS COMUNES
 
-		float interm1 = gridCorner.x - 40;
+		float interm1 = axisCorner.x - 40;
 
 
 		if ((maxDataY - minDataY) * scaleY < 20)
 			lines = {
-					{{interm1,gridCorner.y + (maxDataY - minDataY) * scaleY + 10}, round1d(maxDataY)},
-					{{interm1,gridCorner.y }, round1d(minDataY)} };
+					{{interm1,axisCorner.y + (maxDataY - minDataY) * scaleY + 10}, round1d(maxDataY)},
+					{{interm1,axisCorner.y }, round1d(minDataY)} };
 
 		else if ((maxDataY - minDataY) * scaleY < 30)
-			lines = { {{interm1,gridCorner.y + (maxDataY - minDataY) * scaleY}, round1d(maxDataY)},
-					{{interm1,gridCorner.y }, round1d(minDataY)} };
+			lines = { {{interm1,axisCorner.y + (maxDataY - minDataY) * scaleY}, round1d(maxDataY)},
+					{{interm1,axisCorner.y }, round1d(minDataY)} };
 
 		else
 			lines = {
-					{{interm1,gridCorner.y - minDataY * scaleY}, 0},
-					{{interm1,gridCorner.y + (maxDataY - minDataY) * scaleY}, round1d(maxDataY)},
-					{{interm1,gridCorner.y }, round1d(minDataY)} };
+					{{interm1,axisCorner.y - minDataY * scaleY}, 0},
+					{{interm1,axisCorner.y + (maxDataY - minDataY) * scaleY}, round1d(maxDataY)},
+					{{interm1,axisCorner.y }, round1d(minDataY)} };
 
 		vector<Line> currentData = {
-			{ {gridCorner.x + currentX - maxDataX,gridCorner.y - 20},round1d(tm.currentTime)," s"},
-			{ {gridCorner.x + currentX - maxDataX + 10,gridCorner.y + (data.positions.back().y - minDataY) * scaleY},round1d(currentY)}
+			{ {axisCorner.x + currentX - maxDataX,axisCorner.y - 20},round1d(tm.currentTime)," s"},
+			{ {axisCorner.x + currentX - maxDataX + 10,axisCorner.y + (data.positions.back().y - minDataY) * scaleY},round1d(currentY)}
 		};
 
 
@@ -116,14 +185,14 @@ struct Plot {
 			}
 
 			verticalAuxGridText.push_back(
-				{ {gridCorner.x - maxDataX + verticalAuxGridValues[i] * 50 - 10,gridCorner.y - 20},round1d(verticalAuxGridValues[i]) }
+				{ {axisCorner.x - maxDataX + verticalAuxGridValues[i] * 50 - 10,axisCorner.y - 20},round1d(verticalAuxGridValues[i]) }
 			);
 		}
 
 
 
 		vector<Line> staticLegend = {
-			{ {gridCorner.x + 20,gridCorner.y + gridHeight + 10}," ",name} };
+			{ {axisCorner.x + 20,axisCorner.y + gridHeight + 10}," ",title} };
 
 		lines.insert(lines.end(), currentData.begin(), currentData.end());
 		lines.insert(lines.end(), verticalAuxGridText.begin(), verticalAuxGridText.end());
@@ -136,14 +205,14 @@ struct Plot {
 		auxGridLines.clear();
 
 		//0 horizontal line
-		auxGridLines.push_back({ {gridCorner.x,gridCorner.y - minDataY * scaleY},  0, {gridWidth, 1} });
+		auxGridLines.push_back({ {axisCorner.x,axisCorner.y - minDataY * scaleY},  0, {gridWidth, 1} });
 
-		auxGridLines.push_back({ {gridCorner.x,gridCorner.y + (maxDataY - minDataY) * scaleY},  0, {gridWidth, 1} });
+		auxGridLines.push_back({ {axisCorner.x,axisCorner.y + (maxDataY - minDataY) * scaleY},  0, {gridWidth, 1} });
 
 		for (size_t i = 0; i < verticalAuxGridValues.size(); i++)
 		{
 			auxGridLines.push_back(
-				{  { gridHeight,1 },radians(90) , { gridCorner.x - maxDataX + verticalAuxGridValues[i] * 50,gridCorner.y} });
+				{  { gridHeight,1 },radians(90) , { axisCorner.x - maxDataX + verticalAuxGridValues[i] * 50,axisCorner.y} });
 
 			auxGridLines.push_back({  { 1, 1 }, radians(90), { 100, 0 } });
 		}
@@ -156,7 +225,7 @@ struct Plot {
 		
 		pushData();
 
-		dataCorner = gridCorner - p2{ maxDataX,minDataY * scaleY };
+		dataCorner = axisCorner - p2{ maxDataX,minDataY * scaleY };
 
 		updateAuxGrid();
 		updateText();
@@ -203,11 +272,11 @@ struct Plot {
 			///////////////////////////////////////////////
 			//Here's the only case where the model matrix is used in Lines2DInstanced.
 			//Study if it can be avoided, if so, u_Model in the shader can be eliminated
-			graphicModel2DMatrix = create2DModelMatrix(gridCorner, 0, { gridWidth,gridHeight });
+			graphicModel2DMatrix = create2DModelMatrix(axisCorner, 0, { gridWidth,gridHeight });
 			shader2DInstanced.setUniform("u_Model", graphicModel2DMatrix);
 
 			shader2D.setUniform("u_Color", 1, 1, 1, 1);
-			gridStatic.draw();
+			axis.draw();
 
 			shader2DInstanced.setUniform("u_Model", identityMatrix);
 
@@ -217,8 +286,11 @@ struct Plot {
 			shader2DInstanced.setUniform("u_Color", 1, 0, 0, 1);
 
 			currentXgrid.addInstances({
-				{  { (data.positions.back().y - minDataY)* scaleY,1 },radians(90) , { gridCorner.x - maxDataX + currentX,gridCorner.y}},
-				{ { currentX - maxDataX,1 },0,{gridCorner.x,gridCorner.y + (data.positions.back().y - minDataY) * scaleY}}
+				//horizontal
+				{ { currentX - maxDataX,1 },0,{axisCorner.x,axisCorner.y + (data.positions.back().y - minDataY) * scaleY}},
+				//vertical
+				{  { (data.positions.back().y - minDataY)* scaleY,1 },radians(90) , { axisCorner.x - maxDataX + currentX,axisCorner.y}}
+
 				});
 			currentXgrid.draw();
 		}
@@ -242,7 +314,7 @@ struct Plot {
 			graphicModel2DMatrix = create2DModelMatrix(dataCorner, 0, { 1,scaleY });
 			shader2DInstanced.setUniform("u_Model", graphicModel2DMatrix);
 			glEnable(GL_SCISSOR_TEST); //You'll need to try deque method just for potencial memory leaks
-			glScissor(gridCorner.x, 0, windowWidth, windowHeight);
+			glScissor(axisCorner.x, 0, windowWidth, windowHeight);
 			data.draw();
 			glDisable(GL_SCISSOR_TEST);
 		}

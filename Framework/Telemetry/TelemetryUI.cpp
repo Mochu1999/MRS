@@ -1,8 +1,21 @@
 #include "TelemetryUI.hpp"
-//#include "Graphics.hpp"
+#include "Graphics.hpp"
+#include "Telemetry.hpp"
+
+#include "Axis.hpp"
+#include "Overlay2D.hpp"
+#include "Plot.hpp"
+#include "ProgressBar.hpp"
+#include "Lourdes3DModel.hpp"
+
+#include "WaterMRS.hpp"
+#include "SunMRS.hpp"
+#include "Time.hpp"
+
 
 void TelemetryUI::drawLourdes()
 {
+	std::array<float, 16> shipModelMatrix = identityMatrix;
 
 
 	shader3D.bind();

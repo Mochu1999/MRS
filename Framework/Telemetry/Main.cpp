@@ -1,16 +1,17 @@
 
-
+//To do
+//camera input, tesselation, text, shaders, botones
 
 #include "Common.hpp"
 #include "Graphics.hpp"
 
 #include "SettingsTelemetry.hpp"
 
-#include "Telemetry.hpp"
 #include "TelemetryUI.hpp"
+
 #include "TransmitterPC.hpp"
 
-
+#include "KeyMouseImputs.hpp"
 
 int main(void)
 {
@@ -30,13 +31,14 @@ int main(void)
 
 
 	Settings settings(camera);
+	InputGLFW inputGLFW(window, &camera,&telemetry);
 
-	AllPointers allPointers(&camera/*, &telemetry*/);
-	glfwIput(window, &allPointers, keyboardEventCallback, mouseEventCallback, scrollCallback);
+	//AllPointers allPointers(&camera/*, &telemetry*/);
+	//glfwIput(window, &allPointers, keyboardEventCallback, mouseEventCallback, scrollCallback);
 	
 	while (!glfwWindowShouldClose(window))
 	{
-		getPos(window, mPos);
+		inputGLFW.getPos(window, mPos);
 		if (isRunning)
 		{
 			clearScreen();
@@ -47,7 +49,7 @@ int main(void)
 			ui.draw();
 			
 
-			keyboardRealTimePolls(window/*, camera*/);
+			inputGLFW.keyboardRealTimePolls(window);
 			camera.updateCamera();
 
 			updateCameraLocations(shader3D, camera);
