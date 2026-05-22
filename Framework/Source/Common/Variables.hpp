@@ -19,7 +19,7 @@ inline p2 windowCenter = { windowWidth * 0.5f, windowHeight * 0.5f };
 inline p2 centerWindow = { windowWidth / 2,windowHeight / 2 };
 
 inline p2 mPos = { 0,0 };
-inline p2 LastLMPos = { 0,0 };
+inline p2 LastLMBPos = { 0,0 };
 
 inline bool isLmbPressed = 0;
 inline bool isMmbPressed = 0;

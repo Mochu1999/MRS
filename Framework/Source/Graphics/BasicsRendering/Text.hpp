@@ -24,6 +24,7 @@ No kerning, it can improve spacing between glyphs for specific pairs, like AA vs
 
 //SACAR PATH Y FONT DE CONSTRUCTOR PARA MEJOR USO EN OTROS MÓDULOS
 
+//Se confunde con Lines2d...
 struct Line {
 	p2 pos;
 	string text;

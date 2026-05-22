@@ -17,10 +17,9 @@ void initializeCameraLocations(Shader& shader3D, Shader& shader2D, Shader& shade
 	shader2D.setUniform("u_Model", identityMatrix);
 
 
-	//2D_Instanced
+	//2DInstanced
 	shader2D_Instanced.bind();
 	shader2D_Instanced.setUniform("u_OrthoProjection", camera.orthoMatrix);
-	shader2D_Instanced.setUniform("u_Model", identityMatrix);
 
 
 	//Text

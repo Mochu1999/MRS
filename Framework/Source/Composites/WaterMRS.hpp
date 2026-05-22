@@ -7,11 +7,11 @@ struct WaterMRS
 	Polygons2D circle; 
 	Polyhedra water;
 
-	float waterLength = 10;
+	float waterRadius = 7;
 
 	WaterMRS()
 	{
-		circle.createCircle(10, { 0,0 });
+		circle.createCircle(waterRadius, { 0,0 });
 		vector<p3> positions = p2ToP3Y(circle.positions);
 		vector<p3> normals;
 

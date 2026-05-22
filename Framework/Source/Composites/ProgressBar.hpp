@@ -45,4 +45,29 @@ struct ProgressBar
 		//inner polygon
 		innerRoundedSquare.addSet(createRoundedSquare(outerCorner, outerLength.x, outerLength.y, 25));
 	}
+
+	void draw(Shader& shader2D, Shader& shaderText)
+	{
+		shader2D.bind();
+		shader2D.setUniform("u_Model", identityMatrix);
+
+
+		//outer line
+		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
+		glLineWidth(3);
+		outerRoundedSquare.draw();
+		glLineWidth(1);
+
+		//inner polygon
+		shader2D.setUniform("u_Color", 0.7, 0.7, 0.7, 1);
+		glEnable(GL_SCISSOR_TEST); //method to cut an object just for the rendering
+		glScissor(outerCorner.x - 10, 0, 10 + outerLength.x * (*percentage), windowHeight);
+		innerRoundedSquare.draw();
+		glDisable(GL_SCISSOR_TEST);
+
+		textUpdate();
+
+		shaderText.bind();
+		text.draw();
+	}
 };

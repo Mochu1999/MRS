@@ -1,6 +1,12 @@
 
+// Plot refactorization. Camera refactorization. Input GLFW refactorization. TransmitterPC initial format. Removed all use of u_Model for Shader2DInstanced
 //To do
-//camera input, tesselation, text, shaders, botones
+// camera new modes, sweepTriangulation, text, shaderText, shader3D, botones
+//, fps counter
+// Change to simulation view
+// Simulation parts integration
+//Change rendering values menu, change telemetry values with the mouse
+//import values in csv
 
 #include "Common.hpp"
 #include "Graphics.hpp"
@@ -11,7 +17,7 @@
 
 #include "TransmitterPC.hpp"
 
-#include "KeyMouseImputs.hpp"
+#include "InputGLFW.hpp"
 
 int main(void)
 {
@@ -22,24 +28,21 @@ int main(void)
 	Shader shader2D("resources/shaders/shader2D.shader");
 	Shader shader2DInstanced("resources/shaders/shader2DInstanced.shader");
 	Shader shaderText("resources/shaders/shaderText.shader");
-	Camera camera(window);
+	Camera camera;
 	initializeCameraLocations(shader3D, shader2D, shader2DInstanced, shaderText, camera);
 
 	
 	Telemetry telemetry;
 	TelemetryUI ui(telemetry, shader3D, shader2D, shader2DInstanced, shaderText, camera);
-
+	TransmitterPC transmitter(telemetry);
 
 	Settings settings(camera);
 	InputGLFW inputGLFW(window, &camera,&telemetry);
 
-	//AllPointers allPointers(&camera/*, &telemetry*/);
-	//glfwIput(window, &allPointers, keyboardEventCallback, mouseEventCallback, scrollCallback);
-	
 	while (!glfwWindowShouldClose(window))
 	{
 		inputGLFW.getPos(window, mPos);
-		if (isRunning)
+		if (isRunning) //TO BE USED ONLY FOR DEBUGGING PURPOSES
 		{
 			clearScreen();
 
@@ -49,7 +52,7 @@ int main(void)
 			ui.draw();
 			
 
-			inputGLFW.keyboardRealTimePolls(window);
+			inputGLFW.customPolls(window);
 			camera.updateCamera();
 
 			updateCameraLocations(shader3D, camera);

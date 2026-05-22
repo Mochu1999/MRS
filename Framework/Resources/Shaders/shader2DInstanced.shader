@@ -7,11 +7,6 @@ layout(location = 3) in vec2 scale;
 
 uniform mat4 u_OrthoProjection;
 
-//u_Model is redundant if trans, rot y scale are already getting managed automatically
-//But at the same time, if the instanced object moves with respect of something that does use a model matrix
-// this makes the operation easier
-uniform mat4 u_Model;
-
 
 void main() {
     // Scale, Rotate and translate in that order
@@ -24,7 +19,7 @@ void main() {
 
     vec2 pos = rotated + translation;
 
-    gl_Position = u_OrthoProjection * u_Model * vec4(pos, 0.0, 1.0);
+    gl_Position = u_OrthoProjection * vec4(pos, 0.0, 1.0);
 }
 
 

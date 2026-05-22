@@ -88,21 +88,24 @@ void Lines2DInstanced::addMoreInstances(const vector<InstanceAttributes> instanc
 
 void Lines2DInstanced::draw()
 {
-	glBindVertexArray(vertexArray);
-
-	if (isBufferUpdated)
+	if (instances.size())
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(p2), positions.data(), usageHint);
+		glBindVertexArray(vertexArray);
 
-		glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
-		glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(InstanceAttributes), instances.data(), usageHint);
+		if (isBufferUpdated)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+			glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(p2), positions.data(), usageHint);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usageHint);
+			glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
+			glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(InstanceAttributes), instances.data(), usageHint);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usageHint);
+		}
+
+		glDrawElementsInstanced(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0, instances.size());
 	}
-
-	glDrawElementsInstanced(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0, instances.size());
 }
 
 void Lines2DInstanced::clear()

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 /*
+matrices4x4 are column major
 0  4  8  12
 1  5  9  13
 2  6  10 14
@@ -8,34 +9,24 @@
 */
 
 
-struct Camera {
+struct Camera 
+{
 	std::array<float, 16> perspectiveMatrix, viewMatrix, vpMatrix, orthoMatrix;
 
-	p3 cameraPos;
+	//Settings will overwrite these 2 values on read
+	//Where the camera is and where it is looking at
+	p3 cameraPos = { 10,10,0 };
+	p3 forward = normalize3(p3{ -1,-1,0});
+	p3 right, up;
 
-	p3 forward = normalize3(p3{ 0.148691,-0.742031,-0.651083 });
-	p3 right; //0 because are gettin recalculated anyways
-	p3 up;
+	float fov = 60.0f * PI / 180;
+	float aspectRatio = windowWidth / windowHeight;
 
 	enum CameraModes { drag, FPS, centered };
 	CameraModes cameraMode = centered;
 
-	float translationSpeed = 0.20f, rotationSpeed = 0.05f;
 
-
-	float fov = 45.0f * PI / 180;
-	float aspectRatio = windowWidth / windowHeight;
-	
-	float centeredAngleRotation = 0.1;
-
-
-	p3 translation;
-	float scale = 1;
-
-	GLFWwindow* window;
-
-	Camera(GLFWwindow* window_)
-		:window(window_)
+	Camera()
 	{
 		orthoMatrix = createOrthoMatrix();
 		perspectiveMatrix = createPerspectiveMatrix();
@@ -43,46 +34,39 @@ struct Camera {
 		updateCamera();
 	}
 
-	p3 cursorToXZPlane();
-	void setCursorToXZPoint(const p3& pointInXZ);
-
-
-	std::array<float, 16> createScalingMatrix(float scaleX, float scaleY, float scaleZ);
-
-
 	array<float, 16> createOrthoMatrix();
 
-	////Perspective and View
 	array<float, 16> createPerspectiveMatrix();
 
 	std::array<float, 16> createViewMatrix(const p3& right, const p3& up, p3 forward, const p3& cameraPos);
-
 	
+	//create a new forward vector from rotating the old one. In practice it will rotate around right and up
+	void calculateForward(const float rotationAngle, const p3& rotationAxis);
 
-
-	/*std::array<float, 16> create3DModelMatrix(const p3 translation);
-	std::array<float, 16> create3DModelMatrix(const p3 translation, float angleDeg, p3 axis);*/
-	void create3DModelMatrix(std::array<float, 16>& model3DMatrix, const p3 translation_, const float scale_);
-	/*std::array<float, 16> create3DModelMatrix(const float angleDeg, p3 axis);
-	std::array<float, 16> create3DModelMatrix(const float angleDeg, p3 axis, const float scale);
-	std::array<float, 16> create3DModelMatrix(const float scale);
-	std::array<float, 16> create3DModelMatrix(const p3 translation, const float angleDeg, p3 axis,const float scale);*/
-
-	void rotate3DModelMatrix(std::array<float, 16>& model3DMatrix, const float angleDeg, p3 axis);
-	void translate3DModelMatrix(std::array<float, 16>& model3DMatrix, const p3 translation_);
-	void scale3DModelMatrix(std::array<float, 16>& model3DMatrix, const float scale_);
-
-	
-
-	//the rotations create a new forward vector and the other 2 are deduced from it
-	void calculateForward(p3& forward, const float rotationSpeed, const p3& rotationAxis);
-
-	//creates all the vector and updates the view and vp matrices
+	//creates all the direction vectors and updates the view and vp matrices
 	void updateCamera();
+
+
 };
 
-//These functions were inside camera, which makes sense, but I was calling 
-std::array<float, 16> create2DModelMatrix(const p2 translation, float angleDeg, float scale);
+//--- --- ---
+// Creation of model matrices
+//--- --- ---
 
-std::array<float, 16> create2DModelMatrix(const p2 translation, float angleDeg, p2 scale);
+//The order is always scale, rotate and translate
+matrix4x4 create3DModelMatrix(const float scale, const float angleDeg, p3 axis, const p3 translation);
+
+//These ones are to modify a given matrix
+void scale3DModelMatrix(matrix4x4& model3DMatrix, const float scale);
+void rotate3DModelMatrix(matrix4x4& model3DMatrix, const float angleDeg, p3 axis);
+void translate3DModelMatrix(matrix4x4& model3DMatrix, const p3 translation);
+
+
+matrix4x4 create2DModelMatrix(float scale, float angleDeg,const p2 translation);
+matrix4x4 create2DModelMatrix(p2 scale, float angleDeg, const p2 translation);
+
+void scale2DModelMatrix(matrix4x4& model2DMatrix, const float scale);
+void scale2DModelMatrix(matrix4x4& model2DMatrix, const p2 scale);
+void rotate2DModelMatrix(matrix4x4& model2DMatrix, const float angleDeg);
+void translate2DModelMatrix(matrix4x4& model2DMatrix, const p2 translation);
 
