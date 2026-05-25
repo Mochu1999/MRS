@@ -1,12 +1,13 @@
 
-// Plot refactorization. Camera refactorization. Input GLFW refactorization. TransmitterPC initial format. Removed all use of u_Model for Shader2DInstanced
 //To do
+// Anemómetro, flechas 3D,
 // camera new modes, sweepTriangulation, text, shaderText, shader3D, botones
 //, fps counter
 // Change to simulation view
 // Simulation parts integration
 //Change rendering values menu, change telemetry values with the mouse
 //import values in csv
+//Settings: CameraSensivity value, water
 
 #include "Common.hpp"
 #include "Graphics.hpp"

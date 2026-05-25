@@ -9,13 +9,20 @@ struct InputGLFW
 	Telemetry* telemetry;
 
 	//speed and angles that change the camera angle on input
-	float translationSpeed = 0.15f, rotationSpeed = 0.05f;
+	float translationSpeed = 0.05f, rotationSpeed = 0.002f;
 	float centeredAngleRotation = 0.1;
 
-	p2 LMBPosVariation;
+
+	bool isLMBPressed = 0;
+	bool isMMBPressed = 0;
+
+	p2 lastLMBPos, lastMMBPos;
+	p2 lastMPos;
+
+	p2 lMBPosVariation, mMBPosVariation;
+	p2 mPosVariation;
 
 
-	
 
 	InputGLFW(GLFWwindow* window_, Camera* camera_, Telemetry* telemetry_)
 		:window(window_), camera(camera_), telemetry(telemetry_)
@@ -42,28 +49,46 @@ struct InputGLFW
 		//--- --- ---
 		// Mouse movement 
 		//--- --- ---
-		
-		LMBPosVariation = LastLMBPos - mPos;
 
-		//In drag, when the left mouse button stays pressed, forward rotates with LMBPosVariation
-		if (camera->cameraMode == camera->drag && isLmbPressed)
+		
+		lMBPosVariation = lastLMBPos - mPos;
+		mMBPosVariation = lastMMBPos - mPos;
+		mPosVariation = lastMPos - mPos;
+
+		//In drag, when the left mouse button stays pressed, forward rotates with lMBPosVariation
+		if (camera->cameraMode == camera->drag && isLMBPressed)
 		{
 			//horizontal and vertical rotations
-			camera->calculateForward(LMBPosVariation.y * 0.001, camera->right);
-			camera->calculateForward(-LMBPosVariation.x * 0.001, camera->up);
+			camera->rotateForward(-lMBPosVariation.x * rotationSpeed, camera->up);
+			camera->rotateForward(lMBPosVariation.y * rotationSpeed, camera->right);
 
-			LastLMBPos = mPos;
+			lastLMBPos = mPos;
 		}
-		//also rotates with LMBPosVariation in FPS, but you don't need to press to rotate
+		//also rotates with lMBPosVariation in FPS, but you don't need to press to rotate
 		else if (camera->cameraMode == camera->FPS)
 		{
-			camera->calculateForward(-LMBPosVariation.y * 0.003, camera->right);
-			camera->calculateForward(LMBPosVariation.x * 0.003, camera->up);
+			camera->rotateForward(mPosVariation.x * rotationSpeed, camera->up);
+			camera->rotateForward(-mPosVariation.y * rotationSpeed, camera->right);
 
-			LastLMBPos = mPos;
+			//if we end too close to max or min y we redo that last rotation
+			/*if (>= radians(89))
+			{
+				camera->rotateForward(mPosVariation.y * rotationSpeed, camera->right);
+			}*/
+
+			lastMPos = mPos;
 		}
 
+		//centered and drag MMB translation
+		if (isMMBPressed &&  camera->cameraMode == camera->drag)
+		{
+			//camera->cameraPos = { 10,10,0 };
+			camera->cameraPos += mMBPosVariation.x * camera->right * 0.002;
 
+			camera->cameraPos += mMBPosVariation.y * camera->up * 0.002;
+			lastMMBPos = mPos;
+
+		}
 
 
 		//--- --- ---
@@ -75,16 +100,16 @@ struct InputGLFW
 			//Moves forward with arrows
 			/*{
 				if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-					camera->calculateForward(rotationSpeed, camera->right);
+					camera->rotateForward(rotationSpeed, camera->right);
 
 				if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-					camera->calculateForward(-rotationSpeed, camera->right);
+					camera->rotateForward(-rotationSpeed, camera->right);
 
 				if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-					camera->calculateForward(-rotationSpeed, camera->up);
+					camera->rotateForward(-rotationSpeed, camera->up);
 
 				if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-					camera->calculateForward(rotationSpeed, camera->up);
+					camera->rotateForward(rotationSpeed, camera->up);
 			}*/
 
 
@@ -109,26 +134,28 @@ struct InputGLFW
 				if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
 					camera->cameraPos.y -= translationSpeed;
 			}
+
 		}
-		//more translation
-		// in centered wasd rotates cameraPos around a point and recalculates forward
+		//Centered translation
+		// wasd rotates cameraPos around a point and recalculates forward
 		if (camera->cameraMode == camera->centered)
 		{
 			//rotates camera around center
 			{
 				if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 				{
-					rotatePoint(camera->cameraPos, centeredAngleRotation, { 0, 1, 0 });
+					rotatePoint(camera->cameraPos, centeredAngleRotation, p3{ 0, 1, 0 });
 				}
 				if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 				{
-					rotatePoint(camera->cameraPos, -centeredAngleRotation, { 0, 1, 0 });
+					rotatePoint(camera->cameraPos, -centeredAngleRotation, p3{ 0, 1, 0 });
 				}
 				if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 				{
 					rotatePoint(camera->cameraPos, -centeredAngleRotation, camera->right);
 
 					//it was rotated too close to top limit, so undoes it
+					//This logic must necessarily be wrong. And yet it doesn't break
 					if (camera->up.y <= 2 * centeredAngleRotation && camera->cameraPos.y > 0)
 						rotatePoint(camera->cameraPos, centeredAngleRotation, camera->right);
 				}
@@ -139,7 +166,7 @@ struct InputGLFW
 					if (camera->up.y <= 2 * centeredAngleRotation && camera->cameraPos.y < 0)
 						rotatePoint(camera->cameraPos, -centeredAngleRotation, camera->right);
 				}
-				camera->forward = -normalize3(camera->cameraPos);
+				camera->forward = normalize3(-camera->cameraPos);
 				camera->right = normalize3(cross3(camera->forward, { 0,1,0 }));
 				camera->up = cross3(camera->right, camera->forward);
 			}
@@ -206,7 +233,7 @@ struct InputGLFW
 				case GLFW_KEY_C:
 
 					camera->cameraMode = camera->FPS;
-					LastLMBPos = mPos;
+					self->lastMPos = mPos;
 					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 					break;
@@ -236,12 +263,14 @@ struct InputGLFW
 		//LEFT
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 		{
-			isLmbPressed = 1;
-			LastLMBPos = mPos; //in drag mode this avoids 
+			self->isLMBPressed = 1;
+			self->isMMBPressed = 0;
+
+			self->lastLMBPos = mPos; //in drag mode this avoids giving an unwanted jump
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 		{
-			isLmbPressed = 0;
+			self->isLMBPressed = 0;
 		}
 
 		//RIGHT
@@ -254,11 +283,15 @@ struct InputGLFW
 		//MIDDLE
 		if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
 		{
-			isMmbPressed = 1;
+			self->isMMBPressed = 1;
+			self->isLMBPressed = 0;
+
+			self->lastMMBPos = mPos; //this avoids giving an unwanted jump
+
 		}
 		if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
 		{
-			isMmbPressed = 0;
+			self->isMMBPressed = 0;
 		}
 	}
 

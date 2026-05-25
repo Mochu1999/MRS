@@ -41,7 +41,7 @@ struct Camera
 	std::array<float, 16> createViewMatrix(const p3& right, const p3& up, p3 forward, const p3& cameraPos);
 	
 	//create a new forward vector from rotating the old one. In practice it will rotate around right and up
-	void calculateForward(const float rotationAngle, const p3& rotationAxis);
+	void rotateForward(const float rotationAngle, const p3& rotationAxis);
 
 	//creates all the direction vectors and updates the view and vp matrices
 	void updateCamera();

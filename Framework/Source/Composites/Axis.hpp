@@ -34,8 +34,26 @@ struct Axis {
 		shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
 
 		glLineWidth(1);
+	}
+	//for centered camera axis
+	void drawAux(Shader& shader3D, p3& center)
+	{
+		opaque();
+		shader3D.bind();
 
-		shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
+		matrix4x4 centerModelMatrix = create3DModelMatrix(0.00001, 0, p3{ 0,0,0 }, center);
+		shader3D.setUniform("u_Model", centerModelMatrix);
+
+		shader3D.setUniform("u_fragmentMode", 1);
+
+		glLineWidth(0.2);
+		shader3D.setUniform("u_Color", 1.0, 1.0, 1.0, 1.0);
+		xLine.draw();
+		yLine.draw();
+		zLine.draw();
+
+		glLineWidth(1);
+
 
 	}
 };

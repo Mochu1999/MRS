@@ -86,23 +86,33 @@ std::array<float, 16> Camera::createViewMatrix(const p3& right, const p3& up, p3
 
 
 
-void Camera::calculateForward(const float rotationAngle, const p3& rotationAxis)
+void Camera::rotateForward(const float rotationAngle, const p3& rotationAxis)
 {
-	//we will only set this value as forward if the y value is smallest than 0.99 (not completely vertical)
-	p3 intermForward; 
+	p3 intermForward = forward;
 
-	rotatePoint(forward, rotationAngle, rotationAxis); //quaternion method
-	intermForward = normalize3(forward);
+	rotatePoint(intermForward, rotationAngle, rotationAxis); //quaternion method
+	intermForward = normalize3(intermForward);
 
-	if (abs(intermForward.y) < 0.99)
-		forward = intermForward;
-
-	right = normalize3(cross3(forward, { 0,1,0 }));
-	up = cross3(right, forward);
+	//This is a very complex problem, making forward to overpass 90º and this logic just a simple workaround
+	//Because pitch can be over 90 in a valid state, maybe to check that and to see if the 90º mark is passed at any moment
+	//if (abs(intermForward.y) < 0.995)
+	if (rotationAxis==right && ((intermForward.x<0)!=(forward.x<0)) && abs(intermForward.y) > 0.99)
+	{
+		
+	}
+	else
+	{
+		/*if (abs(intermForward.y) < 0.999)*/
+		{
+			forward = intermForward;
+			right = normalize3(cross3(forward, { 0,1,0 }));
+			up = cross3(right, forward);
+		}
+	}
 }
 
 
-void Camera::updateCamera() 
+void Camera::updateCamera()
 {
 	viewMatrix = createViewMatrix(right, up, forward, cameraPos);
 

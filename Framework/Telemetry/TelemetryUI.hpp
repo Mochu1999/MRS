@@ -57,6 +57,7 @@ struct TelemetryUI
 	void draw()
 	{
 		axis.draw(shader3D);
+		
 
 		drawLourdes();
 		drawWater();
@@ -67,7 +68,9 @@ struct TelemetryUI
 		plotRudder.draw(shader2D, shader2DInstanced, shaderText);
 		pb.draw(shader2D,shaderText);
 
-		drawCenterCross();
+
+		if(camera.cameraMode!=camera.centered)
+			drawCenterCross();
 	}
 
 
