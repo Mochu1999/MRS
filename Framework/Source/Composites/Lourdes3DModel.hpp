@@ -27,4 +27,57 @@ struct Lourdes3DModel
 		timon.addPolyhedra("timon.bin");
 	}
 
+	void draw(Shader& shader3D, Telemetry& t)
+	{
+		std::array<float, 16> shipModelMatrix = identityMatrix;
+
+
+		shader3D.bind();
+		opaque();
+		shader3D.setUniform("u_fragmentMode", shadeColor);
+
+
+
+		translate3DModelMatrix(shipModelMatrix, t.shipHeave - p3{ t.modelSailPosition.x,0,0 });
+		shader3D.setUniform("u_Model", shipModelMatrix);
+
+		shader3D.setUniform("u_Color", 0.1, 0.1, 0.1, 1.0f);
+		shader3D.setUniform("u_Color", 1, 1, 1, 1.0f);
+		shader3D.setUniform("u_Color", 0.9, 0.9, 0.9, 1.0f);
+		casco.draw();
+		patines.draw();
+		shader3D.setUniform("u_Color", 0.1, 0.1, 0.1, 1.0f);
+		orza.draw();
+		shader3D.setUniform("u_Color", 0.0f / 255.0f, 63.0f / 255.0f, 200.0f / 255.0f, 1.0f);
+		shader3D.setUniform("u_Color", 0.1, 0.1, 0.1, 1.0f);
+
+		soportes.draw();
+
+
+
+		//Rudder
+		{
+			std::array<float, 16> rudderMatrix = identityMatrix;
+
+			rotate3DModelMatrix(rudderMatrix, t.rudderAngle, { 0,1,0 });
+			translate3DModelMatrix(rudderMatrix, t.shipHeave - p3{ t.modelSailPosition.x,0,0 });
+
+			shader3D.setUniform("u_Model", rudderMatrix);
+			shader3D.setUniform("u_Color", 0.1, 0.1, 0.1, 1.0f);
+			timon.draw();
+		}
+		//Sail
+		{
+			std::array<float, 16> sailMatrix = identityMatrix;
+
+			rotate3DModelMatrix(sailMatrix, t.sailAngle, { 0,1,0 });
+			translate3DModelMatrix(sailMatrix, t.sailPosition - p3{ t.modelSailPosition.x,0,0 });
+
+			shader3D.setUniform("u_Model", sailMatrix);
+
+			shader3D.setUniform("u_Color", 137.0f / 255.0f, 18.0f / 255.0f, 18.0f / 255.0f, 1.0f);
+			vela.draw();
+		}
+		shader3D.setUniform("u_Model", identityMatrix);
+	}
 };

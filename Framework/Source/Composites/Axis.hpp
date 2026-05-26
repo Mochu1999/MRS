@@ -1,9 +1,8 @@
 #pragma once
 #include "Graphics.hpp"
 
-struct Axis {
-
-
+struct Axis 
+{
 	Lines3D xLine, yLine, zLine, xLine2, zLine2;
 
 	Axis()
@@ -20,9 +19,7 @@ struct Axis {
 		opaque();
 		shader3D.bind();
 		shader3D.setUniform("u_Model", identityMatrix);
-
 		shader3D.setUniform("u_fragmentMode", 1);
-
 
 		glLineWidth(1);
 		shader3D.setUniform("u_Color", 1.0, 0.0, 0.0, 1.0);
@@ -32,11 +29,32 @@ struct Axis {
 		shader3D.setUniform("u_Color", 0.0, 0.0, 1.0, 1.0);
 		zLine.draw();
 		shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
-
 		glLineWidth(1);
-
-		shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
-
 	}
 };
 
+//centerCross is here I don't know why. Too many files already, and it seems to go hand in hand with axis
+struct CenterCross
+{
+	Lines2D centerCross;
+
+	CenterCross()
+	{
+		centerCross.addSet({
+				{ centerWindow.x - 20, centerWindow.y},{ centerWindow.x + 20, centerWindow.y},
+				{ centerWindow.x, centerWindow.y - 20},{ centerWindow.x, centerWindow.y + 20} });
+		centerCross.indices = { 0,1,2,3 };
+	}
+
+	void draw(Shader& shader2D)
+	{
+		transparent();
+		shader2D.bind();
+		shader2D.setUniform("u_Model", identityMatrix);
+		shader2D.setUniform("u_Color", 1, 1, 1, 0.5);
+		glLineWidth(1);
+		centerCross.draw();
+		glLineWidth(1);
+		opaque();
+	}
+};

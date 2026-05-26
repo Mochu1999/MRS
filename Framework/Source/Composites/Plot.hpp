@@ -44,10 +44,12 @@ struct PlotTime
 
 
 
-	PlotTime() : text("resources/Glyphs/Helvetica/Helvetica.otf", 16)
+	PlotTime()
 	{
 		setInitialInstancing();
 		setIndicesPool();
+
+		text.createAtlas("resources/Glyphs/Helvetica/Helvetica.otf", 16);
 	}
 
 	void createPlot(float* currentY_, float* currentX_, p2 frameCorner_, string title_);
@@ -69,40 +71,7 @@ struct PlotTime
 
 	void updateDynamicGrid();
 
-
-
-	void updateText()
-	{
-		vector<Line> allText;
-
-		//values left to the y axis. 0, maxDataY and minData respectively
-		//THE HARDCODED -40 IS A PROBLEM ONCE THE TEXT IS TOO LONG
-			//The only solution I can think of would be to know how much space is available and to set a font that fits it. It's overkill now 2026-05
-		vector<Line> yAxisText ={ {{axisCorner.x - 40,axisCorner.y - minDataY * scaleY}, 0},
-								{{axisCorner.x - 40,axisCorner.y + (maxDataY - minDataY) * scaleY}, round1d(maxDataY)},
-								{{axisCorner.x - 40,axisCorner.y }, round1d(minDataY)} };
-
-		//currentX and currentY
-		vector<Line> dataText = 
-			{{ {axisCorner.x + *currentX * scaleX - offsetX,axisCorner.y - 20},round1d(*currentX)," s"},
-			{ {axisCorner.x + *currentX * scaleX - offsetX + 10,axisCorner.y + (data.positions.back().y - minDataY) * scaleY},round1d(*currentY)}};
-
-		vector<Line> verticalDynamicGridText;
-		for (size_t i = 0; i < verticalDynamicGridValues.size(); i++)
-		{
-			verticalDynamicGridText.push_back(
-				{ {axisCorner.x - offsetX + verticalDynamicGridValues[i] * scaleX - 10,axisCorner.y - 20},round1d(verticalDynamicGridValues[i]) }
-			);
-		}
-
-		vector<Line> titleText = {{ {axisCorner.x + 20,axisCorner.y + gridHeight + 10}," ",title} };
-
-		allText.insert(allText.end(), yAxisText.begin(), yAxisText.end());
-		allText.insert(allText.end(), dataText.begin(), dataText.end());
-		allText.insert(allText.end(), verticalDynamicGridText.begin(), verticalDynamicGridText.end());
-		allText.insert(allText.end(), titleText.begin(), titleText.end());
-		text.addDynamicText(allText);
-	}
+	void updateText();
 
 	void setInitialInstancing();
 

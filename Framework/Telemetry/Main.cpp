@@ -1,5 +1,5 @@
 
-// Plot refactorization. Camera refactorization. Input GLFW refactorization. TransmitterPC initial format. Removed all use of u_Model for Shader2DInstanced
+// Text refactorization. PFS counter
 //To do
 // camera new modes, sweepTriangulation, text, shaderText, shader3D, botones
 //, fps counter
@@ -7,6 +7,7 @@
 // Simulation parts integration
 //Change rendering values menu, change telemetry values with the mouse
 //import values in csv
+//solar panels
 
 #include "Common.hpp"
 #include "Graphics.hpp"
