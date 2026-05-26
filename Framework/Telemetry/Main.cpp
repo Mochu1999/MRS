@@ -1,12 +1,14 @@
 
 // Text refactorization. PFS counter
 //To do
+// Anemómetro, flechas 3D,
 // camera new modes, sweepTriangulation, text, shaderText, shader3D, botones
 //, fps counter
 // Change to simulation view
 // Simulation parts integration
 //Change rendering values menu, change telemetry values with the mouse
 //import values in csv
+//Settings: CameraSensivity value, water
 //solar panels
 
 #include "Common.hpp"

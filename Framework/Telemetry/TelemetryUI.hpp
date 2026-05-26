@@ -53,6 +53,7 @@ struct TelemetryUI
 	void draw()
 	{
 		axis.draw(shader3D);
+		
 
 		lourdesModel.draw(shader3D, t);
 		water.draw(shader3D);
@@ -69,7 +70,7 @@ struct TelemetryUI
 		plotRudder.draw(shader2D, shader2DInstanced, shaderText);
 		pb.draw(shader2D,shaderText);
 
-		
+
 
 		centerCross.draw(shader2D);
 	}
