@@ -84,7 +84,7 @@ struct Text
 	//--- --- ---
 
 	//initializes FreeType and creates the atlas
-	void createAtlas(string glyphPath, int fontPixelSize)
+	void createAtlas(int fontPixelSize, string glyphPath = "resources/Glyphs/Helvetica/Helvetica.otf")
 	{
 		//Freetype objects are discarded after creating the atlas
 		//ft is the FreeType context, the internal state the library needs to operate. Needed to create our use FT_Face

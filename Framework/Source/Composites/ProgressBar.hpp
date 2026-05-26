@@ -18,7 +18,7 @@ struct ProgressBar
 
 	ProgressBar()
 	{
-		text.createAtlas("resources/Glyphs/Helvetica/Helvetica.otf", 20);
+		text.createAtlas(20);
 
 	}
 

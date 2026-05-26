@@ -49,7 +49,7 @@ struct PlotTime
 		setInitialInstancing();
 		setIndicesPool();
 
-		text.createAtlas("resources/Glyphs/Helvetica/Helvetica.otf", 16);
+		text.createAtlas(16);
 	}
 
 	void createPlot(float* currentY_, float* currentX_, p2 frameCorner_, string title_);

@@ -24,7 +24,7 @@
 
 int main(void)
 {
-	GLFWwindow* window = initialize();
+	GLFWwindow* window = initialize(windowWidth/4,windowHeight/2,"MRS");
 
 	//Unify in a single shader once only references of it exist only in UI
 	Shader shader3D("resources/shaders/shader3D.shader");
@@ -34,13 +34,15 @@ int main(void)
 	Camera camera;
 	initializeCameraLocations(shader3D, shader2D, shader2DInstanced, shaderText, camera);
 
+	Buttons buttons;
 	
 	Telemetry telemetry;
-	TelemetryUI ui(telemetry, shader3D, shader2D, shader2DInstanced, shaderText, camera);
+	TelemetryUI ui(telemetry, shader3D, shader2D, shader2DInstanced, shaderText, camera, buttons);
 	TransmitterPC transmitter(telemetry);
 
+
 	Settings settings(camera);
-	InputGLFW inputGLFW(window, &camera,&telemetry);
+	InputGLFW inputGLFW(window, &camera,&telemetry, &buttons);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -48,6 +50,7 @@ int main(void)
 		if (isRunning) //TO BE USED ONLY FOR DEBUGGING PURPOSES
 		{
 			clearScreen();
+			buttons.update();
 
 			//program's logic
 			telemetry.update();

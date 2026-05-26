@@ -7,11 +7,11 @@ struct InputGLFW
 	GLFWwindow* window;
 	Camera* camera;
 	Telemetry* telemetry;
+	Buttons* buttons;
 
 	//speed and angles that change the camera angle on input
 	float translationSpeed = 0.05f, rotationSpeed = 0.002f;
 	float centeredAngleRotation = 0.1;
-
 
 	bool isLMBPressed = 0;
 	bool isMMBPressed = 0;
@@ -22,10 +22,13 @@ struct InputGLFW
 	p2 lMBPosVariation, mMBPosVariation;
 	p2 mPosVariation;
 
+	p2 lastDragMPos;
+
+	bool isDraggingWindow = false;
 
 
-	InputGLFW(GLFWwindow* window_, Camera* camera_, Telemetry* telemetry_)
-		:window(window_), camera(camera_), telemetry(telemetry_)
+	InputGLFW(GLFWwindow* window_, Camera* camera_, Telemetry* telemetry_, Buttons* buttons_)
+		:window(window_), camera(camera_), telemetry(telemetry_), buttons(buttons_)
 	{
 		glfwSetWindowUserPointer(window, this); //Stores a pointer to this specific InputGLFW instance inside the GLFWwindow
 
@@ -50,11 +53,11 @@ struct InputGLFW
 		// Mouse movement 
 		//--- --- ---
 
-		
-		lMBPosVariation = lastLMBPos - mPos;
-		mMBPosVariation = lastMMBPos - mPos;
-		mPosVariation = lastMPos - mPos;
 
+		mPosVariation = lastMPos - mPos;
+		lMBPosVariation = lastLMBPos - mPos;
+
+		mMBPosVariation = lastMMBPos - mPos;
 		//In drag, when the left mouse button stays pressed, forward rotates with lMBPosVariation
 		if (camera->cameraMode == camera->drag && isLMBPressed)
 		{
@@ -70,17 +73,11 @@ struct InputGLFW
 			camera->rotateForward(mPosVariation.x * rotationSpeed, camera->up);
 			camera->rotateForward(-mPosVariation.y * rotationSpeed, camera->right);
 
-			//if we end too close to max or min y we redo that last rotation
-			/*if (>= radians(89))
-			{
-				camera->rotateForward(mPosVariation.y * rotationSpeed, camera->right);
-			}*/
-
 			lastMPos = mPos;
 		}
 
 		//centered and drag MMB translation
-		if (isMMBPressed &&  camera->cameraMode == camera->drag)
+		if (isMMBPressed && camera->cameraMode == camera->drag)
 		{
 			//camera->cameraPos = { 10,10,0 };
 			camera->cameraPos += mMBPosVariation.x * camera->right * 0.002;
@@ -88,6 +85,22 @@ struct InputGLFW
 			camera->cameraPos += mMBPosVariation.y * camera->up * 0.002;
 			lastMMBPos = mPos;
 
+		}
+		//window translation
+		if (isDraggingWindow)
+		{
+			int winX, winY;
+			glfwGetWindowPos(window, &winX, &winY);
+
+			// cursor in screen coords
+			int screenCursorX = winX + (int)mPos.x;
+			int screenCursorY = winY + (int)mPos.y;
+
+			//move window so the cursor stays at the same grab offset inside the window
+			int newX = screenCursorX - (int)dragStartCursorX;
+			int newY = screenCursorY - (int)dragStartCursorY;
+
+			//glfwSetWindowPos(window, newX, newY);
 		}
 
 
@@ -187,7 +200,6 @@ struct InputGLFW
 	}
 
 
-
 	//Only one poll per press
 	static void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
@@ -253,24 +265,47 @@ struct InputGLFW
 	}
 
 
-
-
 	static void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 		InputGLFW* self = static_cast<InputGLFW*>(glfwGetWindowUserPointer(window));
 
 		Camera* camera = self->camera;
+		Buttons* buttons = self->buttons;
 
 		//LEFT
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 		{
 			self->isLMBPressed = 1;
-			self->isMMBPressed = 0;
 
-			self->lastLMBPos = mPos; //in drag mode this avoids giving an unwanted jump
+			self->lastLMBPos = mPos; //in camera mode drag this avoids giving an unwanted jump
+
+			if (self->buttons->currentHoveredID != None)
+			{
+				self->buttons->currentPressedID = self->buttons->currentHoveredID;
+			}
+			if (self->buttons->currentPressedID == Drag)
+			{
+				self->isDraggingWindow = true;
+				self->lastLMBPos = mPos;
+
+			}
 		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 		{
 			self->isLMBPressed = 0;
+
+			//Close and minimize actions are here because we need access to window
+			// As buttons have access to functionality of telemetry, they should also be here
+			if (self->buttons->currentPressedID == Close)
+			{
+				glfwSetWindowShouldClose(window, GLFW_TRUE);
+			}
+			else if (self->buttons->currentPressedID == Minimize)
+			{
+				glfwIconifyWindow(window);
+			}
+			self->isDraggingWindow = false;
+
+			self->buttons->currentPressedID = None;
 		}
 
 		//RIGHT
@@ -298,7 +333,8 @@ struct InputGLFW
 
 
 
-	static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+	static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) 
+	{
 		InputGLFW* self = static_cast<InputGLFW*>(glfwGetWindowUserPointer(window));
 		Camera* camera = self->camera;
 
@@ -317,7 +353,8 @@ struct InputGLFW
 
 	}
 
-	void getPos(GLFWwindow* window, p2& mPos) {
+	void getPos(GLFWwindow* window, p2& mPos) 
+	{
 		double xpos1, ypos1;
 		glfwGetCursorPos(window, &xpos1, &ypos1);
 
