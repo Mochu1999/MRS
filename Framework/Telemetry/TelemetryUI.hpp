@@ -26,7 +26,7 @@ struct TelemetryUI
 	WaterMRS water;
 	SunMRS sun;
 
-	Lines2D centerCross;
+	CenterCross centerCross;
 	Overlay2D overlay;
 	PlotTime plotSail;
 	PlotTime plotRudder;
@@ -34,34 +34,36 @@ struct TelemetryUI
 
 	Axis axis;
 
-
+	Text test;
 
 	TelemetryUI(Telemetry& telemetry_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Camera& camera_)
 		:t(telemetry_), shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), camera(camera_)
 	{
-		pb.createPB(&t.battery, p2{ 1350,700 }, "Battery");
-		plotSail.createPlot(&t.sailAngle, &t.tm.currentTime, { 1350,50 }, "sailAngle");
-		plotRudder.createPlot(&t.rudderAngle,&t.tm.currentTime, { 1350,350 }, "rudderAngle");
+		pb.createPB(&t.battery, p2{ 1350,700 }, "Batterysn");
+		plotSail.createPlot(&t.sailAngle, &t.tm.currentTime, { 1350,50 }, "sailAnglesssssss");
+		plotRudder.createPlot(&t.rudderAngle,&t.tm.currentTime, { 1350,350 }, "rudderAnglessssssss");
 
-		updateSunLocation();
+		test.createAtlas("resources/Glyphs/Helvetica/Helvetica.otf", 50);
+		
 
-		centerCross.addSet({
-				{ centerWindow.x - 20, centerWindow.y},{ centerWindow.x + 20, centerWindow.y},
-				{ centerWindow.x, centerWindow.y - 20},{ centerWindow.x, centerWindow.y + 20} });
-		centerCross.indices = { 0,1,2,3 };
-
+		sun.updateLightLocation(shader3D);
 	}
 
-	//structs that have more than one instance (here or in other project) have their own draw calls, otherwise they are here
-	//THEY ALL WILL HAVE MULTIPLE INSTANCES ONCE SIMULATION PROJECT IS ON
+
 	void draw()
 	{
 		axis.draw(shader3D);
 		
 
-		drawLourdes();
-		drawWater();
-		drawSun();
+		lourdesModel.draw(shader3D, t);
+		water.draw(shader3D);
+		sun.draw(shader3D);
+
+		shaderText.bind();
+		transparent();
+		TextEntry algo({ 100,500 }, "qweorñinqrgxvzbmADSGBCVBXGFJ");
+		test.addDynamicText({ algo });
+		test.draw();
 
 		overlay.draw(shader2D);
 		plotSail.draw(shader2D, shader2DInstanced, shaderText);
@@ -69,21 +71,7 @@ struct TelemetryUI
 		pb.draw(shader2D,shaderText);
 
 
-		if(camera.cameraMode!=camera.centered)
-			drawCenterCross();
+
+		centerCross.draw(shader2D);
 	}
-
-
-
-	void drawLourdes();
-
-	void drawWater();
-
-	void updateSunLocation();
-
-	void drawSun();
-
-	void drawCenterCross();
-
-
 };

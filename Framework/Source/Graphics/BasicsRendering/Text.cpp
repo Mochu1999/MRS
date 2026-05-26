@@ -1,40 +1,8 @@
 #include "Graphics.hpp"
 
-//initializes the library and loads the font face
-void Text::initializeFreeType(const std::string& fontPath, const int fontPixelSize) {
-	if (FT_Init_FreeType(&ft)) {
-		std::cerr << "Could not init FreeType Library" << std::endl;
-		return;
-	}
 
-	if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
-		std::cerr << "Failed to load font" << std::endl;
-		return;
-	}
-	// Set font size in pixels. Word and other apps set the size in dots per inch. RESCALING IS NOT AN OPTION YET
-	FT_Set_Pixel_Sizes(face, 0, fontPixelSize);
-
-	FT_ULong  charcode; //unicode codepoint (the number that represents the character)
-	FT_UInt   glyphIndex;
-
-
-	charcode = FT_Get_First_Char(face, &glyphIndex); //it's 32, if you force glyphIndex to be 0 things as ñ appear in allGlyphs (but there's no glyph for it, idk)
-
-	while (glyphIndex != 0) {
-		//128 first characters are ascii characters. For latin-1 characters (ñ, á, ü) you should have the next 128 or maybe just delete the if
-		if (charcode < 256)
-		{
-			allGlyphs.push_back(static_cast<char>(charcode));
-		}
-
-		charcode = FT_Get_Next_Char(face, charcode, &glyphIndex);
-	}
-
-	//std::cout << "Extracted glyphs: " << allGlyphs << std::endl;
-}
-
-
-void Text::initializeBuffer() {
+void Text::genBuffers() 
+{
 	glBindVertexArray(0);
 	glGenVertexArrays(1, &vertexArray);
 	glBindVertexArray(vertexArray);
@@ -44,105 +12,96 @@ void Text::initializeBuffer() {
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
-
-	//First 2 floats of the vertex buffer are the position and the next 2 the texture coordinates
+	//The are 2 attributes in the vertex bufex: positions and texture coordinates
 	//offset is the last element: 2 floats; stride is the next to last element: 4 floats
-
-	// Position attribute
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-
-	// text coordinate attribute
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
 	glBindVertexArray(0);
 }
 
-//Creates and sets the texture of the atlas first without data
-void Text::initializeAtlasTexture(const float atlasWidth, const float atlasHeight) {
-	glGenTextures(1, &textAtlasTexture);
-	glBindTexture(GL_TEXTURE_2D, textAtlasTexture);
+
+void Text::initializeFreeType(FT_Library& ft, FT_Face& face, string& allCharacters, const std::string& fontPath, const int fontPixelSize)
+{
+	//initializes the FreeType library and links the created library context into ft
+	FT_Init_FreeType(&ft); 
+
+	FT_New_Face(ft, fontPath.c_str(), 0, &face);
+	//The 0 is there if the .ttf or .otf contain a typeface family, and the index let's you choose a single font face
+
+	// Set font size in pixels //Direct alternative to dpis
+	FT_Set_Pixel_Sizes(face, 0, fontPixelSize);
 
 
-
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0,//level of detail, setted on base detail
-		GL_RED,	//this gives the internal format, look for more info
-		atlasWidth, // width of the entire texture atlas.
-		atlasHeight, //height of the tallest glyph in the atlas, used as the atlas height.
-		0, //border of the texture, must be 0
-		GL_RED,
-		GL_UNSIGNED_BYTE,
-		nullptr);
+	//Unicode is the standard that assigns a number to every character. It's fixed: A=65, ñ=241...
+	//The font stores a map that links the Unicode values to the glyphs
+	// Both variables start unitialized, and FT_Get_First_Char looks for the lowest unicode, normally the first index
+	//Then from it, FT_Get_Next_Char will look for the next unicode inmediatly bigger than it, which is normally the next index
+	//it doesn't have to be, sometimes the next unicodeValue will be in a previous index
+	FT_ULong unicodeValue; 
+	FT_UInt glyphIndex;
 
 
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //linearly interpolates the pixel, smoother, but somewhat blurry 
-	/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);*/ //choose the nearest pixel: pixelated, but sharp 
-
-	//clamps texture outside 0,1 range? Don't think I need it 
-		//Revision, after months a bug that shows lines outlines have appeared and the clamp is needed
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-//Stores the metrics of a character inside a map
-void Text::storeGlyph(char character, float& widthAtlas) {
-
-	if (FT_Load_Char(face, character, FT_LOAD_RENDER))
+	unicodeValue = FT_Get_First_Char(face, &glyphIndex);
+	while (glyphIndex != 0)
 	{
-		std::cout << "Failed to load glyph" << std::endl;
-	}
-
-	FT_GlyphSlot& glyph = face->glyph;
-	FT_Bitmap& bitmap = glyph->bitmap; //A bitmap is the FreeType structure that contains the data of a glyph
-
-	//Glyph metrics
-	float bearingX = glyph->bitmap_left;
-	float bearingY = glyph->bitmap_top;
-	float width = bitmap.width;
-	float height = bitmap.rows;
-	float advance = glyph->advance.x >> 6;
-
-
-	widthAtlas += width;
-
-
-	glyphMetricsMap.emplace(character, GlyphMetrics{ width, height, bearingX, bearingY, advance });
-
-}
-
-//main function that includes the initialization of the texture and the call of storeGlyph to end with the final Atlas
-void Text::createAtlasTexture() {
-
-	float atlasWidth = 0, atlasHeight = 0;//Total dimensions of the atlas
-
-	for (char& c : allGlyphs)
-	{
-
-		storeGlyph(c, atlasWidth); //creates metrics map and sets atlas dimensions
-		if (glyphMetricsMap[c].height > atlasHeight)
+		//128 first characters are ascii characters. For latin-1 characters (ñ, á, ü) you should have the next 128 or maybe just delete the if
+		if (unicodeValue < 256)
 		{
-			atlasHeight = glyphMetricsMap[c].height; //highest glyph determines final atlasHeight
+			allCharacters.push_back(static_cast<char>(unicodeValue));
 		}
+
+		unicodeValue = FT_Get_Next_Char(face, unicodeValue, &glyphIndex);
+
 	}
 
-	initializeAtlasTexture(atlasWidth, atlasHeight);
+	//std::cout << "Extracted characters: " << allCharacters << std::endl;
+}
+
+
+void Text::createAtlasTexture(FT_Face& face, string& allCharacters)
+{
+	float atlasWidth = 0, atlasHeight = 0;
+
+	for (char& c : allCharacters)
+	{
+		//FT_Load_Char has access to the map that links glyph index with its associated unicode value
+		// The function renders the glyph into a bitmap from which we extract the metrics
+		FT_Load_Char(face, c, FT_LOAD_RENDER);
+
+		FT_GlyphSlot& glyph = face->glyph;
+		FT_Bitmap& bitmap = glyph->bitmap; //A bitmap is the FreeType structure that contains the data of a glyph
+
+		//Glyph metrics
+		//FreeType explicitly defines bitmap_left and bitmap_top as bitmap bearings
+		// Advance is stored in 26.6 fractional pixel format, so >> 6 converts to pixels.
+		float bearingX = glyph->bitmap_left;
+		float bearingY = glyph->bitmap_top;
+		float width = bitmap.width;
+		float height = bitmap.rows;
+		float advance = glyph->advance.x >> 6;
+
+
+		glyphMetricsMap.emplace(c, GlyphMetrics{ width, height, bearingX, bearingY, advance });
+
+		atlasWidth += width;
+
+		if (glyphMetricsMap[c].height > atlasHeight)
+			atlasHeight = glyphMetricsMap[c].height; //highest glyph determines final atlasHeight
+	}
+
+	genAtlasTexture(atlasWidth, atlasHeight);
 
 	//OpenGL by default expects the rows of data to be packed in multiples of 4 bytes, it isn't our case, putting it in 1 somehow means 
 	// that “Each row is packed with no extra padding—just one byte per pixel, back-to-back.” and it just works without removing efficiency
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	float currentWidth = 0; //sets the x position of the glyph in the atlas
-	for (char& c : allGlyphs) { //stores a texture of each glyph in the atlas
+	for (char& c : allCharacters) { //stores a texture of each glyph in the atlas
 
-		glBindTexture(GL_TEXTURE_2D, textAtlasTexture);//necessary here
+		glBindTexture(GL_TEXTURE_2D, textureAtlasTexture);//necessary here
 
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
 			std::cout << "Failed to load glyph " << c << std::endl;
@@ -175,14 +134,6 @@ void Text::createAtlasTexture() {
 		glyphMetricsMap[c].texCoordY1 = glyphMetricsMap[c].height / atlasHeight;
 
 		currentWidth += glyphMetricsMap[c].width;
-
-		// This is some padding so it doesn't fall exactly at the edges because it was giving a weird edge artifacts in an edge case
-		float du = 0.5f / atlasWidth;
-		float dv = 0.5f / atlasHeight;
-		glyphMetricsMap[c].texCoordX0 += du;
-		glyphMetricsMap[c].texCoordX1 -= du;
-		glyphMetricsMap[c].texCoordY0 += dv;  
-		glyphMetricsMap[c].texCoordY1 -= dv;
 	}
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4); //Returning to default for next operations
 
@@ -206,6 +157,43 @@ void Text::createAtlasTexture() {
 
 	//glyphMetricsMap.clear(); //Clears that memory bc it's not going to be used anymore
 }
+
+
+void Text::genAtlasTexture(const float atlasWidth, const float atlasHeight) 
+{
+	glGenTextures(1, &textureAtlasTexture);
+	glBindTexture(GL_TEXTURE_2D, textureAtlasTexture);
+
+	glTexImage2D(
+		GL_TEXTURE_2D,
+		0,//level of detail, set on base detail
+		GL_RED,	//this gives the internal format, look for more info
+		atlasWidth, // width of the entire texture atlas.
+		atlasHeight, //height of the tallest glyph in the atlas, used as the atlas height.
+		0, //border of the texture, must be 0
+		GL_RED,
+		GL_UNSIGNED_BYTE,
+		nullptr);
+
+	
+
+	//clamps texture outside 0,1 range? Don't think I need it 
+		//Revision, after months a bug that shows lines outlines have appeared and the clamp is needed 2025
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);*/ //linearly interpolates the pixel, smoother, but somewhat blurry 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //choose the nearest pixel: pixelated, but sharp 
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
+
+
+
 
 
 
@@ -267,12 +255,12 @@ void Text::createIndices(size_t i) {
 
 Text::~Text() {
 	// Clean up the resources
-	glDeleteTextures(1, &textAtlasTexture);
+	glDeleteTextures(1, &textureAtlasTexture);
 	glDeleteBuffers(1, &vertexBuffer);
 	glDeleteBuffers(1, &indexBuffer); // Ensure you've created and stored the indexBuffer handle
 	glDeleteVertexArrays(1, &vertexArray);
 
-	// Cleanup FreeType resources
-	FT_Done_Face(face);
-	FT_Done_FreeType(ft);
+	
+	
+	
 }

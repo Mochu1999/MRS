@@ -23,8 +23,13 @@ struct WaterMRS
 		water.addPolyhedra(positions, normals, circle.indices);
 	}
 
-	void draw()
+	void draw(Shader& shader3D)
 	{
+		transparent();
+		shader3D.setUniform("u_Model", identityMatrix);
+		shader3D.setUniform("u_fragmentMode", shadeColor);
+		shader3D.setUniform("u_Color", 40.0f / 255.0f, 189.9f / 255.0f, 255.0f / 255.0f, 0.6);
 		water.draw();
+		opaque();
 	}
 };

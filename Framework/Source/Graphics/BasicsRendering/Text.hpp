@@ -5,32 +5,21 @@
 
 
 
-//////////////////////////// 
-/*
-General pipeline:
-The objective is to construct the class with the font name and the size at the start.
-It automatically creates a texture atlas looping through storeGlyph in createAtlasTexture, storing the metrics
+//to do
+//There's mo kerning, that what improves spacing between glyphs for specific pairs, like AA vs AV
+// texto en dpis, reserves
+// Separación de atlas y addText en dos diferentes struct. Que solo haya un objeto en UI que alimente toda instancia de texto
+// Un atlas con distintos tamaños de font
+// Que tu des un tamaño de texto y el struct te elija automáticamente la font
 
-Considerations:
-A lot of variables should be cleared after the createAtlasTexture creation. These variables should be inside functions and not as class variables
-It only allows one font type and size per atlas, which I don't know if it positive or negative
-No kerning, it can improve spacing between glyphs for specific pairs, like AA vs AV
-
-*/
-
-/////////////////////////////////////////////////////////////////////////////////////////////////
-	//Falta poner texto estático, dinámico y multiples inputs en text to draw, texto en dpis, reserves
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-
-//SACAR PATH Y FONT DE CONSTRUCTOR PARA MEJOR USO EN OTROS MÓDULOS
-
-//Se confunde con Lines2d...
-struct Line {
+//An entry with a position and an undertermined amount of text arguments that gets added in addText
+struct TextEntry 
+{
 	p2 pos;
 	string text;
 
 	template <typename... Args>
-	Line(p2 pos_, Args&&... body) : pos(pos_)
+	TextEntry(p2 pos_, Args&&... body) : pos(pos_)
 	{
 		std::ostringstream oss;
 		(oss << ... << body);
@@ -38,67 +27,114 @@ struct Line {
 	}
 };
 
+//2 different parts, Atlas creation and addTexts.
+//Size of text is set in pixels to maintain proportions between devices
 
-struct Text {
+struct Text 
+{
 
-	unsigned int vertexArray, vertexBuffer, indexBuffer, textAtlasTexture;
-
-	vector<float> positions;	//quads
-	vector<unsigned int> indices;
-
-	FT_Library ft;
-	//A typeface (or font family) englobes all the stylings of a font, a typefont is Helvetica while a font is Helvetica Regular
-	FT_Face face; //a face is the structure that stores all the data for a specific font
-
-	string glyphPath;
-	int fontPixelSize;
-
-	string allGlyphs; //a font is a collection of glyphs
-	bool isBufferUpdated = true;
-
-	//initializes the library and loads the font face
-	void initializeFreeType(const std::string& fontPath, const int fontPixelSize);
+	unsigned int vertexArray, vertexBuffer, indexBuffer;
+	unsigned int textureAtlasTexture; //OpenGL texture object
 
 
-	//in oneNote you have images of what every metric is.
-	struct GlyphMetrics {
+	//in assets/TextMetrics there are photos of what these metrics mean
+	struct GlyphMetrics
+	{
 		float width, height;
 		float bearingX, bearingY;
 		float advance;
 		float texCoordX0 = 0, texCoordY0 = 0;
 		float texCoordX1 = 1, texCoordY1 = 1;
 	};
-	std::map<char, GlyphMetrics> glyphMetricsMap; //will store all the metrics
+
+	//NO SÉ SI SE PUEDE ENCAPSULAR
+	//stores the glyph metrics of every character in allCharacters
+	std::map<char, GlyphMetrics> glyphMetricsMap;
 
 
 
 
 
-	Text(string glyphPath_, int fontPixelSize_) :glyphPath(glyphPath_), fontPixelSize(fontPixelSize_) {
-
-		initializeFreeType(glyphPath, fontPixelSize);
-		initializeBuffer();
-		createAtlasTexture();
-
-
-	}
-
-
-
-
-
-
+	vector<float> positions; //CONTIENE POSITIONES Y TEXTURE COORDINATES
+	vector<unsigned int> indices;
+	
 	vector<p2> textPosition;
 	vector<string> textToDraw;
 
+	int indexOffset = 0; //to separate different textToDraws
 
 
 	
-	//Hazte un resumen comentario de en que formato se llama cada función, no?
+	
+
+
+
+	bool isBufferUpdated = true;
+
+
+	Text() 
+	{
+		genBuffers();
+	}
+
+	void genBuffers();
+
+	//--- --- ---
+	// Atlas functions
+	//--- --- ---
+
+	//initializes FreeType and creates the atlas
+	void createAtlas(string glyphPath, int fontPixelSize)
+	{
+		//Freetype objects are discarded after creating the atlas
+		//ft is the FreeType context, the internal state the library needs to operate. Needed to create our use FT_Face
+		FT_Library ft;
+		FT_Face face; //stores a font //you can have multiple fonts in one ft
+		//Font face would be Helvetica Bold Italic, while a typeface would be helvetica. Here we are talking about a font face
+
+		//A font is a collection of characters and glyphs, being glyphs the geometric representation that will be drawn
+		//allCharacters stores all the used unicode values (their associated characters really) so their glpyh data is retrieved in storeGlyph
+		string allCharacters;
+
+
+		initializeFreeType(ft,face, allCharacters, glyphPath, fontPixelSize);
+		createAtlasTexture(face, allCharacters);
+
+		// Cleanup FreeType resources //I'm not sure they aren't deleted out of scope
+		FT_Done_Face(face);
+		FT_Done_FreeType(ft);
+	}
+
+	
+
+	//initializes the library, the font size and gets a vector of the all characters that the font provides
+	void initializeFreeType(FT_Library& ft, FT_Face& face, string& allCharacters,const std::string& fontPath, const int fontPixelSize);
+
+	//main function that includes the initialization of the texture and the call of storeGlyph to end with the final Atlas
+	void createAtlasTexture(FT_Face& face, string& allCharacters);
+
+	//similar to genBuffers but with the atlas texture, but it needs to know how to big the texture is, so it's called in createAtlasTexture
+	void genAtlasTexture(const float atlasWidth, const float atlasHeight);
+
+
+
+
+
+
+	//fills the vertex buffer with the final quad positions and with the coordinates of the glyph in the atlas
+	void fillVertexBuffer();
+	
+
+
+
+	//--- --- ---
+	// Add text functions
+	//--- --- ---
+	
 	////Currently if you use substituteText in a while loop it will be equivalent to using addDynamicText, that can't be right
 
-	//meant to be the initial push for static text. It wont delete previous entries. Accepts vector a single Line format
-	void addText(vector<Line> line)
+	//meant to be the initial push for static text. It wont delete previous entries. Accepts vector a single TextEntry format
+	void addText(vector<TextEntry> line)
 	{
 		for (auto& l : line)
 		{
@@ -108,8 +144,8 @@ struct Text {
 
 		fillVertexBuffer();
 	}
-	//line must go inside {} in the call, in the vector call and Dybamic the format is: {{},{}};
-	void addText(Line line)
+	//line must go inside {} in the call, in the vector call and Dynamic the format is: {{},{}};
+	void addText(TextEntry line)
 	{
 
 		textPosition.push_back(line.pos);
@@ -122,7 +158,7 @@ struct Text {
 	}
 
 	//meant to substitute a single entry
-	void substituteText(unsigned int i, Line line)
+	void substituteText(unsigned int i, TextEntry line)
 	{
 
 		textPosition[i] = line.pos;
@@ -146,7 +182,7 @@ struct Text {
 
 	}
 
-	void addDynamicText(vector<Line> line)
+	void addDynamicText(vector<TextEntry> line)
 	{
 		textPosition.clear();
 		textToDraw.clear();
@@ -164,40 +200,11 @@ struct Text {
 		isBufferUpdated = true;
 
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//Creates and sets the texture of the atlas first without data
-	void initializeAtlasTexture(const float atlasWidth, const float atlasHeight);
-
-
-	//Stores the metrics of a character inside a map and the sum of its advances gets the width of the atlas
-	void storeGlyph(char character, float& atlasWidth);
-
-	//main function that includes the initialization of the texture and the call of storeGlyph to end with the final Atlas
-	void createAtlasTexture();
-
-
-
-
-	//fills the vertex buffer with the final quad positions and with the coordinates of the glyph in the atlas
-	void fillVertexBuffer();
-
-	int indexOffset = 0; //to separate different textToDraws
+	
 	void createIndices(size_t i);
 
 
-	void initializeBuffer();
+	
 
 
 
@@ -207,7 +214,7 @@ struct Text {
 	void draw() 
 	{
 
-		//if (isBufferUpdated) 
+		if (isBufferUpdated) 
 		{
 			glBindVertexArray(vertexArray);
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -216,7 +223,7 @@ struct Text {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 4, indices.data(), GL_DYNAMIC_DRAW);
 
-			glBindTexture(GL_TEXTURE_2D, textAtlasTexture);
+			glBindTexture(GL_TEXTURE_2D, textureAtlasTexture);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * 4, positions.data());
 
 			isBufferUpdated = false;
@@ -228,6 +235,17 @@ struct Text {
 	~Text();
 
 };
+
+/* Usage example
+text.createAtlas("resources/Glyphs/Helvetica/Helvetica.otf", 16);
+
+*/
+
+
+
+//--- --- ---
+// String format functions
+//--- --- ---
 
 template<typename T>
 inline T round2d(T number) {
