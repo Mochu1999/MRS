@@ -47,7 +47,8 @@ struct InputGLFW
 	//The "self" references in the functions are a reconstruction of "this", a pointer of the InputGLFW struct object
 
 	//A call each frame
-	void customPolls(GLFWwindow* window)
+	//SEPARATE IN DIFFERENT FUNCTIONS
+	void customPolls()
 	{
 		//--- --- ---
 		// Mouse movement 
@@ -97,8 +98,8 @@ struct InputGLFW
 			int screenCursorY = winY + (int)mPos.y;
 
 			//move window so the cursor stays at the same grab offset inside the window
-			int newX = screenCursorX - (int)dragStartCursorX;
-			int newY = screenCursorY - (int)dragStartCursorY;
+			/*int newX = screenCursorX - (int)dragStartCursorX;
+			int newY = screenCursorY - (int)dragStartCursorY;*/
 
 			//glfwSetWindowPos(window, newX, newY);
 		}
@@ -192,9 +193,9 @@ struct InputGLFW
 			telemetry->sailAngle -= telemetry->sailIncrease;
 		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && telemetry->sailAngle <= 60)
 			telemetry->sailAngle += telemetry->sailIncrease;
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && telemetry->rudderAngle >= -40)
-			telemetry->rudderAngle -= telemetry->rudderIncrease;
 		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && telemetry->rudderAngle <= 40)
+			telemetry->rudderAngle -= telemetry->rudderIncrease;
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && telemetry->rudderAngle >= -40)
 			telemetry->rudderAngle += telemetry->rudderIncrease;
 
 	}

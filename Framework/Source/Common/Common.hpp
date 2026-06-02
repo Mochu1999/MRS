@@ -34,6 +34,9 @@ using namespace std;
 namespace fs = std::filesystem;
 
 
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX //avoid min and max from windows, which causes a conflict with std ones
+#include <windows.h>
 
 // Constants
 constexpr double PI = 3.14159265358979323846;

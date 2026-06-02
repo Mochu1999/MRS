@@ -1,33 +1,14 @@
 #pragma once
 
 #include <chrono>
-using namespace std;
 using namespace std::chrono;
-
-
-
-
-struct TimeCounter {
-	high_resolution_clock::time_point currentTime;
-	high_resolution_clock::time_point lastTime;
-	double endTime = std::numeric_limits<double>::max();
-	TimeCounter() {
-		currentTime = high_resolution_clock::now();
-	}
-	void endCounter() {
-		lastTime = high_resolution_clock::now();
-		endTime = duration_cast<duration<double>>(lastTime - currentTime).count();
-		std::cout << "Elapsed time: " << endTime << "s" << endl;
-	}
-
-
-};
 
 
 
 //if isRunning = 0 the counter keeps summing, if you want to stop it create a variable pausedTime that only adds time if paused and is always been rest from the sum
 
-struct TimeStruct {
+struct TimeStruct 
+{
 	std::chrono::high_resolution_clock::time_point lastFrameTime;
 	std::chrono::high_resolution_clock::time_point startElapsedTime;
 
@@ -37,29 +18,14 @@ struct TimeStruct {
 	float fps = 0.0f;
 	float frameCount = 0.0f;
 	float timeAccumulator = 0.0f;
-	
-	float plotTimeAccumulator = 0.0f;
-	const float plotUpdateInterval = 0.0167f;
-	float fiveSecondsAccumulator = 0; //to update auxVerticalGridLines from the plot
-	unsigned int counterSecondsPlot = 0;
-	unsigned int counterUpdatePlot = 0;
 
-	//Autopilot
-	const float mRSUpdateInterval = 1;
-	float mRSTimeAccumulator = 0;
-	unsigned int counterUpdateMRS = 0;
+	//Transmitter
+	const float transmitterUpdateInterval = 0.5f; //Doing a transmitter.update this interval
+	float transmitterUpdateAccumulator = 0;
+	unsigned int counterUpdateTransmitter = 0;
 
-	//Solar
-	const float solarUpdateInterval = 0.001f;
-	float solarUpdateAccumulator = 0;
-	unsigned int counterUpdateSolar = 0;
-
-	//Offshore
-	const float offshoreUpdateInterval = 0.001f;
-	float offshoreUpdateAccumulator = 0;
-	unsigned int counterUpdateOffshore = 0;
-
-	TimeStruct() {
+	TimeStruct() 
+	{
 		lastFrameTime = std::chrono::high_resolution_clock::now();
 		startElapsedTime = lastFrameTime;
 	}
@@ -75,10 +41,7 @@ struct TimeStruct {
 
 
 		updateFPS();
-		updatePlot();
-		updateMRS();
-		updateSolar();
-		updateOffshore();
+		updateTransmitter();
 	}
 
 	void updateFPS()
@@ -93,56 +56,35 @@ struct TimeStruct {
 			timeAccumulator -= 0.5f;
 		}
 	}
-	void updatePlot() 
+
+	void updateTransmitter()
 	{
-		plotTimeAccumulator += deltaTime;
-		fiveSecondsAccumulator += deltaTime;
-		if (plotTimeAccumulator >= plotUpdateInterval) 
+		transmitterUpdateAccumulator += deltaTime;
+
+		while (transmitterUpdateAccumulator >= transmitterUpdateInterval)
 		{
-			plotTimeAccumulator -= plotUpdateInterval; // Reset accumulator
-
-			if (fiveSecondsAccumulator >= 1)
-			{
-				fiveSecondsAccumulator -= 1;
-				++counterSecondsPlot;
-			}
-
-			counterUpdatePlot++;
-		}
-	}
-	void updateMRS()
-	{
-		if (currentTime > 2)
-			mRSTimeAccumulator += deltaTime;
-
-		if (mRSTimeAccumulator >= mRSUpdateInterval)
-		{
-			mRSTimeAccumulator -= mRSUpdateInterval;
-
-			counterUpdateMRS++;
-		}
-	}
-	void updateSolar()
-	{
-		solarUpdateAccumulator += deltaTime;
-
-		while (solarUpdateAccumulator >= solarUpdateInterval) 
-		{
-			solarUpdateAccumulator -= solarUpdateInterval;
-			++counterUpdateSolar; 
-		}
-	}
-
-	void updateOffshore()
-	{
-		offshoreUpdateAccumulator += deltaTime;
-
-		while (offshoreUpdateAccumulator >= offshoreUpdateInterval)
-		{
-			offshoreUpdateAccumulator -= offshoreUpdateInterval;
-			++counterUpdateOffshore;
+			transmitterUpdateAccumulator -= transmitterUpdateInterval;
+			++counterUpdateTransmitter;
 		}
 	}
 };
 
 
+//To count elapsed time between whatever events. For debugging purposes
+struct TimeCounter
+{
+	high_resolution_clock::time_point currentTime;
+	high_resolution_clock::time_point lastTime;
+	double endTime = std::numeric_limits<double>::max();
+
+	TimeCounter()
+	{
+		currentTime = high_resolution_clock::now();
+	}
+	void endCounter() 
+	{
+		lastTime = high_resolution_clock::now();
+		endTime = duration_cast<duration<double>>(lastTime - currentTime).count();
+		std::cout << "Elapsed time: " << endTime << "s" << endl;
+	}
+};

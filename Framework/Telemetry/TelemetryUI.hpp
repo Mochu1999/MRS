@@ -43,8 +43,8 @@ struct TelemetryUI
 		:t(telemetry_), shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), camera(camera_), buttons(buttons_)
 	{
 		pb.createPB(&t.battery, p2{ 1350,700 }, "Batterysn");
-		plotSail.createPlot(&t.sailAngle, &t.tm.currentTime, { 1350,50 }, "sailAnglesssssss");
-		plotRudder.createPlot(&t.rudderAngle,&t.tm.currentTime, { 1350,350 }, "rudderAnglessssssss");
+		plotSail.createPlot(&t.sailAngle, &t.tm.currentTime, { 1350,50 }, "sailAngle");
+		plotRudder.createPlot(&t.rudderAngle,&t.tm.currentTime, { 1350,350 }, "rudderAngle");
 
 		test.createAtlas(50);
 		
@@ -66,7 +66,7 @@ struct TelemetryUI
 		transparent();
 		TextEntry algo({ 100,500 }, "qweorñinqrgxvzbmADSGBCVBXGFJ");
 		test.addDynamicText({ algo });
-		test.draw();
+		//test.draw();
 
 		overlay.draw(shader2D);
 		plotSail.draw(shader2D, shader2DInstanced, shaderText);

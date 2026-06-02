@@ -1,7 +1,8 @@
 
+//Transmitter integration. Buttons refactorization WIP. Time refactorization and transmitter time. OnBoard solution WIP
 // Text refactorization. PFS counter
 //To do
-// Anemómetro, flechas 3D,
+// Anemómetro, flechas 3D, onboard cmakelists
 // camera new modes, sweepTriangulation, text, shaderText, shader3D, botones
 //, fps counter
 // Change to simulation view
@@ -11,8 +12,11 @@
 //Settings: CameraSensivity value, water
 //solar panels
 
+
+
 #include "Common.hpp"
 #include "Graphics.hpp"
+
 
 #include "SettingsTelemetry.hpp"
 
@@ -22,9 +26,13 @@
 
 #include "InputGLFW.hpp"
 
+
+
 int main(void)
 {
-	GLFWwindow* window = initialize(windowWidth/4,windowHeight/2,"MRS");
+
+	//GLFWwindow* window = initialize(windowWidth, windowHeight, "MRS");
+	GLFWwindow* window = initialize(/*windowWidth,windowHeight,"MRS"*/);
 
 	//Unify in a single shader once only references of it exist only in UI
 	Shader shader3D("resources/shaders/shader3D.shader");
@@ -39,7 +47,6 @@ int main(void)
 	Telemetry telemetry;
 	TelemetryUI ui(telemetry, shader3D, shader2D, shader2DInstanced, shaderText, camera, buttons);
 	TransmitterPC transmitter(telemetry);
-
 
 	Settings settings(camera);
 	InputGLFW inputGLFW(window, &camera,&telemetry, &buttons);
@@ -56,9 +63,10 @@ int main(void)
 			telemetry.update();
 			//program's rendering
 			ui.draw();
-			
+			//sends message if value is updated
+			transmitter.update();
 
-			inputGLFW.customPolls(window);
+			inputGLFW.customPolls();
 			camera.updateCamera();
 
 			updateCameraLocations(shader3D, camera);
