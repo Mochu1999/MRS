@@ -1,5 +1,5 @@
 
-//Transmitter integration. Buttons refactorization WIP. Time refactorization and transmitter time. OnBoard solution WIP
+//
 // Text refactorization. PFS counter
 //To do
 // Anemómetro, flechas 3D, onboard cmakelists

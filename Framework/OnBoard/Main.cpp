@@ -1,87 +1,103 @@
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include <iostream>
 #include <string>
-int main(void)
+#include <cstring>
+
+#include <fcntl.h>      // open
+#include <unistd.h>     // read, write, close
+#include <termios.h>    // termios
+#include <errno.h>
+
+int main()
 {
+    const char* portName = "/dev/ttyUSB0";
 
-    const char* portName = "\\\\.\\COM5";
+    int serial = open(portName, O_RDWR | O_NOCTTY);
 
-    HANDLE serial = CreateFileA(
-        portName,
-        GENERIC_READ | GENERIC_WRITE,
-        0,
-        nullptr,
-        OPEN_EXISTING,
-        0,
-        nullptr
-    );
-
-    if (serial == INVALID_HANDLE_VALUE)
+    if (serial < 0)
     {
-        std::cerr << "Error: could not open COM5\n";
+        std::cerr << "Error: could not open " << portName << "\n";
+        std::cerr << "errno: " << strerror(errno) << "\n";
         return 1;
     }
 
-    DCB dcb = {};
-    dcb.DCBlength = sizeof(dcb);
+    termios tty{};
 
-    if (!GetCommState(serial, &dcb))
+    if (tcgetattr(serial, &tty) != 0)
     {
-        std::cerr << "Error: could not get COM state\n";
-        CloseHandle(serial);
+        std::cerr << "Error: could not get serial settings\n";
+        close(serial);
         return 1;
     }
 
-    dcb.BaudRate = CBR_9600;
-    dcb.ByteSize = 8;
-    dcb.Parity = NOPARITY;
-    dcb.StopBits = ONESTOPBIT;
+    cfsetispeed(&tty, B9600);
+    cfsetospeed(&tty, B9600);
 
-    if (!SetCommState(serial, &dcb))
+    // 8 data bits
+    tty.c_cflag &= ~CSIZE;
+    tty.c_cflag |= CS8;
+
+    // no parity
+    tty.c_cflag &= ~PARENB;
+
+    // 1 stop bit
+    tty.c_cflag &= ~CSTOPB;
+
+    // disable hardware flow control
+    tty.c_cflag &= ~CRTSCTS;
+
+    // enable receiver, ignore modem control lines
+    tty.c_cflag |= CREAD | CLOCAL;
+
+    // raw mode: no line processing
+    tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY);
+    tty.c_oflag &= ~OPOST;
+
+    // read timeout behavior
+    tty.c_cc[VMIN] = 0;
+    tty.c_cc[VTIME] = 1; // 0.1 seconds
+
+    if (tcsetattr(serial, TCSANOW, &tty) != 0)
     {
-        std::cerr << "Error: could not configure COM5\n";
-        CloseHandle(serial);
+        std::cerr << "Error: could not apply serial settings\n";
+        close(serial);
         return 1;
     }
 
-    COMMTIMEOUTS timeouts = {};
-    timeouts.ReadIntervalTimeout = 50;
-    timeouts.ReadTotalTimeoutConstant = 50;
-    timeouts.ReadTotalTimeoutMultiplier = 10;
-
-    SetCommTimeouts(serial, &timeouts);
-
-    std::cout << "Listening on COM5...\n";
+    std::cout << "Listening on " << portName << "...\n";
 
     while (true)
     {
         char buffer[256];
-        DWORD bytesRead = 0;
 
-        BOOL ok = ReadFile(
-            serial,
-            buffer,
-            sizeof(buffer) - 1,
-            &bytesRead,
-            nullptr
-        );
+        int bytesRead = read(serial, buffer, sizeof(buffer));
 
-        if (!ok)
+        if (bytesRead < 0)
         {
-            std::cerr << "Error while reading from COM5\n";
+            std::cerr << "Error while reading\n";
             break;
         }
 
         if (bytesRead > 0)
         {
-            buffer[bytesRead] = '\0';
-            std::cout << buffer << std::flush;
+            std::cout << "Received " << bytesRead << " bytes: ";
+            std::cout.write(buffer, bytesRead);
+            std::cout << "\n";
+
+            int bytesWritten = write(serial, buffer, bytesRead);
+
+            if (bytesWritten < 0)
+            {
+                std::cerr << "Error while writing echo response\n";
+                break;
+            }
+
+            std::cout << "Echoed back " << bytesWritten << " bytes\n";
         }
 
-        Sleep(10);
+        usleep(10000); // 10 ms
     }
 
-    CloseHandle(serial);
+    close(serial);
     return 0;
 }
