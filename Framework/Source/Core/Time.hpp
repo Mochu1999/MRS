@@ -20,7 +20,7 @@ struct TimeStruct
 	float timeAccumulator = 0.0f;
 
 	//Transmitter
-	const float transmitterUpdateInterval = 0.5f; //Doing a transmitter.update this interval
+	const float transmitterUpdateInterval = 0.5f; //Doing a transmitter.update after this interval
 	float transmitterUpdateAccumulator = 0;
 	unsigned int counterUpdateTransmitter = 0;
 

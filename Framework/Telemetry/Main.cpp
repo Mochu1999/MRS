@@ -1,5 +1,9 @@
 
-//
+//Caso límite muchos mensajes acumulados en el serial, solo procesar de ";" a ";"
+//Redactar funciones/requisitos de la antena de corto alcance con lo que hay, pasar por todo lo que se ha hecho y resumir en la propuesta de control
+
+// 
+// Documentation moved to the MRS google drive
 // Text refactorization. PFS counter
 //To do
 // Anemómetro, flechas 3D, onboard cmakelists
@@ -22,7 +26,7 @@
 
 #include "TelemetryUI.hpp"
 
-#include "TransmitterPC.hpp"
+#include "LoRa.hpp"
 
 #include "InputGLFW.hpp"
 
@@ -46,7 +50,7 @@ int main(void)
 	
 	Telemetry telemetry;
 	TelemetryUI ui(telemetry, shader3D, shader2D, shader2DInstanced, shaderText, camera, buttons);
-	TransmitterPC transmitter(telemetry);
+	LoRa lora(telemetry);
 
 	Settings settings(camera);
 	InputGLFW inputGLFW(window, &camera,&telemetry, &buttons);
@@ -54,7 +58,7 @@ int main(void)
 	while (!glfwWindowShouldClose(window))
 	{
 		inputGLFW.getPos(window, mPos);
-		if (isRunning) //TO BE USED ONLY FOR DEBUGGING PURPOSES
+		if (isRunning) //Debugging purposes
 		{
 			clearScreen();
 			buttons.update();
@@ -64,7 +68,7 @@ int main(void)
 			//program's rendering
 			ui.draw();
 			//sends message if value is updated
-			transmitter.update();
+			lora.update();
 
 			inputGLFW.customPolls();
 			camera.updateCamera();
