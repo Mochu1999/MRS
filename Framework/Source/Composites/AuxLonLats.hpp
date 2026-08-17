@@ -1,11 +1,16 @@
-﻿#pragma once
+
+#pragma once
+#include "Common.hpp"
+#include "Graphics.hpp"
+#include "Lines2D.hpp"
+
+static const float earthRadius = 6378137.0f;
 
 
 
 
 
-
-string lonLatToString(p2 lonLat)
+static string lonLatToString(p2 lonLat)
 {
 	string lonStr, latStr;
 	float lon = lonLat.x, lat = lonLat.y;
@@ -25,12 +30,11 @@ string lonLatToString(p2 lonLat)
 
 
 
-const float earthRadius = 6378137.0f;
 //Web mercator projection. Output in mercator projected meters
 // In the equator the distances are exact (cilindrical proj) but you lose accuracy the more away you are from it
 // Mercator is only valid for visualization, otherwise use geodesic calculations
 //assumes you wont have latitudes close to +-90 for now. lonlats in degrees
-vector<p2> lonLatToMercator(const vector<p2> lonLats)
+static vector<p2> lonLatToMercator(const vector<p2> lonLats)
 {
 	vector<p2> positions;
 	positions.reserve(lonLats.size());
@@ -48,7 +52,7 @@ vector<p2> lonLatToMercator(const vector<p2> lonLats)
 	return positions;
 }
 
-p2 lonLatToMercator(const p2 lonLat) {
+static p2 lonLatToMercator(const p2 lonLat) {
 
 	float lambda = radians(lonLat.x);   // lon in radians
 	float phi = radians(lonLat.y);   // lat in radians
@@ -59,7 +63,7 @@ p2 lonLatToMercator(const p2 lonLat) {
 
 
 //Comprobar
-vector<p2> mercatorToLonLat(const vector<p2> coords) {
+static vector<p2> mercatorToLonLat(const vector<p2> coords) {
 	vector<p2> lonLats;
 	lonLats.reserve(coords.size());
 
@@ -82,7 +86,7 @@ vector<p2> mercatorToLonLat(const vector<p2> coords) {
 }
 
 //Comprobar
-p2 mercatorToLonLat(const p2 pos) {
+static p2 mercatorToLonLat(const p2 pos) {
 
 
 	// Convertir x (Mercator) a longitud (lambda)
@@ -103,53 +107,50 @@ p2 mercatorToLonLat(const p2 pos) {
 
 //the map format that gives you longitudes and latitudes is WGS84 (EPSG:4326)
 
-// DEPRECATED //For very small angles the function collapses as the cosine is 0.9999... and rounded to 1
+//DEPRECATED //For very small angles the function collapses as the cosine is 0.9999... and rounded to 1
 //Calculates the distance of 2 spherical points in meter (input in degrees)
-/*float calculateDistance(const p2 point1, const p2 point2) {
-
-
-	float lon1 = radians(point1.x);
-	float lat1 = radians(point1.y);
-	float lon2 = radians(point2.x);
-	float lat2 = radians(point2.y);
-
-
-	//θ = arccos(sin(φ1)sin(φ2) + cos(φ1)cos(φ2)cos(Δλ))
-	float numerator = std::sin(lat1) * std::sin(lat2) + std::cos(lat1) * std::cos(lat2) * std::cos(lon2 - lon1);
-
-	// See if this even happens
-	if (numerator > 1.0f) numerator = 1.0f;
-	if (numerator < -1.0f) numerator = -1.0f;
-
-	float theta = std::acos(numerator);
-
-	return earthRadius * theta;
-}*/
+//static float calculateDistance(const p2 point1, const p2 point2) {
+//
+//
+//	float lon1 = radians(point1.x);
+//	float lat1 = radians(point1.y);
+//	float lon2 = radians(point2.x);
+//	float lat2 = radians(point2.y);
+//
+//
+//	//theta = arccos(sin(theta1)sin(theta2) + cos(theta1)cos(theta2)cos(deltaLambda))
+//	float numerator = std::sin(lat1) * std::sin(lat2) + std::cos(lat1) * std::cos(lat2) * std::cos(lon2 - lon1);
+//
+//	// See if this even happens
+//	if (numerator > 1.0f) numerator = 1.0f;
+//	if (numerator < -1.0f) numerator = -1.0f;
+//
+//	float theta = std::acos(numerator);
+//
+//	return earthRadius * theta;
+//}
 
 //Haversine formula, good for small angles. Logic to be revised but it's working
-float calculateDistance(p2 a, p2 b) 
-{
+static float calculateDistance(p2 a, p2 b) {
+	const double R = 6378137.0;
 	double lon1 = radians(a.x), lat1 = radians(a.y);
 	double lon2 = radians(b.x), lat2 = radians(b.y);
 	double dlon = lon2 - lon1, dlat = lat2 - lat1;
-
-	double h = sin(dlat / 2) * sin(dlat / 2) + cos(lat1) * cos(lat2) * sin(dlon / 2) * sin(dlon / 2);
-
-	h = std::clamp(h, 0.0, 1.0);
-
+	double h = sin(dlat / 2) * sin(dlat / 2)
+		+ cos(lat1) * cos(lat2) * sin(dlon / 2) * sin(dlon / 2);
 	double c = 2 * atan2(sqrt(h), sqrt(1 - h));
-	return float(earthRadius * c);
+	return float(R * c);
 }
 
 
-float meterSecondToKnot(const float input)
+static float meterSecondToKnot(const float input)
 {
 	return input * 3600 / 1852;
 }
 
 
 
-p3 lonLatsTo3DVector(p2 lonLat)
+static p3 lonLatsTo3DVector(p2 lonLat)
 {
 	float lon = radians(lonLat.x);
 	float lat = radians(lonLat.y);
@@ -158,7 +159,7 @@ p3 lonLatsTo3DVector(p2 lonLat)
 }
 
 //it must be checked before entering the function that start and end do not coincide
-vector<p2> divideGreatCircle(p2 lonLatStart, p2 lonLatEnd, float distanceThreshold)
+static vector<p2> divideGreatCircle(p2 lonLatStart, p2 lonLatEnd, float distanceThreshold)
 {
 	vector<p2> intermediatePoints;
 
@@ -191,7 +192,7 @@ vector<p2> divideGreatCircle(p2 lonLatStart, p2 lonLatEnd, float distanceThresho
 
 
 //surveyor's formula
-float computeArea(const vector<p2>& polygon)
+static float computeArea(const vector<p2>& polygon)
 {
 	float area = 0.0f;
 
@@ -206,7 +207,7 @@ float computeArea(const vector<p2>& polygon)
 
 
 //returns the input with polygons swapped to CCW
-vector<vector<p2>> setPolygonsCCW(vector<vector<p2>>& input)
+static vector<vector<p2>> setPolygonsCCW(vector<vector<p2>>& input)
 {
 	vector<vector<p2>> output = input;
 
@@ -223,12 +224,12 @@ vector<vector<p2>> setPolygonsCCW(vector<vector<p2>>& input)
 }
 
 
-//DEPRECATED, it is usefull because ascii, but too slow
+//DEPRECATED, it is useful because ascii, but too slow
 //The function expect to finds in each line of the file polylines
 //First the number of vertices, then all the points separated by commas
 //After storing of the polylines (actual world coordinates), it projects them all
 // , sets the first polyline as a frame, returns the 3 variables as references
-void readTextOfLonLats(std::string relativePath, std::vector<std::vector<p2>>& allLonLats, Lines2D& mercator, Lines2D& frame)
+static void readTextOfLonLats(std::string relativePath, std::vector<std::vector<p2>>& allLonLats, Lines2D& mercator, Lines2D& frame)
 {
 	std::string basePath = "Resources/";
 	std::string path = basePath + relativePath;
@@ -296,43 +297,11 @@ void readTextOfLonLats(std::string relativePath, std::vector<std::vector<p2>>& a
 
 
 
-void readMapBinary(const std::string& nameText, std::vector<std::vector<p2>>& map, Lines2D& mercator, Lines2D& frame)
-{
-    std::string path = "Resources/MRS/" + nameText;
-
-    std::ifstream inFile(path, std::ios::binary);
-    if (!inFile) {
-        std::cerr << "Error opening file for reading: " << path << "\n";
-    }
-
-    while (true)
-    {
-        size_t size;
-        inFile.read(reinterpret_cast<char*>(&size), sizeof(size)); //single polygon size
-        if (!inFile) break;  // EOF reached or error
-
-        std::vector<p2> interm(size);
-        inFile.read(reinterpret_cast<char*>(interm.data()), size * sizeof(p2));
-        if (!inFile) break;  
-
-        map.push_back(std::move(interm));
-    }
-
-	//map = setPolygonsCCW(map);
-	
-
-	//Starting with the first point after the frame
-	for (size_t i = 1; i < map.size(); i++)
-	{
-		vector<p2>interm = lonLatToMercator(map[i]);
-		mercator.addSet(interm);
-	}
-	frame.addSet(lonLatToMercator(map[0]));
-}
 
 
 
-void writeMapBinary(const vector<vector<p2>>& map, string nameText) {
+
+static void writeMapBinary(const vector<vector<p2>>& map, string nameText) {
 
 	std::string path = "Resources/MRS/" + nameText;
 

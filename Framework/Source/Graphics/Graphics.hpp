@@ -1,7 +1,7 @@
 #pragma once
 
 //Header containing the low level logic for the Graphics Engine
-inline int counterA = 0;
+
 
 //Access to OpenGL and GLFW
 #include <GL/glew.h>
@@ -20,9 +20,9 @@ inline int counterA = 0;
 #include "Camera.hpp"
 
 //Initializes OpenGL locations of the Camera
-void initializeCameraLocations(Shader& shader3D, Shader& shader2D, Shader& shader2D_Instanced, Shader& shaderText, Camera& camera);
+void initializeCameraLocations(Shader& shader3D, Shader& shader2D, Shader& shader2D_Instanced, Shader& shaderText, Shader& shaderText3D, Camera& camera);
 //updating view camera shader location
-void updateCameraLocations(Shader& shader3D, Camera& camera);
+void updateCameraLocations(Shader& shader3D, Shader& shaderText3D, Camera& camera);
 
 
 //Basic Rendering
@@ -44,5 +44,6 @@ void updateCameraLocations(Shader& shader3D, Camera& camera);
 void polyhedraToPolygon2D(Polyhedra polyhedra, Polygons2D& polygon);
 
 #include "Text.hpp"
+#include "Text3D.hpp"
 
 #include "SweepTriangulation.hpp"

@@ -2,6 +2,7 @@
 #include "Graphics.hpp"
 #include "Telemetry.hpp"
 
+#include "Route.hpp"
 #include "Axis.hpp"
 #include "Overlay2D.hpp"
 #include "Plot.hpp"
@@ -12,6 +13,93 @@
 #include "SunMRS.hpp"
 
 #include "Buttons.hpp"
+#include "FpsCounter.h"
+
+#include "AuxLonLats.hpp"
+#include "World.hpp"
+#include "Icons.hpp"
+
+struct DataRoute
+{
+	Telemetry& t;
+
+	//box
+	Polygons2D box;
+	Lines2D boxOutline;
+	Text boxText;
+
+	//Route
+	Polygons2D circleFinish;
+	Polygons2D circlesNodes; //Nodes and ship's position
+	Lines2D courseLine;
+
+
+	DataRoute(Telemetry& t_) : t(t_)
+	{
+		boxText.createAtlas(36, "resources/Glyphs/Helvetica/Helvetica.otf");
+		boxOutline.addSet(createRoundedSquare({ 80,370 }, 600, 380, 30));
+		box.addSet(createRoundedSquare({ 80,370 }, 600, 380, 30));
+
+		vector<p2> nodes = { t.position };
+		nodes.push_back(t.finishPoint);
+		circlesNodes.addCircle(2500, lonLatToMercator(nodes), 100);
+		circleFinish.addCircle(5000, lonLatToMercator(t.finishPoint), 100);
+		courseLine.addSet(lonLatToMercator(nodes));
+
+	}
+
+	//mapModel2DMatrix to scale the points down
+	//THESE ELEMENTS SHOULD STAY OF A CONSTANT SIZE NO MATTER HOW MUCH YOU ZOOM IN OR OUT, BUT YOU STILL NEED TO KNOW THE TRANSLATION AND SCALE FACTORS OF THE MAP
+	void draw(World& world, Shader& shader2D, Shader& shaderText)
+	{
+		shader2D.bind();
+		shader2D.setUniform("u_Model", identityMatrix);
+		shader2D.setUniform("u_Color", 40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
+		box.draw();
+		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
+		glLineWidth(3);
+		boxOutline.draw();
+		glLineWidth(1);
+
+		shaderText.bind();
+		//ETA SHOULD USE AN AVERAGE SPEED
+		float eta;
+		if (t.speed == 0) eta = std::numeric_limits<float>::quiet_NaN();
+		else eta = round1d(t.totalDistance / t.speed / 3600);
+
+
+		boxText.addDynamicText({
+			{{ 100,700 }, "Ship coordinates:  ", lonLatToString(t.position)},
+			{ { 100,650 }, "Distance left:  ", round1d(t.totalDistance / 1000)," km"},
+			{ { 100,600 }, "Speed: ", round1d(meterSecondToKnot(t.speed)) ,"  knots"},
+			{ { 100,550 }, "Estimated time left: ",eta," hours"},
+			{ { 100,500 }, "Errors:  N/A"}
+			});
+		shaderText.setUniform("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
+		boxText.draw();
+
+		shader2D.bind();
+
+		matrix4x4 mapModel2DMatrix = identityMatrix;
+		translate2DModelMatrix(mapModel2DMatrix, world.translationModel);
+		scale2DModelMatrix(mapModel2DMatrix, world.scaleModel);
+
+		shader2D.setUniform("u_Model", mapModel2DMatrix);
+
+		shader2D.setUniform("u_Color", 0, 0, 1, 1.0f);
+		courseLine.draw();
+
+		shader2D.setUniform("u_Color", 1, 1, 1, 1);
+		circlesNodes.draw();
+
+		shader2D.setUniform("u_Color", 1.0f, 0, 0, 1.0f);
+		circleFinish.draw();
+	}
+
+};
+
+
+
 
 struct TelemetryUI
 {
@@ -19,62 +107,80 @@ struct TelemetryUI
 	Shader& shader2D;
 	Shader& shader2DInstanced;
 	Shader& shaderText;
+	Shader& shaderText3D;
 	Camera& camera;
 
-	Buttons& buttons;
-
 	Telemetry& t;
+
+	Buttons& buttons;
 
 	Lourdes3DModel lourdesModel;
 	WaterMRS water;
 	SunMRS sun;
 
+	FpsCounter fpsCounter;
+
+	//ship
 	CenterCross centerCross;
 	Overlay2D overlay;
 	PlotTime plotSail;
 	PlotTime plotRudder;
 	ProgressBar pb;
-
 	Axis axis;
 
-	Text test;
+	//Route
+	World world;
+	DataRoute dataRoute;
+	Ship2DIcon icon;
 
-	TelemetryUI(Telemetry& telemetry_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Camera& camera_, Buttons& buttons_)
-		:t(telemetry_), shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), camera(camera_), buttons(buttons_)
+
+	TelemetryUI(Telemetry& telemetry_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Shader& shaderText3D_, Camera& camera_, Buttons& buttons_)
+		:t(telemetry_), shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), shaderText3D(shaderText3D_), camera(camera_), buttons(buttons_)
+		, lourdesModel(t), fpsCounter(t.tm), dataRoute(t)
 	{
-		pb.createPB(&t.battery, p2{ 1350,700 }, "Batterysn");
+		//Ship
+		pb.createPB(&t.battery, p2{ 1350,700 }, "Battery");
 		plotSail.createPlot(&t.sailAngle, &t.tm.currentTime, { 1350,50 }, "sailAngle");
-		plotRudder.createPlot(&t.rudderAngle,&t.tm.currentTime, { 1350,350 }, "rudderAngle");
-
-		test.createAtlas(50);
-		
+		plotRudder.createPlot(&t.rudderAngle, &t.tm.currentTime, { 1350,350 }, "rudderAngle");
 
 		sun.updateLightLocation(shader3D);
+
+		//Route
 	}
 
 
 	void draw()
 	{
-		axis.draw(shader3D);
-		
+		plotSail.update();
+		plotRudder.update();
 
-		lourdesModel.draw(shader3D, t);
-		water.draw(shader3D);
-		sun.draw(shader3D);
 
-		shaderText.bind();
-		transparent();
-		TextEntry algo({ 100,500 }, "qweorñinqrgxvzbmADSGBCVBXGFJ");
-		test.addDynamicText({ algo });
-		//test.draw();
 
-		overlay.draw(shader2D);
-		plotSail.draw(shader2D, shader2DInstanced, shaderText);
-		plotRudder.draw(shader2D, shader2DInstanced, shaderText);
-		pb.draw(shader2D,shaderText);
+		if (programState == ship)
+		{
+			axis.draw(shader3D);
+			lourdesModel.draw(shader3D);
+			water.draw(shader3D, shaderText3D);
+			sun.draw(shader3D);
 
-		buttons.draw(shader2D,shaderText);
 
-		centerCross.draw(shader2D);
+
+			overlay.draw(shader2D);
+			plotSail.draw(shader2D, shader2DInstanced, shaderText);
+			plotRudder.draw(shader2D, shader2DInstanced, shaderText);
+			pb.draw(shader2D, shaderText);
+			centerCross.draw(shader2D);
+		}
+		else if (programState == route)
+		{
+			world.draw(shader2D);
+			dataRoute.draw(world, shader2D, shaderText);
+			icon.draw(world, t, shader2D);
+		}
+		fpsCounter.draw(shaderText);
+
+		buttons.draw(shader2D, shaderText);
+
+
 	}
 };

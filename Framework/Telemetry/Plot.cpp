@@ -213,7 +213,6 @@ void PlotTime::setIndicesPool()
 
 void PlotTime::draw(Shader& shader2D, Shader& shader2DInstanced, Shader& shaderText)
 {
-	update();
 
 	//Frame
 	transparent();

@@ -1,26 +1,19 @@
 #pragma once
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
+//Automatically includes Text.hpp, access to freetype
 
 
-
-//to do
-//There's mo kerning, that what improves spacing between glyphs for specific pairs, like AA vs AV
-// texto en dpis, reserves
-// Separación de atlas y addText en dos diferentes struct. Que solo haya un objeto en UI que alimente toda instancia de texto
-// Un solo atlas con distintos tamaños de font
-// Que tu des un tamaño de texto y el struct te elija automáticamente la font
-//Al parecer si haces las texturas más grandes tendrás más resolución al final, pero la textura consumirá más memoria
-
-//An entry with a position and an undertermined amount of text arguments that gets added in addText
-struct TextEntry
+//Only difference with Text3DEntry is that it uses p3 instead of p2
+struct Text3DEntry
 {
-	p2 pos;
+	p3 pos;
+	p3 right; //reading direction of the words
+	p3 up; //up direction of the words
 	string text;
 
 	template <typename... Args>
-	TextEntry(p2 pos_, Args&&... body) : pos(pos_)
+	Text3DEntry(p3 pos_, p3 right_, p3 up_, Args&&... body)
+		: pos(pos_), right(normalize3(right_)), up(normalize3(up_))
 	{
 		std::ostringstream oss;
 		(oss << ... << body);
@@ -28,19 +21,21 @@ struct TextEntry
 	}
 };
 
-//2 different parts, Atlas creation and addTexts.
-//Size of text is set in pixels to maintain proportions between devices
-struct Text
+
+//To create Text in the 3D world
+struct Text3D
 {
 
 	unsigned int vertexArray, vertexBuffer, indexBuffer;
 	unsigned int textureAtlasTexture; //OpenGL texture object
 
 
-	vector<float> positions; //Contains positions and texture coordinates
+	vector<float> positions; // x, y, z, s, t; Contains positions and texture coordinates
 	vector<unsigned int> indices;
 
-	vector<p2> textPosition;
+	vector<p3> textPosition;
+	vector<p3> textRight;
+	vector<p3> textUp;
 	vector<string> textToDraw;
 
 	int indexOffset = 0; //to separate different textToDraws
@@ -66,7 +61,7 @@ struct Text
 
 
 
-	Text()
+	Text3D()
 	{
 		genBuffers();
 	}
@@ -78,13 +73,13 @@ struct Text
 	//--- --- ---
 
 	//Encapsulates initializeFreeType and createAtlasTexture. Handles the needed Freetype objects
-	void createAtlas(int fontPixelSize, string glyphPath = "resources/Glyphs/Helvetica/Helvetica.otf");
+	void createAtlas(float fontSize, string glyphPath = "resources/Glyphs/Helvetica/Helvetica.otf");
 
 	//initializes the library, the font size and gets a vector of the all characters that the font provides
-	void initializeFreeType(FT_Library& ft, FT_Face& face, string& allCharacters, const std::string& fontPath, const int fontPixelSize);
+	void initializeFreeType(FT_Library& ft, FT_Face& face, string& allCharacters, const std::string& fontPath, const int fontSize);
 
 	//main function that includes the initialization of the texture and the call of storeGlyph to end with the final Atlas
-	void createAtlasTexture(FT_Face& face, string& allCharacters);
+	void createAtlasTexture(FT_Face& face, string& allCharacters, float glyphScale);
 
 	//similar to genBuffers but with the atlas texture, but it needs to know how to big the texture is, so it's called in createAtlasTexture
 	void genAtlasTexture(const float atlasWidth, const float atlasHeight);
@@ -106,48 +101,29 @@ struct Text
 
 	////Currently if you use substituteText in a while loop it will be equivalent to using addDynamicText, that can't be right
 
-	//meant to be the initial push for static text. It wont delete previous entries. Accepts vector a single TextEntry format
+	//meant to be the initial push for static text. It wont delete previous entries. Accepts vector a single Text3DEntry format
 	//line must go inside {} in the call, in the vector call and Dynamic the format is: {{},{}};
-	void addText(vector<TextEntry> line);
-	void addText(TextEntry line);
-	void addCenteredText(TextEntry line);
+	void addText(vector<Text3DEntry> line);
+	void addText(Text3DEntry line);
+
+	//the bottom center of the string will be centered (without left bearing of the first glyph)
+	void addCenteredText(Text3DEntry line);
 
 	//meant to substitute a single entry
-	void substituteText(unsigned int i, TextEntry line);
+	void substituteText(unsigned int i, Text3DEntry line);
 
 	//fancy function to use when you don't want to change the corner position. Here you call it with (index, oss) instead of (index,{p2,oss})
 	template <typename... Args>
 	void substituteText(unsigned int i, Args&&... body);
 
-	void addDynamicText(vector<TextEntry> line);
+	void addDynamicText(vector<Text3DEntry> line);
 
+	//2 triangles per each quad in the order {0,1,2 , 0,2,3}
 	void createIndices(size_t i);
 
 	void draw();
 
-	~Text();
+	void clear();
+
+	~Text3D();
 };
-
-/* Usage example
-text.createAtlas("resources/Glyphs/Helvetica/Helvetica.otf", 16);
-
-TextEntry textEntry({ 50,100}, "algo");
-text.addDynamicText({ textEntry });
-text.draw();
-*/
-
-
-
-//--- --- ---
-// String format functions
-//--- --- ---
-
-template<typename T>
-inline T round2d(T number) {
-	return round(number * 100.0) / 100.0;
-}
-
-template<typename T>
-inline T round1d(T number) {
-	return round(number * 10.0) / 10.0;
-}

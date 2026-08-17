@@ -15,9 +15,11 @@ struct TimeStruct
 	float currentTime = 0.0f;
 	float  deltaTime = 0.0f;
 
-	float fps = 0.0f;
+	//these 2 variables calculate the fps counter over a small period of time
+	//they get reset over that small period of time. The fps variable is on FpsCounter.hpp
+	float fpsTimeAccumulator = 0.0f;
 	float frameCount = 0.0f;
-	float timeAccumulator = 0.0f;
+
 
 	//Transmitter
 	const float transmitterUpdateInterval = 0.5f; //Doing a transmitter.update after this interval
@@ -44,17 +46,11 @@ struct TimeStruct
 		updateTransmitter();
 	}
 
+	//updates the 2 variables that change over time
 	void updateFPS()
 	{
+		fpsTimeAccumulator += deltaTime;
 		frameCount++;
-		timeAccumulator += deltaTime;
-
-		if (timeAccumulator >= 0.5f)
-		{
-			fps = frameCount / timeAccumulator;
-			frameCount = 0;
-			timeAccumulator -= 0.5f;
-		}
 	}
 
 	void updateTransmitter()

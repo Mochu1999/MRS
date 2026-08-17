@@ -5,14 +5,16 @@
 
 #include <cmath>
 #include <unistd.h>
+#include <iostream>
+#include <algorithm>
 
 struct Control
 {
     Parameters& p;
 
     //ids of the GPIOs
-    int sailStepPin = 23;
-    int sailDirectionPin = 24;
+    int sailStepPin = 24;
+    int sailDirectionPin = 23;
 
     GPIO gpio;
 
@@ -28,66 +30,139 @@ struct Control
         , gpio({sailStepPin, sailDirectionPin})
     {
         sailAnglePerPulse = 360.0f / (motorStepsPerRevolution * microsteps * gearRatio);
-
-        gpio.write(sailStepPin, 0);
-
     }
 
+        
+    //void update()
+    //{
+    //    //updateSail();
+    //    //updateRudder();
+
+    //    gpio.write(sailStepPin, true);
+    //    int pulse = 1500;
+    //    usleep(pulse);
+
+
+    //    gpio.write(sailStepPin, 0);
+    //    usleep(20000-pulse);
+
+    //}
+    
+    //void update()
+    //{
+    //    //updateSail();
+    //    //updateRudder();
+    //    int diff = 0;
+    //    gpio.write(sailStepPin, true);
+    //    int pulse = 1500+diff;
+
+    //    usleep(pulse);
+
+
+    //    gpio.write(sailStepPin, 0);
+    //    usleep(20000-pulse);
+
+    //    diff++;
+
+    //}
+
+    //void update()
+    //{
+    //    //updateSail();
+    //    //updateRudder();
+    //    int pulse = 100000;
+    //    gpio.write(sailStepPin, 1);
+
+    //    usleep(pulse);
+
+
+    //    gpio.write(sailStepPin, 0);
+    //    usleep(pulse);
+
+
+    //}
+    
     void update()
     {
-        //updateSail();
-        //updateRudder();
+        static int pulse = 1000;   // us
+        static int dir = 1;
 
         gpio.write(sailStepPin, true);
-        usleep(100000);
+        usleep(pulse);
 
+        gpio.write(sailStepPin, false);
+        usleep(20000 - pulse);
 
-        gpio.write(sailStepPin, 0);
-        usleep(100000);
+        pulse += dir * 10;
 
-    }
-
-    void updateSail()
-    {
-        float difference = p.sailAngle - p.currentSailAngle;
-
-        /*if (abs(difference) < sailAnglePerPulse)
-            return;*/
-        
-        bool direction = (difference > 0.0f) ? 1 : 0;//1 CCW, 0 CW
-            
-        sendPulse(sailDirectionPin,sailStepPin,direction);
-
-        p.currentSailAngle += (direction * sailAnglePerPulse);
-    }
-
-    void sendPulse(int gpioDirectionPin, int gpioStepPin, int direction)
-    {
-        //Setting direction
-        //gpioWrite(sailDirectionPin, direction);
-
-        // STEP pulse
-        gpio.write(sailStepPin, true);
-        std::cout << "Light up\n";
-
-        usleep(1000000); //creating the pulse by waiting //ASSUMPTION
-
-        gpio.write(sailStepPin, 0);
-        std::cout << "Light down\n";
+        if (pulse >= 2000) {
+            pulse = 2000;
+            dir = -1;
+        }
+        else if (pulse <= 1000) {
+            pulse = 1000;
+            dir = 1;
+        }
+        std::cout << "pulso es: " << pulse << " ms\n";
 
     }
+
+    // For a servo HS-5646WP, -60º=900us, 0º=1500us, 60º=2100us
+    //Receives angle in degrees, returns a pulse in us
+    //int setAngleToPulse(float angle)
+    //{
+    //    
+    //    if (angle < -60) angle = -60;
+    //    if (angle > 60) angle = 60;
+
+    //    return static_cast<int>(1500.0f + angle * 10.0f);
+    //}
 
     //void updateRudder()
     //{
-    //    float difference = p.sailAngle - p.currentRudderAngle;
+    //    if (p.rudderCounter > 0)
+    //    {
+    //        p.rudderCounter--;
+    //        int pulse = setAngleToPulse(p.rudderAngle);
 
-    //    if (abs(difference) < rudderAnglePerPulse)
-    //        return;
+    //        gpio.write(sailStepPin, true);
+    //        usleep(pulse);
 
-    //    bool direction = (difference > 0.0f) ? 1 : 0;//1 CCW, 0 CW
+    //        gpio.write(sailStepPin, false);
+    //        usleep(20000-pulse);
 
-    //    //sendPulse(rudderDirectionPin, rudderStepPin, direction);
-
-    //    p.currentRudderAngle += (direction * rudderAnglePerPulse);
+    //        std::cout << "Moviendose a: " << p.rudderAngle << "º, pulso es: " << pulse << " ms\n";
+    //    }
     //}
+
+    //void updateSail()
+    //{
+    //    float difference = p.sailAngle - p.currentSailAngle;
+
+    //    /*if (abs(difference) < sailAnglePerPulse)
+    //        return;*/
+    //    
+    //    bool direction = (difference > 0.0f) ? 1 : 0;//1 CCW, 0 CW
+    //        
+    //    sendPulse(sailDirectionPin,sailStepPin,direction);
+
+    //    p.currentSailAngle += (direction * sailAnglePerPulse);
+    //}
+
+    //void sendPulse(int gpioDirectionPin, int gpioStepPin, int direction)
+    //{
+    //    //Setting direction
+    //    //gpioWrite(sailDirectionPin, direction);
+
+    //    // STEP pulse
+    //    gpio.write(sailStepPin, true);
+    //    std::cout << "Light up\n";
+
+    //    usleep(1000000); //creating the pulse by waiting //ASSUMPTION
+
+    //    gpio.write(sailStepPin, 0);
+    //    std::cout << "Light down\n";
+
+    //}
+
 };

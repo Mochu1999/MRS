@@ -95,7 +95,15 @@ void rotate3D(std::vector<p3>& vertices, float angleX, float angleY, float angle
 
 
 
+void rotateNormalizedP2(p2& v, float angleDegrees)
+{
+	float a = radians(angleDegrees);
 
+	float c = std::cos(a);
+	float s = std::sin(a);
+
+	v = normalize2(p2{ v.x * c - v.y * s, v.x * s + v.y * c });
+}
 
 float isRightOfLine(p2& A, p2& B, p2& P) {		 //is P to the right of AB?
 	p2 AB = { B.x - A.x,  B.y - A.y };

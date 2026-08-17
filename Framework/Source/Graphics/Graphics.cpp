@@ -1,7 +1,7 @@
 #include "Common.hpp"
 #include "Graphics.hpp"
 
-void initializeCameraLocations(Shader& shader3D, Shader& shader2D, Shader& shader2D_Instanced, Shader& shaderText, Camera& camera)
+void initializeCameraLocations(Shader& shader3D, Shader& shader2D, Shader& shader2D_Instanced, Shader& shaderText, Shader& shaderText3D, Camera& camera)
 {
 	//3D
 	shader3D.bind();
@@ -26,12 +26,23 @@ void initializeCameraLocations(Shader& shader3D, Shader& shader2D, Shader& shade
 	shaderText.bind();
 	shaderText.setUniform("u_OrthoProjection", camera.orthoMatrix);
 	shaderText.setUniform("u_Color", 1.0f, 1.0f, 1.0f);
+
+	//Text3D
+	shaderText3D.bind();
+	shaderText3D.setUniform("u_Perspective", camera.perspectiveMatrix);
+	shaderText3D.setUniform("u_Model", identityMatrix);
+	shaderText3D.setUniform("u_Color", 1.0f, 1.0f, 1.0f);
+	shaderText3D.setUniform("u_fragmentMode", flatColor);
+
 }
 
-void updateCameraLocations(Shader& shader3D, Camera& camera)
+void updateCameraLocations(Shader& shader3D, Shader& shaderText3D, Camera& camera)
 {
 	shader3D.bind();
 	shader3D.setUniform("u_View", camera.viewMatrix);
+
+	shaderText3D.bind();
+	shaderText3D.setUniform("u_View", camera.viewMatrix);
 }
 
 

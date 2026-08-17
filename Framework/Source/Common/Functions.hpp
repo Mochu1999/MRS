@@ -96,7 +96,10 @@ void print_(const string& name, const vector<T>& items) {
 //	std::cout << ss.str() << "\n\n";
 //}
 
+
+//--- --- ---
 //matrix4x4
+//--- --- ---
 void print_(const std::string& name, const std::array<float, 16>& matrix);
 
 #define print(var) print_(#var, var)
@@ -115,14 +118,13 @@ std::array<float, 4> inverseQuaternion(const std::array<float, 4>& q);
 
 std::array<float, 4> multiplyQuaternions(const std::array<float, 4>& a, const std::array<float, 4>& b);
 
-// q * p * q^-1
-void rotatePoint(p3& point, const float& angle, const p3& axis);
+void normalizeQuaternion(std::array<float, 4>& q);
 
+//The high level functions you normally use
+void rotatePoint(p3& point, const float& angle, const p3& axis);
 void rotate3D(std::vector<p3>& vertices, const p3& centroid, float angleX, float angleY, float angleZ);
 void rotate3D(std::vector<p3>& vertices, float angleX, float angleY, float angleZ);
 
-// Normalizes the quaternion [w, x, y, z] in-place
-void normalizeQuaternion(std::array<float, 4>& q);
 
 
 
@@ -130,6 +132,8 @@ void normalizeQuaternion(std::array<float, 4>& q);
 //--- --- ---
 //
 //--- --- ---
+
+void rotateNormalizedP2(p2& v, float angleDegrees);
 
 float isRightOfLine(p2& A, p2& B, p2& P);
 

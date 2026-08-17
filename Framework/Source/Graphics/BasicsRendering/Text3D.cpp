@@ -1,7 +1,7 @@
 #include "Graphics.hpp"
 
 
-void Text::genBuffers() 
+void Text3D::genBuffers()
 {
 	glBindVertexArray(0);
 	glGenVertexArrays(1, &vertexArray);
@@ -13,17 +13,20 @@ void Text::genBuffers()
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
 	//The are 2 attributes in the vertex bufex: positions and texture coordinates
-	//offset is the last element: 2 floats; stride is the next to last element: 4 floats
+	//offset is 3 because texture comes after 3 floats; stride is the next to last element: 5 floats
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))); //still has 2 components, starts after the third
 
 	glBindVertexArray(0);
 }
 
-void Text::createAtlas(int fontPixelSize, string glyphPath)
+void Text3D::createAtlas(float fontSize, string glyphPath)
 {
+	int rasterSize = 256;
+	float glyphScale = fontSize / static_cast<float>(rasterSize);
+
 	//Freetype objects are discarded after creating the atlas
 	//ft is the FreeType context, the internal state the library needs to operate. Needed to create our use FT_Face
 	FT_Library ft;
@@ -35,24 +38,24 @@ void Text::createAtlas(int fontPixelSize, string glyphPath)
 	string allCharacters;
 
 
-	initializeFreeType(ft, face, allCharacters, glyphPath, fontPixelSize);
-	createAtlasTexture(face, allCharacters);
+	initializeFreeType(ft, face, allCharacters, glyphPath, rasterSize);
+	createAtlasTexture(face, allCharacters, glyphScale);
 
 	// Cleanup FreeType resources //I'm not sure they aren't deleted out of scope
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
 }
 
-void Text::initializeFreeType(FT_Library& ft, FT_Face& face, string& allCharacters, const std::string& fontPath, const int fontPixelSize)
+void Text3D::initializeFreeType(FT_Library& ft, FT_Face& face, string& allCharacters, const std::string& fontPath, int rasterSize)
 {
 	//initializes the FreeType library and links the created library context into ft
-	FT_Init_FreeType(&ft); 
+	FT_Init_FreeType(&ft);
 
 	FT_New_Face(ft, fontPath.c_str(), 0, &face);
 	//The 0 is there if the .ttf or .otf contain a typeface family, and the index let's you choose a single font face
 
 	// Set font size in pixels //Direct alternative to dpis
-	FT_Set_Pixel_Sizes(face, 0, fontPixelSize);
+	FT_Set_Pixel_Sizes(face, 0, rasterSize);
 
 
 	//Unicode is the standard that assigns a number to every character. It's fixed: A=65, ñ=241...
@@ -60,7 +63,7 @@ void Text::initializeFreeType(FT_Library& ft, FT_Face& face, string& allCharacte
 	// Both variables start unitialized, and FT_Get_First_Char looks for the lowest unicode, normally the first index
 	//Then from it, FT_Get_Next_Char will look for the next unicode inmediatly bigger than it, which is normally the next index
 	//it doesn't have to be, sometimes the next unicodeValue will be in a previous index
-	FT_ULong unicodeValue; 
+	FT_ULong unicodeValue;
 	FT_UInt glyphIndex;
 
 
@@ -81,8 +84,9 @@ void Text::initializeFreeType(FT_Library& ft, FT_Face& face, string& allCharacte
 }
 
 
-void Text::createAtlasTexture(FT_Face& face, string& allCharacters)
+void Text3D::createAtlasTexture(FT_Face& face, string& allCharacters, float glyphScale)
 {
+	constexpr int atlasPadding = 2; //transparent pixels around each glyph to avoid texture bleeding
 	float atlasWidth = 0, atlasHeight = 0;
 
 	for (char& c : allCharacters)
@@ -104,12 +108,18 @@ void Text::createAtlasTexture(FT_Face& face, string& allCharacters)
 		float advance = glyph->advance.x >> 6;
 
 
-		glyphMetricsMap.emplace(c, GlyphMetrics{ width, height, bearingX, bearingY, advance });
+		//glyphMetricsMap.emplace(c, GlyphMetrics{ width, height, bearingX, bearingY, advance });
 
-		atlasWidth += width;
+		//atlasWidth += width;
 
-		if (glyphMetricsMap[c].height > atlasHeight)
-			atlasHeight = glyphMetricsMap[c].height; //highest glyph determines final atlasHeight
+		//if (glyphMetricsMap[c].height > atlasHeight)
+		//	atlasHeight = glyphMetricsMap[c].height; //highest glyph determines final atlasHeight
+		glyphMetricsMap.emplace(c, GlyphMetrics{ width * glyphScale, height * glyphScale, bearingX * glyphScale, bearingY * glyphScale, advance * glyphScale });
+
+		atlasWidth += width + 2 * atlasPadding;
+
+		if (height + 2 * atlasPadding > atlasHeight)
+			atlasHeight = height + 2 * atlasPadding;
 	}
 
 	genAtlasTexture(atlasWidth, atlasHeight);
@@ -134,11 +144,14 @@ void Text::createAtlasTexture(FT_Face& face, string& allCharacters)
 		//cout << "currentWidth: " << currentWidth << endl;
 
 		FT_Bitmap& bitmap = face->glyph->bitmap; //A bitmap is the FreeType structure that contains the data of a glyph
+		int glyphX = static_cast<int>(currentWidth) + atlasPadding;
+		int glyphY = atlasPadding;
+
 		glTexSubImage2D(
 			GL_TEXTURE_2D,
 			0, //level of detail, setted on base detail
-			currentWidth, //X offset in the texture where the subimage will be placed
-			0, //Y offset in the texture
+			glyphX, //X offset in the texture where the subimage will be placed
+			glyphY, //Y offset in the texture
 			bitmap.width, // width of the subimage (glyph)
 			bitmap.rows, //  height of the subimage
 			GL_RED,
@@ -148,12 +161,17 @@ void Text::createAtlasTexture(FT_Face& face, string& allCharacters)
 
 
 		//height is the total height, width is the total width of the glyph, advance is the width plus the space till next glyph
-		glyphMetricsMap[c].texCoordX0 = currentWidth / atlasWidth;
-		glyphMetricsMap[c].texCoordX1 = (currentWidth + glyphMetricsMap[c].width) / atlasWidth;
+		glyphMetricsMap[c].texCoordX0 = glyphX / atlasWidth;
+		/*glyphMetricsMap[c].texCoordX1 = (currentWidth + glyphMetricsMap[c].width) / atlasWidth;
 		glyphMetricsMap[c].texCoordY0 = 0;
 		glyphMetricsMap[c].texCoordY1 = glyphMetricsMap[c].height / atlasHeight;
 
-		currentWidth += glyphMetricsMap[c].width;
+		currentWidth += glyphMetricsMap[c].width;*/
+		glyphMetricsMap[c].texCoordX1 = (glyphX + bitmap.width) / atlasWidth;
+		glyphMetricsMap[c].texCoordY0 = glyphY / atlasHeight;
+		glyphMetricsMap[c].texCoordY1 = (glyphY + bitmap.rows) / atlasHeight;
+
+		currentWidth += bitmap.width + 2 * atlasPadding;
 	}
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4); //Returning to default for next operations
 
@@ -179,10 +197,14 @@ void Text::createAtlasTexture(FT_Face& face, string& allCharacters)
 }
 
 
-void Text::genAtlasTexture(const float atlasWidth, const float atlasHeight) 
+void Text3D::genAtlasTexture(const float atlasWidth, const float atlasHeight)
 {
 	glGenTextures(1, &textureAtlasTexture);
 	glBindTexture(GL_TEXTURE_2D, textureAtlasTexture);
+
+	//The atlas must start transparent. Otherwise the padding pixels contain undefined data.
+	std::vector<unsigned char> emptyAtlas(
+		static_cast<size_t>(atlasWidth) * static_cast<size_t>(atlasHeight), 0);
 
 	glTexImage2D(
 		GL_TEXTURE_2D,
@@ -193,17 +215,17 @@ void Text::genAtlasTexture(const float atlasWidth, const float atlasHeight)
 		0, //border of the texture, must be 0
 		GL_RED,
 		GL_UNSIGNED_BYTE,
-		nullptr);
+		emptyAtlas.data());
 
-	
+
 
 	//clamps texture outside 0,1 range? Don't think I need it 
 		//Revision, after months a bug that shows lines outlines have appeared and the clamp is needed 2025
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //linearly interpolates the pixel, smoother, but somewhat blurry 
+	/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);*/ //linearly interpolates the pixel, smoother, but somewhat blurry 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //choose the nearest pixel: pixelated, but sharp 
 
@@ -218,7 +240,7 @@ void Text::genAtlasTexture(const float atlasWidth, const float atlasHeight)
 
 
 //fills the vertex buffer with the final quad positions and the atlas coordinates of the glyph
-void Text::fillVertexBuffer() {
+void Text3D::fillVertexBuffer() {
 	positions.clear();
 	indices.clear();
 	indexOffset = 0;
@@ -226,20 +248,29 @@ void Text::fillVertexBuffer() {
 
 	for (size_t i = 0; i < textToDraw.size(); i++)
 	{
-		//bottom left coordinates of the string to render
-		int x = textPosition[i].x;
-		int y = textPosition[i].y;
+		//bottom coordinates of the string to render
+		p3 origin = textPosition[i];
+		p3 right = textRight[i];
+		p3 up = textUp[i];
+
+		//variable that represents the current right offset
+		float x = 0.0f;
 
 		for (size_t j = 0; j < textToDraw[i].size(); ++j) {
 
 			char c = textToDraw[i][j];
 			GlyphMetrics metrics = glyphMetricsMap[c];
 
-			//logic is sound
+
 			float x0 = x + metrics.bearingX;
-			float y0 = y - metrics.height + metrics.bearingY;
+			float y0 = -metrics.height + metrics.bearingY;
 			float x1 = x0 + metrics.width;
 			float y1 = y0 + metrics.height;
+
+			p3 v0 = origin + right * x0 + up * y0;
+			p3 v1 = origin + right * x1 + up * y0;
+			p3 v2 = origin + right * x1 + up * y1;
+			p3 v3 = origin + right * x0 + up * y1;
 
 
 			float s0 = metrics.texCoordX0;
@@ -247,12 +278,13 @@ void Text::fillVertexBuffer() {
 			float s1 = metrics.texCoordX1;
 			float t1 = metrics.texCoordY1;
 
-
-			positions.insert(positions.end(), //positions and texture coordinates interleaved
-				{ x0, y0, s0, t1,
-				x1, y0, s1, t1,
-				x1, y1, s1, t0,
-				x0, y1, s0, t0
+			//positions and texture coordinates interleaved
+			positions.insert(positions.end(),
+				{
+					v0.x, v0.y, v0.z, s0, t1,
+					v1.x, v1.y, v1.z, s1, t1,
+					v2.x, v2.y, v2.z, s1, t0,
+					v3.x, v3.y, v3.z, s0, t0
 				});
 
 
@@ -260,35 +292,47 @@ void Text::fillVertexBuffer() {
 
 			createIndices(j);
 		}
-		indexOffset = indices.back() + 1;
+		if (!indices.empty())
+			indexOffset = indices.back() + 1;
 	}
 }
 
-void Text::addText(vector<TextEntry> line)
+void Text3D::addText(vector<Text3DEntry> line)
 {
+	if (line.size() == 0)
+		return;
+
 	for (auto& l : line)
 	{
 		textPosition.push_back(l.pos);
+		textRight.push_back(l.right);
+		textUp.push_back(l.up);
 		textToDraw.push_back(l.text);
 	}
 
 	fillVertexBuffer();
+
 	isBufferUpdated = true;
 }
 //line must go inside {} in the call, in the vector call and Dynamic the format is: {{},{}};
-void Text::addText(TextEntry line)
+void Text3D::addText(Text3DEntry line)
 {
+	if (line.text.empty())
+		return;
 
 	textPosition.push_back(line.pos);
+	textRight.push_back(line.right);
+	textUp.push_back(line.up);
 	textToDraw.push_back(line.text);
 
 
 	fillVertexBuffer();
+
 	isBufferUpdated = true;
 
 }
 
-void Text::addCenteredText(TextEntry line)
+void Text3D::addCenteredText(Text3DEntry line)
 {
 	if (line.text.empty())
 		return;
@@ -320,15 +364,17 @@ void Text::addCenteredText(TextEntry line)
 	float center = (left + right) / 2.0f;
 
 	//corrected TextEntry position
-	line.pos.x -= center;
+	line.pos -= line.right * center;
 
 	addText(line);
 }
 
-void Text::substituteText(unsigned int i, TextEntry line)
+void Text3D::substituteText(unsigned int i, Text3DEntry line)
 {
 
 	textPosition[i] = line.pos;
+	textRight[i] = line.right;
+	textUp[i] = line.up;
 	textToDraw[i] = line.text;
 
 
@@ -336,14 +382,16 @@ void Text::substituteText(unsigned int i, TextEntry line)
 	isBufferUpdated = true;
 }
 
-void Text::addDynamicText(vector<TextEntry> line)
+void Text3D::addDynamicText(vector<Text3DEntry> line)
 {
-	textPosition.clear();
-	textToDraw.clear();
+	clear();
 
 	for (auto& l : line)
 	{
 		textPosition.push_back(l.pos);
+		textRight.push_back(l.right);
+		textUp.push_back(l.up);
+
 		if (!l.text.empty())
 			textToDraw.push_back(l.text);
 		else
@@ -355,14 +403,13 @@ void Text::addDynamicText(vector<TextEntry> line)
 
 }
 
-//2 triangles per each quad in the order {0,1,2 , 0,2,3}
-void Text::createIndices(size_t i) {
+void Text3D::createIndices(size_t i) {
 	unsigned int aux = i * 4;
 	indices.insert(indices.end(), { indexOffset + aux,indexOffset + aux + 1,indexOffset + aux + 2,indexOffset + aux,indexOffset + aux + 2,indexOffset + aux + 3 });
 }
 
 template <typename... Args>
-void Text::substituteText(unsigned int i, Args&&... body)
+void Text3D::substituteText(unsigned int i, Args&&... body)
 {
 	std::ostringstream oss;
 	(oss << ... << body);
@@ -374,7 +421,7 @@ void Text::substituteText(unsigned int i, Args&&... body)
 
 }
 
-void Text::draw()
+void Text3D::draw()
 {
 	glBindVertexArray(vertexArray);
 
@@ -395,15 +442,26 @@ void Text::draw()
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
+void Text3D::clear()
+{
+	textPosition.clear();
+	textRight.clear();
+	textUp.clear();
+	textToDraw.clear();
 
-Text::~Text() {
+	positions.clear();
+	indices.clear();
+	indexOffset = 0;
+	isBufferUpdated = true;
+}
+
+Text3D::~Text3D()
+{
+	clear();
+
 	// Clean up the resources
 	glDeleteTextures(1, &textureAtlasTexture);
 	glDeleteBuffers(1, &vertexBuffer);
 	glDeleteBuffers(1, &indexBuffer); // Ensure you've created and stored the indexBuffer handle
 	glDeleteVertexArrays(1, &vertexArray);
-
-	
-	
-	
 }

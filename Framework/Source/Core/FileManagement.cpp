@@ -1,6 +1,7 @@
 #include "Common.hpp"
 #include "FilesManagement.hpp"
 
+//Used in Polyhedra.addPolyhedra
 void readSTL(const std::string& localPath
 	, std::vector<p3>& positions, std::vector<p3>& normals, std::vector<unsigned int>& indices)
 {
@@ -50,6 +51,8 @@ void readSTL(const std::string& localPath
 	inFile.close();
 }
 
+//Simple polyhedra stores all positions, normals and indices efficiently
+//Meant to be used with Polyhedra.addPolyhedra
 void readSimplePolyhedra(const std::string& localPath
 	, std::vector<p3>& positions, std::vector<p3>& normals, std::vector<unsigned int>& indices)
 {

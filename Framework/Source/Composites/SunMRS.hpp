@@ -15,6 +15,7 @@ struct SunMRS
 
 	void draw(Shader& shader3D)
 	{
+		shader3D.bind();
 		opaque();
 		shader3D.bind();
 		shader3D.setUniform("u_Model", identityMatrix);

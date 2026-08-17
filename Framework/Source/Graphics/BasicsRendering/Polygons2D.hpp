@@ -48,11 +48,11 @@ struct Polygons2D
 	//Heights must be different
 	void createRectangle(const p2 c1, const p2 c2);
 
-	void createCircle(const int r, const p2 center, int segments = 0);
+	void addCircle(const int r, const p2 center, int segments = 0);
 
-	//POLYGONS INTANCING
+	//POLYGONS INSTANCING
 	void createRectangle(vector<std::pair<p2, p2>> rectangles);
-	void createCircle(const int r, const vector<p2> centers, int segments = 0);
+	void addCircle(const int r, const vector<p2> centers, int segments = 0);
 
 	void draw();
 

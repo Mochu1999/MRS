@@ -8,6 +8,7 @@ struct InputGLFW
 	Camera* camera;
 	Telemetry* telemetry;
 	Buttons* buttons;
+	TelemetryUI* ui;
 
 	//speed and angles that change the camera angle on input
 	float translationSpeed = 0.05f, rotationSpeed = 0.002f;
@@ -27,8 +28,8 @@ struct InputGLFW
 	bool isDraggingWindow = false;
 
 
-	InputGLFW(GLFWwindow* window_, Camera* camera_, Telemetry* telemetry_, Buttons* buttons_)
-		:window(window_), camera(camera_), telemetry(telemetry_), buttons(buttons_)
+	InputGLFW(GLFWwindow* window_, Camera* camera_, Telemetry* telemetry_, TelemetryUI* ui_, Buttons* buttons_)
+		:window(window_), camera(camera_), telemetry(telemetry_), ui(ui_), buttons(buttons_)
 	{
 		glfwSetWindowUserPointer(window, this); //Stores a pointer to this specific InputGLFW instance inside the GLFWwindow
 
@@ -304,6 +305,14 @@ struct InputGLFW
 			{
 				glfwIconifyWindow(window);
 			}
+			else if (self->buttons->currentPressedID == Ship)
+			{
+				programState = ship;
+			}
+			else if (self->buttons->currentPressedID == RouteID)
+			{
+				programState = route;
+			}
 			self->isDraggingWindow = false;
 
 			self->buttons->currentPressedID = None;
@@ -338,18 +347,29 @@ struct InputGLFW
 	{
 		InputGLFW* self = static_cast<InputGLFW*>(glfwGetWindowUserPointer(window));
 		Camera* camera = self->camera;
+		TelemetryUI* ui = self->ui;
 
 		float scrollTranslationSpeedFactor = 5;
 
 		if (yoffset > 0)
 		{
-			camera->cameraPos = camera->cameraPos + camera->forward * self->translationSpeed * scrollTranslationSpeedFactor;
-
+			if (programState == ship)
+				camera->cameraPos = camera->cameraPos + camera->forward * self->translationSpeed * scrollTranslationSpeedFactor;
+			else if (programState == route)
+			{
+				ui->world.totalXpixels *= 1.1;
+				ui->world.updateCamera();
+			}
 		}
 		else if (yoffset < 0)
 		{
-			camera->cameraPos = camera->cameraPos - camera->forward * self->translationSpeed * scrollTranslationSpeedFactor;
-
+			if (programState == ship)
+				camera->cameraPos = camera->cameraPos - camera->forward * self->translationSpeed * scrollTranslationSpeedFactor;
+			else if (programState == route)
+			{
+				ui->world.totalXpixels /= 1.1;
+				ui->world.updateCamera();
+			}
 		}
 
 	}

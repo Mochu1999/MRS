@@ -144,9 +144,13 @@ matrix4x4 create3DModelMatrix(const float scale, const float angleDeg, p3 axis, 
 //first 3 elements of the diagonal. scale is a float, so same scale in the 3 dimensions
 void scale3DModelMatrix(matrix4x4& model3DMatrix, const float scale)
 {
-	model3DMatrix[0] *= scale;
-	model3DMatrix[5] *= scale;
-	model3DMatrix[10] *= scale;
+	matrix4x4 scaleMatrix = identityMatrix;
+
+	scaleMatrix[0] *= scale;
+	scaleMatrix[5] *= scale;
+	scaleMatrix[10] *= scale;
+
+	model3DMatrix = multiplyMatrices(model3DMatrix, scaleMatrix);
 }
 
 
@@ -192,14 +196,19 @@ void rotate3DModelMatrix(matrix4x4& model3DMatrix, const float angleDeg, p3 axis
 }
 
 //Fourth column
-void translate3DModelMatrix(matrix4x4& model3DMatrix, const p3 translation)
+// Translation must be multiplied so it composes correctly with other transformations
+void translate3DModelMatrix(matrix4x4& model3DMatrix, p3 t)
 {
-	model3DMatrix[12] += translation.x;
-	model3DMatrix[13] += translation.y;
-	model3DMatrix[14] += translation.z;
+	matrix4x4 translationMatrix = identityMatrix;
+
+	translationMatrix[12] = t.x;
+	translationMatrix[13] = t.y;
+	translationMatrix[14] = t.z;
+
+	model3DMatrix = multiplyMatrices(model3DMatrix, translationMatrix);
 }
 
-
+//THESE 2 FUNCTIONS SHOULD USE THE ONES FROM BELLOW
 matrix4x4 create2DModelMatrix(float scale, float angleDeg, const p2 translation)
 {
 	matrix4x4 modelMatrix = identityMatrix;
@@ -224,7 +233,6 @@ matrix4x4 create2DModelMatrix(float scale, float angleDeg, const p2 translation)
 
 	return modelMatrix;
 }
-
 matrix4x4 create2DModelMatrix(p2 scale, float angleDeg, const p2 translation)
 {
 	matrix4x4 modelMatrix = identityMatrix;
@@ -257,6 +265,7 @@ matrix4x4 create2DModelMatrix(p2 scale, float angleDeg, const p2 translation)
 void scale2DModelMatrix(matrix4x4& model2DMatrix, const float scale)
 {
 	matrix4x4 scaleMatrix = identityMatrix;
+
 	scaleMatrix[0] *= scale;
 	scaleMatrix[1] *= scale;
 
@@ -276,9 +285,24 @@ void scale2DModelMatrix(matrix4x4& model2DMatrix, const p2 scale)
 	scaleMatrix[5] *= scale.y;
 
 	model2DMatrix = multiplyMatrices(model2DMatrix, scaleMatrix);
-
 }
 
+//void rotate2DModelMatrix(matrix4x4& model2DMatrix, const float angleDeg)
+//{
+//	matrix4x4 rotationMatrix = identityMatrix;
+//
+//	float theta = radians(angleDeg);
+//	float c = std::cos(theta);
+//	float s = std::sin(theta);
+//
+//	rotationMatrix[0] *= c;
+//	rotationMatrix[1] *= s;
+//
+//	rotationMatrix[4] *= -s;
+//	rotationMatrix[5] *= c;
+//
+//	model2DMatrix = multiplyMatrices(model2DMatrix, rotationMatrix);
+//}
 void rotate2DModelMatrix(matrix4x4& model2DMatrix, const float angleDeg)
 {
 	matrix4x4 rotationMatrix = identityMatrix;
@@ -287,23 +311,24 @@ void rotate2DModelMatrix(matrix4x4& model2DMatrix, const float angleDeg)
 	float c = std::cos(theta);
 	float s = std::sin(theta);
 
-	rotationMatrix[0] *= c;
-	rotationMatrix[1] *= s;
+	rotationMatrix[0] = c;
+	rotationMatrix[1] = s;
 
-	rotationMatrix[4] *= -s;
-	rotationMatrix[5] *= c;
+	rotationMatrix[4] = -s;
+	rotationMatrix[5] = c;
 
 	model2DMatrix = multiplyMatrices(model2DMatrix, rotationMatrix);
 }
 
 void translate2DModelMatrix(matrix4x4& model2DMatrix, const p2 translation)
 {
-	model2DMatrix[12] += translation.x;
-	model2DMatrix[13] += translation.y;
+	matrix4x4 translationMatrix = identityMatrix;
+
+	translationMatrix[12] += translation.x;
+	translationMatrix[13] += translation.y;
+
+	model2DMatrix = multiplyMatrices(model2DMatrix, translationMatrix);
 }
-
-
-
 
 
 

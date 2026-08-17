@@ -83,13 +83,13 @@ void Polygons2D::createRectangle(vector<std::pair<p2, p2>> rectangles)
 	}
 }
 
-void Polygons2D::createCircle(const int r, const p2 center, int segments)
+void Polygons2D::addCircle(const int r, const p2 center, int segments)
 {
 	addSet(createCirclePositions(r, center, segments));
 
 }
 
-void Polygons2D::createCircle(const int r, const vector<p2> centers, int segments)
+void Polygons2D::addCircle(const int r, const vector<p2> centers, int segments)
 {
 	if (segments == 0)
 		segments = r * 3;

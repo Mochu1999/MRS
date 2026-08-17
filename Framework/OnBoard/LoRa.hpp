@@ -211,6 +211,7 @@ struct LoRa
 
         p.rudderAngle = receivedRudderAngle;
         p.sailAngle = receivedSailAngle;
+        p.rudderCounter = 10;
         //std::cout << "processed message: " << p.rudderAngle << ", " << p.sailAngle << std::endl;
     }
 };

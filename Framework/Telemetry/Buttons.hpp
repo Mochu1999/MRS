@@ -9,12 +9,13 @@ enum class ButtonID
 	None,
 	Close,
 	Minimize,
-	Drag
+	Drag,
+	Ship,
+	RouteID, //It already exists a struct called Route
 };
 using enum ButtonID;
 
 //stores a hitbox, a polygon and a ButtonID
-//ICONS
 struct Button
 {
 	ButtonID id = None;
@@ -36,15 +37,22 @@ struct Button
 
 
 
-//all Buttons in the program
+//all Buttons of the program
 struct Buttons
 {
+	float tbh; //Top bar height //needs to be defined before the buttons that use it
+
+
 	//all buttons
-	Button buttonClose;
-	Button buttonMinimize;
+	Button buttonClose, buttonMinimize;
+	Lines2D minimizeLines, closeLines;
 
 	Button buttonDrag;
 	Text windowName;
+
+	Button buttonShip, buttonCourse;
+	Text shipText, courseText;
+	Lines2D shipLine, courseLine;
 
 	//each loop it looks if we are over a button
 	ButtonID currentHoveredID = None;
@@ -52,11 +60,35 @@ struct Buttons
 
 
 	Buttons()
-		: buttonClose(Close, p2{ windowWidth - 20 * (float)sqrt2, windowHeight - 20 }, p2{ windowWidth, windowHeight })
-		, buttonMinimize(Minimize, p2{ windowWidth - 40 * (float)sqrt2, windowHeight - 20 }, p2{ windowWidth - 20 * (float)sqrt2, windowHeight })
-		, buttonDrag(Drag, p2{ 0, windowHeight - 20 }, p2{ windowWidth, windowHeight }) //can be full width because hitBox check goes after the other buttons
+		: tbh(20)
+		, buttonClose(Close, p2{ windowWidth - 20 * (float)sqrt2, windowHeight - tbh }, p2{ windowWidth, windowHeight })
+		, buttonMinimize(Minimize, p2{ windowWidth - 40 * (float)sqrt2, windowHeight - tbh }, p2{ windowWidth - 20 * (float)sqrt2, windowHeight })
+		, buttonDrag(Drag, p2{ 0, windowHeight - tbh }, p2{ windowWidth, windowHeight }) //can be full width because hitBox check goes after the other buttons
+		, buttonShip(Ship, p2{ 0,windowHeight - tbh - 30 }, p2{ 100, windowHeight - tbh })
+		, buttonCourse(RouteID, p2{ 100,windowHeight - tbh - 30 }, p2{ 200, windowHeight - tbh })
 	{
-		windowName.createAtlas(14);
+
+
+		windowName.createAtlas(17);
+		windowName.addCenteredText({ {windowWidth/2, windowHeight - 17}, "Telemetry Lourdes" });
+
+		shipText.createAtlas(15);
+		shipText.addCenteredText({ {50, windowHeight - tbh - 30 + 8}, "Ship" });
+
+		courseText.createAtlas(15);
+		courseText.addCenteredText({ {150, windowHeight - tbh - 30 + 8}, "Route" });
+
+		shipLine.addSet({ {0,windowHeight - tbh - 30},{100,windowHeight - tbh - 30} });
+		courseLine.addSet({ {100,windowHeight - tbh - 30},{200,windowHeight - tbh - 30} });
+
+		minimizeLines.addSet({ { windowWidth - 35 * (float)sqrt2, windowHeight - 10 }, { windowWidth - 25 * (float)sqrt2, windowHeight - 10 } });
+
+		int cld = 5; //close button lines distance+
+		p2 mp = { windowWidth - 10 * (float)sqrt2,windowHeight - 20 / 2 };//middle position of the close button
+		closeLines.addSet({ {mp.x - cld,mp.y - cld},{mp.x + cld,mp.y + cld} });
+		closeLines.addSet({ {mp.x - cld,mp.y + cld},{mp.x + cld,mp.y - cld} });
+
+
 	}
 
 	void update()
@@ -75,24 +107,40 @@ struct Buttons
 		shader2D.setUniform("u_Color", 0.35f, 0.35f, 0.35f, 1.0f);
 		buttonDrag.draw();
 		shaderText.bind();
-		windowName.addDynamicText({ { {10, windowHeight - 17}, "Telemetry Lourdes" } });
 		windowName.draw();
-		shader2D.bind();
 
+		shader2D.bind();
 		colorButton(buttonClose, shader2D);
 		colorButton(buttonMinimize, shader2D);
+		shader2D.setUniform("u_Color", 1, 1, 1, 1);
+		minimizeLines.draw();
+		closeLines.draw();
 
+
+		colorButton(buttonShip, shader2D);
+		colorButton(buttonCourse, shader2D);
+		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
+		if (programState == ship)
+			shipLine.draw();
+		else if (programState == route)
+			courseLine.draw();
+
+		shaderText.bind();
+		shipText.draw();
+		courseText.draw();
 	}
 
 
-	//to know where I am if mouse button get's pressed
+	//to know where I am if a mouse button get's pressed
 	ButtonID checkHitBoxes(const p2& m)
 	{
 		if (isInsideHitBox(buttonClose, m)) return buttonClose.id;
-		else if (isInsideHitBox(buttonMinimize, m)) return buttonMinimize.id;
-		else if (isInsideHitBox(buttonDrag, m)) return buttonDrag.id; //if drag is after close and minimize, they won't interact
+		if (isInsideHitBox(buttonMinimize, m)) return buttonMinimize.id;
+		if (isInsideHitBox(buttonDrag, m)) return buttonDrag.id;
+		if (isInsideHitBox(buttonShip, m)) return buttonShip.id;
+		if (isInsideHitBox(buttonCourse, m)) return buttonCourse.id;
 
-		else return None;
+		return None;
 	}
 
 	bool isInsideHitBox(const Button& b, const p2& m)
@@ -102,6 +150,7 @@ struct Buttons
 	}
 
 	//changes the color if we are hovering, pressing or none to a button
+	//In a hardcoced way, maybe it will be more customizable in the future 
 	void colorButton(Button& b, Shader& shader2D)
 	{
 		if (currentPressedID == b.id)
@@ -112,6 +161,9 @@ struct Buttons
 			shader2D.setUniform("u_Color", 0.121f, 0.121f, 0.121f, 1);
 
 		b.draw();
+
+		
+
 	}
 
 
