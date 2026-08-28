@@ -46,12 +46,12 @@ struct Polygons2D
 
 	//Specific for squares
 	//Heights must be different
-	void createRectangle(const p2 c1, const p2 c2);
+	void addRectangle(const p2 c1, const p2 c2);
 
 	void addCircle(const int r, const p2 center, int segments = 0);
 
 	//POLYGONS INSTANCING
-	void createRectangle(vector<std::pair<p2, p2>> rectangles);
+	void addRectangle(vector<std::pair<p2, p2>> rectangles);
 	void addCircle(const int r, const vector<p2> centers, int segments = 0);
 
 	void draw();
@@ -68,8 +68,8 @@ polygon.addSet({ {1000,500},{1100,500},{1100,600},{1050,700}, { 1000,600 },{1000
 polygon.addSet({ {1000,500},{1100,500},{1100,600},{1050,700}, { 1000,600 },{1000,500} }, { 0, 1, 2, 0, 2, 3, 0, 3, 4 });
 
 //rectangles
-polygon.createRectangle({ 1000,500 }, { 1100,600 });
-polygon.createRectangle({ 1300,500 }, { 1500,600 });
+polygon.addRectangle({ 1000,500 }, { 1100,600 });
+polygon.addRectangle({ 1300,500 }, { 1500,600 });
 
 shader2D.bind();
 shader2D.setUniform("u_Color", 1, 1, 1, 1);

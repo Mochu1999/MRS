@@ -3,16 +3,22 @@
 //Header containing the low level logic for the Graphics Engine
 
 
+#include "Common.hpp"
+
+
+
 //Access to OpenGL and GLFW
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
 
 //Logic that only involves OpengGL and GLFW
 #include "SimpleGraphics.hpp"
 
 
-//Up to this point involved logic make use Common
-#include "Common.hpp"
+
 
 //Foundational logic of the Graphics Engine
 //Both Camera and Shader are at the same level and do not depend of each other
@@ -20,9 +26,9 @@
 #include "Camera.hpp"
 
 //Initializes OpenGL locations of the Camera
-void initializeCameraLocations(Shader& shader3D, Shader& shader2D, Shader& shader2D_Instanced, Shader& shaderText, Shader& shaderText3D, Camera& camera);
+void initializeCameraLocations(Shader& shader3D, Shader& shader2D, Shader& shader2D_Instanced, Shader& shaderText, Shader& shaderText3D, Shader& shaderWater, Camera& camera);
 //updating view camera shader location
-void updateCameraLocations(Shader& shader3D, Shader& shaderText3D, Camera& camera);
+void updateCameraLocations(Shader& shader3D, Shader& shaderText3D, Shader& shaderWater, Camera& camera);
 
 
 //Basic Rendering

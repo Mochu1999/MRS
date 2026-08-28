@@ -26,9 +26,30 @@ inline float degrees(float input) {
 	return input * 180 * invPI;
 }
 
+inline float normalizeAngleDegrees(float angle)
+{
+	while (angle < 0)
+		angle += 360;
+	while (angle >= 360)
+		angle -= 360;
+
+	return angle;
+}
+
 inline std::string formatFloat(float value)
 {
 	std::ostringstream oss;
 	oss << std::fixed << std::setprecision(2) << value;
 	return oss.str();
+}
+
+
+inline float knToMs(float kn)
+{
+	return kn * 0.5144444;
+}
+
+inline float msToKn(float ms)
+{
+	return ms * 1.943844;
 }

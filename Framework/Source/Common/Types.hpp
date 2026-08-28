@@ -117,7 +117,7 @@ template<typename T>
 vec2<T> normalize2(const vec2<T>& v) {
 	T magnitudeSquared = v.x * v.x + v.y * v.y;
 	if (magnitudeSquared == 0.0f) {
-		return vec2<T>(0, 0); // Return a zero vector to avoid division by zero
+		return vec2<T>(0, 0); // Returns a zero vector to avoid division by zero
 	}
 	float magnitude_inv = fastInverseSqrt(magnitudeSquared);
 	return vec2<T>(v.x * magnitude_inv, v.y * magnitude_inv);

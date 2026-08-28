@@ -155,6 +155,10 @@ void Shader::setUniform(const std::string& name, const p3& vec) {
 void Shader::setUniform(const std::string& name, float x, float y, float z, float w) {
 	glUniform4f(getUniformLocation(name), x, y, z, w);
 }
+void Shader::setUniform(const std::string& name, p3 vec, float a)
+{
+	glUniform4f(getUniformLocation(name), vec.x, vec.y, vec.z, a);
+}
 //1i
 void Shader::setUniform(const std::string& name, int value) {
 	glUniform1i(getUniformLocation(name), value);

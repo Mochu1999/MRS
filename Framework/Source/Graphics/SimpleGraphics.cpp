@@ -45,6 +45,17 @@ void initializeGlew()
 	//glViewport(0, 0, windowWidth, windowHeight);
 }
 
+void loadIcon(GLFWwindow* window)
+{
+	HWND hwnd = glfwGetWin32Window(window);
+	HICON icon = (HICON)LoadImage(NULL, ".\\Resources\\IconMRS.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
+	if (icon)
+	{
+		SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
+		SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+	}
+}
+
 //specific version where you set the window's height and name
 GLFWwindow* initialize(float windowWidth_, float windowHeight_, const char* windowName)
 {
@@ -61,6 +72,8 @@ GLFWwindow* initialize(float windowWidth_, float windowHeight_, const char* wind
 	//fullscreen
 	//windowHeight-1 to access Window's bottom bar
 	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, windowName, NULL, NULL);
+
+	loadIcon(window);
 
 	glfwMakeContextCurrent(window);
 
@@ -94,10 +107,12 @@ GLFWwindow* initialize()
 
 
 
+
 void clearScreen()
 {
 	opaque();
 	glClearColor(40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
+	//glClearColor(1,1,1,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 

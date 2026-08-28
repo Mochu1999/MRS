@@ -25,7 +25,7 @@ struct Button
 	Button(ButtonID id_, p2 corner1, p2 corner2)
 		:id(id_)
 	{
-		square.createRectangle(corner1, corner2);
+		square.addRectangle(corner1, corner2);
 		hitBoxSquare = square.positions;
 	}
 

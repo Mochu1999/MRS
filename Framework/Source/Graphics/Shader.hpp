@@ -1,8 +1,8 @@
 #pragma once
 
-struct Shader 
+struct Shader
 {
-	struct ShaderProgramSource 
+	struct ShaderProgramSource
 	{
 		std::string VertexSource;
 		std::string FragmentSource;
@@ -13,10 +13,10 @@ struct Shader
 	//id is only use internally to call the program
 	unsigned int id;
 
-	
+
 
 	Shader(const std::string& filepath)
-		:id(0) 
+		:id(0)
 	{
 		ShaderProgramSource source = parseShader(filepath);
 		id = createShader(source.VertexSource, source.FragmentSource);
@@ -32,7 +32,7 @@ struct Shader
 
 	//Combines compiled shaders into a program
 	unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader);
-	
+
 	// Checks if the different Shaders have compiled properly
 	void compileErrors(unsigned int shader, const char* type);
 
@@ -60,15 +60,18 @@ struct Shader
 
 	//p3
 	void setUniform(const std::string& name, const p3& vec);
-	
+
 	//4f
 	void setUniform(const std::string& name, float x, float y, float z, float w);
+	//a can't be defaulted to a value because setUniform thinks it's the p3 version instead of the 4f
+	void setUniform(const std::string& name, p3 vec, float a);
 
 	//1i
 	void setUniform(const std::string& name, int value);
 
 	//mat4
 	void setUniform(const std::string& name, const std::array<float, 16>& mat);
+
 
 };
 

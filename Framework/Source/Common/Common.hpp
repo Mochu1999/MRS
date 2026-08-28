@@ -38,6 +38,8 @@ namespace fs = std::filesystem;
 #define NOMINMAX //avoid min and max from windows, which causes a conflict with std ones
 #include <windows.h>
 
+
+
 // Constants
 constexpr double PI = 3.14159265358979323846;
 constexpr double halfPI = PI / 2;

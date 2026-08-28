@@ -54,6 +54,7 @@ struct Axis
 	}
 };
 
+
 //centerCross is here I don't know why. Too many files already, and it seems to go hand in hand with axis
 struct CenterCross
 {

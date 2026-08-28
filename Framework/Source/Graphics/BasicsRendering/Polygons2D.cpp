@@ -61,16 +61,14 @@ void Polygons2D::addSet(const vector<p2>& positions_, const vector<unsigned int>
 
 //Specific for squares
 //Heights must be different
-void Polygons2D::createRectangle(const p2 corner1, const p2 corner2)
+void Polygons2D::addRectangle(const p2 corner1, const p2 corner2)
 {
-	if (corner1.y == corner2.y) return;
+	//if (corner1.y == corner2.y) return;
 
 	addSet(createRectanglePositions(corner1,corner2));
-
-	isBufferUpdated = true;
 }
 
-void Polygons2D::createRectangle(vector<std::pair<p2, p2>> rectangles)
+void Polygons2D::addRectangle(vector<std::pair<p2, p2>> rectangles)
 {
 	for (auto& rectangle : rectangles)
 	{
@@ -86,7 +84,6 @@ void Polygons2D::createRectangle(vector<std::pair<p2, p2>> rectangles)
 void Polygons2D::addCircle(const int r, const p2 center, int segments)
 {
 	addSet(createCirclePositions(r, center, segments));
-
 }
 
 void Polygons2D::addCircle(const int r, const vector<p2> centers, int segments)

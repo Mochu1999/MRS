@@ -1,7 +1,7 @@
 #pragma once
 
 
-//Common functions 
+//Functions that use information from types.hpp and variables.hpp
 
 //--- --- ---
 //Custom print functions
@@ -132,6 +132,7 @@ void rotate3D(std::vector<p3>& vertices, float angleX, float angleY, float angle
 //--- --- ---
 //
 //--- --- ---
+void rotateP2(p2& v, float angleDegrees);
 
 void rotateNormalizedP2(p2& v, float angleDegrees);
 

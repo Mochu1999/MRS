@@ -1,11 +1,15 @@
 #pragma once
 
-struct WaterMRS
+
+
+
+
+struct AuxVisual3D
 {
 	float waterRadius = 2;
 
-	//IMPLEMENTAR ADDCIRCLES EN POLYGONS3D
-	Polygons2D circle;
+	Telemetry& t;
+
 	Polyhedra water;
 
 	Polygons3D compassLines;
@@ -36,22 +40,16 @@ struct WaterMRS
 	int anglesStep = 10;//º
 	int anglesCount = 360 / anglesStep;
 
-	WaterMRS()
+	//Lines
+	Lines3D headingLine, shipSpeedLine, sailLine, rudderLine;
+
+	AuxVisual3D(Telemetry& t_) :t(t_)
 	{
-		{
-			circle.addCircle(waterRadius, { 0,0 });
-			vector<p3> positions = p2ToP3Y(circle.positions);
-			vector<p3> normals;
 
-			for (size_t i = 0; i < positions.size(); i++)
-			{
-				normals.push_back({ 0,1,0 });
-			}
+		createWaterMesh();
 
-			water.addPolyhedra(positions, normals, circle.indices);
-		}
 
-		createLinesPolygons();
+		createRoseLinesPolygons();
 
 		//smallLineLength = 1;
 		n.createAtlas(smallLineLength);
@@ -82,9 +80,97 @@ struct WaterMRS
 			currentAngle += anglesStep;
 		}
 
+		//Lines
+		{
+			headingLine.addSet({ {0,0,0},{waterRadius + bigLineLength,0,0} });
+			shipSpeedLine.addSet({ {0,0,0},{waterRadius + bigLineLength,0,0} });
+			sailLine.addSet({ {0,-0.5,0},{0,1.75,0} });
+			rudderLine.addSet({ {0,-0.25,0},{0,0.25,0} });
+
+		}
+
 	}
 
-	void createLinesPolygons()
+	//creates a rectangle of a fixed length
+	void createWaterMesh()
+	{
+		/*
+		{
+			Polygons2D rectangle;
+
+			rectangle.addRectangle({ -10,-10 }, { 10,10 });
+			vector<p3> positions = p2ToP3Y(rectangle.positions);
+
+			vector<p3> normals;
+			for (size_t i = 0; i < positions.size(); i++)
+			{
+				normals.push_back({ 0,1,0 });
+			}
+
+			water.addPolyhedra(positions, normals, rectangle.indices);
+		}*/
+
+		//sin(x)
+		float width = 10;
+		vector<p3> positions, normals;
+		vector<unsigned int> indices;
+		float waveLength = 1; //m
+		float k = 2 * PI / waveLength;
+		float step = PI / 100;
+
+		float waveAmplitude = 0.02;
+
+		{
+			p3 a = { -10,0,0 };
+			p3 b = { -10,0,width };
+			p3 c, d; d.z += width;
+			positions.insert(positions.end(), { a,b,c, b,d,c });
+
+			p3 normal = { 0,1,0 };
+			normals.insert(normals.end(), { normal, normal, normal, normal, normal, normal });
+
+			indices.insert(indices.end(), { 0,1,2 ,3,4,5 });
+
+		}
+		for (unsigned int i = 0; i < /*2 * */PI / step; i++)
+		{
+			float currentX = i * step;
+			p3 a = { currentX / k,waveAmplitude * sin(currentX),0 };
+			p3 b = a; b.z = width;
+			p3 c = { (currentX + step) / k,waveAmplitude * sin(currentX + step),0 };
+			p3 d = c; d.z = width;
+
+
+			positions.insert(positions.end(), { a,b,c, b,d,c });
+
+			//CW to make them positive because reference system is fucked
+			p3 normal = cross3(b - a, c - a);
+			normals.insert(normals.end(), { normal, normal, normal });
+
+			normal = cross3(d - b, c - b);
+			normals.insert(normals.end(), { normal, normal, normal });
+
+			unsigned int currentIndex = i * 6 + 6;
+			indices.insert(indices.end(), { currentIndex,currentIndex + 1,currentIndex + 2	,currentIndex + 3,currentIndex + 4,currentIndex + 5 });
+		}
+		{
+			p3 a = positions[positions.size() - 2];
+			p3 b = positions[positions.size() - 1];
+			p3 c = a; c.x += 10;
+			p3 d = b; d.x += 10;
+			positions.insert(positions.end(), { a,b,c, b,d,c });
+
+			p3 normal = { 0,1,0 };
+			normals.insert(normals.end(), { normal, normal, normal, normal, normal, normal });
+
+			unsigned int li = indices.back() + 1; //last index
+			indices.insert(indices.end(), { li,li + 1,li + 2	,li + 3,li + 4,li + 5 });
+
+		}
+		water.addPolyhedra(positions, normals, indices);
+	}
+
+	void createRoseLinesPolygons()
 	{
 		//small
 		int nLines = 360;
@@ -113,7 +199,7 @@ struct WaterMRS
 		}
 
 		////medium 10º
-		nLines = 360/10;
+		nLines = 360 / 10;
 		step = 360.0f / nLines;
 		angle = 0;
 		for (size_t i = 0; i < nLines; i++)
@@ -140,68 +226,133 @@ struct WaterMRS
 
 	}
 
-	void draw(Shader& shader3D, Shader& shaderText3D)
+	float waterPos = 2.2;
+
+	void draw(Shader& shader3D, Shader& shaderText3D, Shader& shaderWater)
 	{
+		{
+			transparent();
+			shaderWater.bind();
+			shaderWater.setUniform("u_CropRadius", waterRadius);
+			matrix4x4 waterMatrix = identityMatrix;
+			translate3DModelMatrix(waterMatrix, { waterPos,0,-5 });
+
+			waterPos -= 0.01;
+			if (waterPos < -2.2)
+				waterPos = 2.2;
+
+			shaderWater.setUniform("u_Model", waterMatrix);
+
+			shaderWater.setUniform("u_fragmentMode", shadeColor);
+			shaderWater.setUniform("u_Color", lightBlue, 0.4);
+			water.draw();
+		}
+
+
 		shader3D.bind();
-		transparent();
-		shader3D.setUniform("u_Model", identityMatrix);
-		shader3D.setUniform("u_fragmentMode", shadeColor);
-		shader3D.setUniform("u_Color", 40.0f / 255.0f, 189.9f / 255.0f, 255.0f / 255.0f, 0.6);
-		water.draw();
+		matrix4x4 headingMatrix = identityMatrix;
+		rotate3DModelMatrix(headingMatrix, t.headingAngle, { 0,1,0 });
+
+
 
 
 		opaque();
-		shader3D.setUniform("u_Color", 1, 1, 1, 1);
+		shader3D.setUniform("u_Color", white, 1);
+		matrix4x4 modelText = identityMatrix;
+		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		shader3D.setUniform("u_Model", modelText);
 		compassLines.draw();
+
 
 		transparent();
 		shaderText3D.bind();
-		shaderText3D.setUniform("u_Model", identityMatrix);
+
+		modelText = identityMatrix;
+		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		shaderText3D.setUniform("u_Model", modelText);
 		n.draw();
 
-		matrix4x4 modelText = identityMatrix;
+		modelText = identityMatrix;
+		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 315, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		ne.draw();
 
 		modelText = identityMatrix;
+		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 270, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		e.draw();
 
 		modelText = identityMatrix;
+		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 225, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		se.draw();
 
 		modelText = identityMatrix;
+		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 180, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		s.draw();
 
 		modelText = identityMatrix;
+		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 135, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		sw.draw();
 
 		modelText = identityMatrix;
+		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 90, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		w.draw();
 
 		modelText = identityMatrix;
+		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 45, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		nw.draw();
+
 
 		int currentAngle = 0;
 		for (size_t i = 0; i < anglesCount; i++)
 		{
 			modelText = identityMatrix;
+			rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
 			rotate3DModelMatrix(modelText, -currentAngle, { 0,1,0 });
 			shaderText3D.setUniform("u_Model", modelText);
 			angles[i].draw();
 			currentAngle += anglesStep;
 		}
+
+
+		shader3D.bind();
+		matrix4x4 linesModelMatrix = identityMatrix;
+
+		shader3D.setUniform("u_fragmentMode", 1);
+
+		//sail is already at O
+		translate3DModelMatrix(linesModelMatrix, t.shipHeave);
+		shader3D.setUniform("u_Model", linesModelMatrix);
+		shader3D.setUniform("u_Color", green, 1);
+		sailLine.draw();
+
+		translate3DModelMatrix(linesModelMatrix, -t.sailPositionVisual); //shipHeave still applied
+		shader3D.setUniform("u_Model", linesModelMatrix);
+		rudderLine.draw();
+
+		linesModelMatrix = identityMatrix;
+		glLineWidth(3);
+
+		shader3D.setUniform("u_Color", white, 1);
+		shader3D.setUniform("u_Model", linesModelMatrix);
+		headingLine.draw();
+
+		rotate3DModelMatrix(linesModelMatrix, t.headingAngle, { 0,1,0 });
+		shader3D.setUniform("u_Model", linesModelMatrix);
+		shader3D.setUniform("u_Color", blue, 1);
+		shipSpeedLine.draw();
+		glLineWidth(1);
 	}
 };

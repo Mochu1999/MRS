@@ -1,12 +1,11 @@
 
+//
 
-
-//fijar dataroute en algún sitio definitivo(y círculos, icono, líneas. Cambiar nombre para que lo refleje), mediterranean map corner fix, safe zones fix
 
 //To do
-// new methods for changing u_color 
+//fijar dataroute en algún sitio definitivo(y círculos, icono, líneas. Cambiar nombre para que lo refleje), mediterranean map corner fix, safe zones fix
+//visual speed water proportional to the ship's speed 
 // Anemómetro, flechas 3D
-// Change to a global telemetry mode
 // Simulation parts integration
 //Change rendering values menu, change telemetry values with the mouse
 //Settings: CameraSensivity value, water
@@ -14,7 +13,6 @@
 
 
 //Caso límite muchos mensajes acumulados en el serial, solo procesar de ";" a ";"
-//Redactar funciones/requisitos de la antena de corto alcance con lo que hay, pasar por todo lo que se ha hecho y resumir en la propuesta de control
 //Icono de que hay o no hay antena
 
 #include "Common.hpp"
@@ -28,6 +26,7 @@
 
 #include "InputGLFW.hpp"
 
+#include "ForceModel.hpp"
 
 
 int main()
@@ -40,18 +39,20 @@ int main()
 	Shader shader2DInstanced("resources/shaders/shader2DInstanced.shader");
 	Shader shaderText("resources/shaders/shaderText.shader");
 	Shader shaderText3D("resources/shaders/shaderText3D.shader");
+	Shader shaderWater("resources/shaders/shaderWater.shader");
 	Camera camera;
-	initializeCameraLocations(shader3D, shader2D, shader2DInstanced, shaderText, shaderText3D, camera);
+	initializeCameraLocations(shader3D, shader2D, shader2DInstanced, shaderText, shaderText3D, shaderWater, camera);
 
 	Buttons buttons;
 
 	Telemetry telemetry;
-	TelemetryUI ui(telemetry, shader3D, shader2D, shader2DInstanced, shaderText, shaderText3D, camera, buttons);
+	TelemetryUI ui(telemetry, shader3D, shader2D, shader2DInstanced, shaderText, shaderText3D, shaderWater, camera, buttons);
 	//LoRa lora(telemetry);
 
 	Settings settings(camera);
 	InputGLFW inputGLFW(window, &camera, &telemetry, &ui, &buttons);
 
+	//return 0;
 	while (!glfwWindowShouldClose(window))
 	{
 		inputGLFW.getPos(window, mPos);
@@ -70,7 +71,7 @@ int main()
 			inputGLFW.customPolls();
 			camera.updateCamera();
 
-			updateCameraLocations(shader3D,shaderText3D, camera);
+			updateCameraLocations(shader3D,shaderText3D, shaderWater, camera);
 		}
 		glfwSwapBuffers(window);
 		glfwPollEvents();

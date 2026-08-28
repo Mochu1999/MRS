@@ -77,7 +77,7 @@ struct Ship2DIcon
 		//Sail model matrix
 		matrix4x4 sail2DMatrix = ship2DMatrix;
 
-		translate2DModelMatrix(ship2DMatrix, { t.sailPosition.x,t.sailPosition.z });
+		translate2DModelMatrix(ship2DMatrix, { t.sailPositionVisual.x,t.sailPositionVisual.z });
 		rotate2DModelMatrix(ship2DMatrix, t.sailAngle);
 		shader2D.setUniform("u_Model", ship2DMatrix);
 		shader2D.setUniform("u_Color", 1, 1, 1, 1.0f);

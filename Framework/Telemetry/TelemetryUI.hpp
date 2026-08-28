@@ -9,7 +9,7 @@
 #include "ProgressBar.hpp"
 #include "Lourdes3DModel.hpp"
 
-#include "WaterMRS.hpp"
+#include "AuxVisual3D.hpp"
 #include "SunMRS.hpp"
 
 #include "Buttons.hpp"
@@ -62,16 +62,16 @@ struct DataRoute
 		glLineWidth(1);
 
 		shaderText.bind();
-		//ETA SHOULD USE AN AVERAGE SPEED
+		//ETA SHOULD USE AN AVERAGE shipSpeed
 		float eta;
-		if (t.speed == 0) eta = std::numeric_limits<float>::quiet_NaN();
-		else eta = round1d(t.totalDistance / t.speed / 3600);
+		if (magnitude2(t.shipSpeed) == 0) eta = std::numeric_limits<float>::quiet_NaN();
+		else eta = round1d(t.totalDistance / magnitude2(t.shipSpeed) / 3600);
 
 
 		boxText.addDynamicText({
 			{{ 100,700 }, "Ship coordinates:  ", lonLatToString(t.position)},
 			{ { 100,650 }, "Distance left:  ", round1d(t.totalDistance / 1000)," km"},
-			{ { 100,600 }, "Speed: ", round1d(meterSecondToKnot(t.speed)) ,"  knots"},
+			{ { 100,600 }, "shipSpeed: ", round1d(meterSecondToKnot(magnitude2(t.shipSpeed))) ,"  knots"},
 			{ { 100,550 }, "Estimated time left: ",eta," hours"},
 			{ { 100,500 }, "Errors:  N/A"}
 			});
@@ -99,7 +99,33 @@ struct DataRoute
 };
 
 
+struct DataShip
+{
+	Overlay2D overlay;
+	PlotTime plotSail;
+	PlotTime plotRudder;
+	ProgressBar pb;
 
+	DataShip(Telemetry& t)
+	{
+		pb.createPB(&t.battery, p2{ 1350,700 }, "Battery");
+		plotSail.createPlot(&t.sailAngle, &t.tm.currentTime, { 1350,50 }, "sailAngle");
+		plotRudder.createPlot(&t.rudderAngle, &t.tm.currentTime, { 1350,350 }, "rudderAngle");
+
+	}
+
+	void draw(Shader& shader2D, Shader& shader2DInstanced, Shader& shaderText)
+	{
+		plotSail.update();
+		plotRudder.update();
+
+		overlay.draw(shader2D);
+		plotSail.draw(shader2D, shader2DInstanced, shaderText);
+		plotRudder.draw(shader2D, shader2DInstanced, shaderText);
+		pb.draw(shader2D, shaderText);
+	}
+
+};
 
 struct TelemetryUI
 {
@@ -108,6 +134,7 @@ struct TelemetryUI
 	Shader& shader2DInstanced;
 	Shader& shaderText;
 	Shader& shaderText3D;
+	Shader& shaderWater;
 	Camera& camera;
 
 	Telemetry& t;
@@ -115,17 +142,14 @@ struct TelemetryUI
 	Buttons& buttons;
 
 	Lourdes3DModel lourdesModel;
-	WaterMRS water;
+	AuxVisual3D water;
 	SunMRS sun;
 
 	FpsCounter fpsCounter;
 
 	//ship
 	CenterCross centerCross;
-	Overlay2D overlay;
-	PlotTime plotSail;
-	PlotTime plotRudder;
-	ProgressBar pb;
+	DataShip dataShip;
 	Axis axis;
 
 	//Route
@@ -134,16 +158,15 @@ struct TelemetryUI
 	Ship2DIcon icon;
 
 
-	TelemetryUI(Telemetry& telemetry_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Shader& shaderText3D_, Camera& camera_, Buttons& buttons_)
-		:t(telemetry_), shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), shaderText3D(shaderText3D_), camera(camera_), buttons(buttons_)
-		, lourdesModel(t), fpsCounter(t.tm), dataRoute(t)
+	TelemetryUI(Telemetry& telemetry_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Shader& shaderText3D_, Shader& shaderWater_, Camera& camera_, Buttons& buttons_)
+		:t(telemetry_), shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), shaderText3D(shaderText3D_), shaderWater(shaderWater_), camera(camera_), buttons(buttons_)
+		, lourdesModel(t), fpsCounter(t.tm), dataRoute(t), dataShip(t), water(t)
 	{
 		//Ship
-		pb.createPB(&t.battery, p2{ 1350,700 }, "Battery");
-		plotSail.createPlot(&t.sailAngle, &t.tm.currentTime, { 1350,50 }, "sailAngle");
-		plotRudder.createPlot(&t.rudderAngle, &t.tm.currentTime, { 1350,350 }, "rudderAngle");
+		
 
 		sun.updateLightLocation(shader3D);
+		sun.updateLightLocation(shaderWater);
 
 		//Route
 	}
@@ -151,24 +174,14 @@ struct TelemetryUI
 
 	void draw()
 	{
-		plotSail.update();
-		plotRudder.update();
-
-
-
 		if (programState == ship)
 		{
-			axis.draw(shader3D);
+			//axis.draw(shader3D);
 			lourdesModel.draw(shader3D);
-			water.draw(shader3D, shaderText3D);
+			water.draw(shader3D, shaderText3D,shaderWater);
+			dataShip.draw(shader2D, shader2DInstanced, shaderText);
 			sun.draw(shader3D);
 
-
-
-			overlay.draw(shader2D);
-			plotSail.draw(shader2D, shader2DInstanced, shaderText);
-			plotRudder.draw(shader2D, shader2DInstanced, shaderText);
-			pb.draw(shader2D, shaderText);
 			centerCross.draw(shader2D);
 		}
 		else if (programState == route)
@@ -183,4 +196,5 @@ struct TelemetryUI
 
 
 	}
+
 };
