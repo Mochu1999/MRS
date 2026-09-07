@@ -8,55 +8,28 @@ struct Telemetry
 {
 	TimeStruct tm;
 
-	p2 position = { 2.128842,41.248926 }; //in LonLats
-	p2 finishPoint = { 1.25,39.05 };
+	
 
-	float greatCircleDistance; //spherical distance in meters to finish line
-	float totalDistance; //Distance following the nodes
+	float headingAngle = 0; //Where the bow is pointing //In dregrees, where north 0º, east 90(cw)º...
 
-	float headingAngle = 0; //Where the bow is pointing //In dregrees, where north 0º, east 90º...
-	p2 shipSpeed; //{surge,sway} with respect of the headingAngle //m/s
-	p2 shipSpeedLocal; //surge and sway
+	p2 shipSpeed; // global axis
+	p2 shipSpeedLocal; //{surge,sway} with respect of the headingAngle //m/s
 
-	float trueWindSpeed;
-	float trueWindAngle;
 
 	float windsSpeed = 0; //m/s
 	float windAngle = 0; //º around north
 
-	float sailAngle = 0; //global coordinates
+	p2 trueWind; //global axis
+	float trueWindSpeed = 0;
+	float trueWindAngle = 0;
+
+	float sailAngle = 0; //global axis
 	float sailAngleLocal = 0; //local coordinates
-	float sailIncrease = 0.4; //how much it changes by pressing the keyboard
 
 	float rudderAngle = 0;
-	float rudderAngleLocal;
-	float rudderIncrease = 0.2; //how much it changes by pressing the keyboard
+	float rudderAngleLocal = 0; 
 
-	float battery = 1; //Percentage of battery
-
-
-
-
-
-	//Visual heave effect
-	p3 shipHeave = { 0,-0.056,0 };
-	float shipHeaveIncrease = 0.0002;
-
-
-	//Ship's parameters, to encapsulate somewhere else
-	p3 sailPositionVisual = { 0.602, 0.017, 0 }; //Coordinates where the sail model should be (otherwise is centered on 0)
-
-	//VALORES JORGE 3M PARA VALIDACIÓN CON FORCE MODEL DE REZOLA
-	/*
-	B_one_hull=0.3
-	L=3
-
-	# Definición de coordenadas de los apéndices
-	sail_pos_m = np.array([1.5, 0, +1.5])
-	keel_pos_m = np.array([1.5, 0, -0.3])
-	rudder_pos_m = np.array([0.1, 0, -0.15])
-	GC_pos_m = np.array([1.3, 0, +0.5])
-	*/
+	//Valores barco 3 metros rezola
 	float L = 3;
 	float B = 0.3; //one hull
 	p3 sailPos = { 1.5,1.5,0 };
@@ -64,43 +37,15 @@ struct Telemetry
 	p3 rudderPos = { 0.1,-0.15,0 };
 	p3 CG = { 1.3,0.5,0 };
 
-
-	Telemetry()
-	{
-		update();
-	}
-
-	void update()
-	{
-		headingAngle += 0.01;
-		tm.update();
-
-		updatePosition();
-
-		//Visual heave effect
-		if (shipHeave.y >= -0.05 || shipHeave.y <= -0.1)
-			shipHeaveIncrease = -shipHeaveIncrease;
-		shipHeave.y += shipHeaveIncrease;
-
-	}
-
-	void updatePosition()
-	{
-		greatCircleDistance = calculateDistance(finishPoint, position);
-
-		//USAR CON NODOS
-		totalDistance = greatCircleDistance;
-	}
-
 	void updateSituation()
 	{
 		// --- --- ---
-	// True wind to global axes
-	// --- --- ---
-	//We turn trueWindSpeed and trueWindAngle into a single p2 with +x being wind pointing north and +y wind pointing west
-	// First we make it negative because it says from where it's coming. if the angle is 0º it's going to -x (south), not to the +x (north)
-	//We make a generic vector and then we rotate it
-		p2 trueWind = { -trueWindSpeed,0 };
+		// True wind to global axes
+		// --- --- ---
+		//We turn trueWindSpeed and trueWindAngle into a single p2 with +x being wind pointing north and +y wind pointing west
+		// First we make it negative because it points towards where it's coming. if the angle is 0º it's going to -x south, not to the +x north
+		//We make a generic vector and then we rotate it
+		trueWind = { -trueWindSpeed,0 };
 		//Our angle convention goes the other way, 90º cw (east), not ccw (would have been west)
 		rotateP2(trueWind, -trueWindAngle);
 
@@ -109,7 +54,7 @@ struct Telemetry
 		// Ship's speed to global axes
 		// --- --- ---
 		//we maintain speedLocal surge and sway, and we also calculate a global one
-		p2 shipSpeed = shipSpeedLocal;
+		shipSpeed = shipSpeedLocal;
 		rotateP2(shipSpeed, -headingAngle);
 
 		float driftAngle = degrees(atan2(shipSpeedLocal.y, shipSpeedLocal.x));//degrees
@@ -157,6 +102,61 @@ struct Telemetry
 		// DriftAngle is local, so the AoA can be calculated without transforming rudder into global
 		float rudderAngleOfAttack = std::remainder(-(rudderAngleLocal + driftAngle), 360.0f);
 	}
+
+
+	float sailIncrease = 0.4; //how much it changes by pressing the keyboard
+	float rudderIncrease = 0.2; //how much it changes by pressing the keyboard
+
+	float battery = 1; //Percentage of battery
+
+
+	p2 position = { 2.128842,41.248926 }; //in LonLats
+	p2 finishPoint = { 1.25,39.05 };
+
+	float greatCircleDistance; //spherical distance in meters to finish line
+	float totalDistance; //Distance following the nodes
+
+
+	//Visual heave effect
+	p3 shipHeave = { 0,-0.056,0 };
+	float shipHeaveIncrease = 0.0002;
+
+
+	//Ship's parameters, to encapsulate somewhere else
+	p3 sailPositionVisual = { 0.602, 0.017, 0 }; //Coordinates where the sail model should be (otherwise is centered on 0)
+
+
+
+
+
+	Telemetry()
+	{
+		update();
+	}
+
+	void update()
+	{
+		headingAngle += 0.01;
+		tm.update();
+
+		updatePosition();
+
+		//Visual heave effect
+		if (shipHeave.y >= -0.05 || shipHeave.y <= -0.1)
+			shipHeaveIncrease = -shipHeaveIncrease;
+		shipHeave.y += shipHeaveIncrease;
+
+	}
+
+	void updatePosition()
+	{
+		greatCircleDistance = calculateDistance(finishPoint, position);
+
+		//USAR CON NODOS
+		totalDistance = greatCircleDistance;
+	}
+
+	
 };
 
 

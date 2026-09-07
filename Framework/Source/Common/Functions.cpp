@@ -94,7 +94,7 @@ void rotate3D(std::vector<p3>& vertices, float angleX, float angleY, float angle
 
 
 
-
+//Counter clockwise
 void rotateP2(p2& v, float angleDegrees)
 {
 	float a = radians(angleDegrees);

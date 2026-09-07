@@ -2,7 +2,6 @@
 
 
 //The output we want is: Fx, Fy, Mz
-// speedLocal is given with respect with the longitudinal axis {surge, sway}
 //Everything in SI except the heading and trueWind and sail angles that are on degrees
 //All angles are in global coordinates unless it says they are local
 
