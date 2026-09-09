@@ -8,26 +8,34 @@ struct Telemetry
 {
 	TimeStruct tm;
 
+	//all angles in degrees, the rest in IS
 	
+	//north 0º, east will be shown as 90º, but as it is cw, internally it will be shown as -90 to respect the positive=ccw standard and so on
+	float headingAngle = 0; //Where the bow is pointing
 
-	float headingAngle = 0; //Where the bow is pointing //In dregrees, where north 0º, east 90(cw)º...
-
-	p2 shipSpeed; // global axis
 	p2 shipSpeedLocal; //{surge,sway} with respect of the headingAngle //m/s
+	p2 shipSpeed; // speed in global axis
 
+	float driftAngle = 0; //0º is there's no sway
 
-	float windsSpeed = 0; //m/s
-	float windAngle = 0; //º around north
 
 	p2 trueWind; //global axis
-	float trueWindSpeed = 0;
-	float trueWindAngle = 0;
+	float trueWindSpeed = 0; //m/s
+	float trueWindAngle = 0; //º around north
 
-	float sailAngle = 0; //global axis
+	p2 appWind; //apparent wind
+	p2 appWindDir; //unitary value of appWind
+
 	float sailAngleLocal = 0; //local coordinates
+	float sailAngle = 0; //global axis
 
-	float rudderAngle = 0;
+	float sailAngleOfAttack = 0; // Difference between sailAngle and appWindAngle
+
+
 	float rudderAngleLocal = 0; 
+	float rudderAngle = 0;
+
+
 
 	//Valores barco 3 metros rezola
 	float L = 3;
@@ -37,7 +45,7 @@ struct Telemetry
 	p3 rudderPos = { 0.1,-0.15,0 };
 	p3 CG = { 1.3,0.5,0 };
 
-	void updateSituation()
+	void calculateVariables()
 	{
 		// --- --- ---
 		// True wind to global axes
@@ -53,23 +61,24 @@ struct Telemetry
 		// --- --- ---
 		// Ship's speed to global axes
 		// --- --- ---
-		//we maintain speedLocal surge and sway, and we also calculate a global one
+		//we calculate the global one from the know local one
 		shipSpeed = shipSpeedLocal;
 		rotateP2(shipSpeed, -headingAngle);
 
-		float driftAngle = degrees(atan2(shipSpeedLocal.y, shipSpeedLocal.x));//degrees
+		driftAngle = degrees(atan2(shipSpeedLocal.y, shipSpeedLocal.x));
 
 
 		// --- --- ---
 		// Apparent wind 
 		// --- --- ---
-		p2 appWind = trueWind - shipSpeed;
+		appWind = trueWind - shipSpeed;
 
 		float appWindAngle = degrees(atan2(appWind.y, appWind.x));
-		float appWindSpeed = magnitude2(appWind);
+		//float appWindSpeed = magnitude2(appWind);
 
-		p2 appWindDir = normalize2(appWind);
-		p2 appWindDirPerpendicular = { appWindDir.y,-appWindDir.x };
+		appWindDir = normalize2(appWind);
+		//Solo se usa una vez en cálculo de fuerzas, ponerlo directamente ahí
+		//p2 appWindDirPerpendicular = { appWindDir.y,-appWindDir.x };
 
 
 		// --- --- ---
@@ -77,11 +86,11 @@ struct Telemetry
 		// --- --- ---
 		// Putting the angle of the sail that we had on global coordinates
 		// The negative to follow the angles of the rose, the 180 to flip it so the vector points backwards along the sail (Rezola's AoA sign convention)
-		float  sailAngle = 180.0f - (headingAngle + sailAngleLocal);
+		sailAngle = 180.0f - (headingAngle + sailAngleLocal);
 
 		// Difference between sailAngle and appWindAngle
 		// remainder takes any angle and rewrites it as the equivalent signed angle closest to zero, so range is -180,180 (the closest)
-		float sailAngleOfAttack = std::remainder(sailAngle - appWindAngle, 360.0f);
+		sailAngleOfAttack = std::remainder(sailAngle - appWindAngle, 360.0f);
 
 
 		// --- --- ---
