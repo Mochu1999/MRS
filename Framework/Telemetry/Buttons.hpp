@@ -9,9 +9,13 @@ enum class ButtonID
 	None,
 	Close,
 	Minimize,
-	Drag,
+	WindowDrag,
 	Ship,
 	RouteID, //It already exists a struct called Route
+	RudderText,
+	SailText,
+	RudderBar,
+	SailBar,
 };
 using enum ButtonID;
 
@@ -35,6 +39,102 @@ struct Button
 	}
 };
 
+struct TextField : Button
+{
+	Text text;
+	float& value;
+	p2 bottomCenter;
+
+	//0 usual state //1 you are writing a new angle //2 you have written a new angle and have pressed enter
+	int state = 0;
+	float newValue = 0; //the one your write
+
+	bool decimal = false;
+	float decimalFactor = 0.1f;
+	bool negative = false;
+
+	TextField(ButtonID id_, p2 corner1, p2 corner2, float& value_)
+		: Button(id_, corner1, corner2), value(value_)
+	{
+		bottomCenter = { corner1.x + (corner2.x - corner1.x) / 2,corner1.y + 5 };
+		text.createAtlas(36, "resources/Glyphs/Helvetica/Helvetica.otf");
+
+
+	}
+	void drawTextField(Shader& shaderText)
+	{
+		if (state == 2)
+		{
+			value = newValue;
+			newValue = 0;
+			state = 0;
+		}
+
+		shaderText.bind();
+		text.clear();
+		if (state == 0)
+		{
+			TextEntry textEntry(bottomCenter, round1d(value));
+			text.addCenteredText(textEntry);
+
+		}
+		else if (state == 1)
+		{
+			TextEntry textEntry(bottomCenter, newValue);
+			text.addCenteredText(textEntry);
+
+		}
+
+		text.draw();
+
+	}
+};
+
+struct DragBar
+{
+	ButtonID id = None;
+
+	p2 barCenter; //fixed
+	p2 squareCenter; //moves
+	float squareWidth = 18; //fixed
+
+	float distance = 50; //bar goes distance left/right
+
+	int state = 0; //0 normal, 1 being dragged
+
+	Polygons2D square;
+	Polygons2D bar;
+
+	DragBar(ButtonID id_, p2 center_)
+		: id(id_), barCenter(center_), squareCenter(center_)
+	{
+		square.addRectangle(
+			{ squareCenter.x - squareWidth, squareCenter.y - squareWidth },
+			{ squareCenter.x + squareWidth, squareCenter.y + squareWidth });
+
+		bar.addRectangle(
+			{ barCenter.x - distance, barCenter.y - 3 },
+			{ barCenter.x + distance, barCenter.y + 3 });
+	}
+
+	void draw(Shader& shader2D, ButtonID currentPressedID, ButtonID currentHoveredID)
+	{
+		shader2D.setUniform("u_Color", almostWhite, 1);
+		bar.draw();
+
+
+		if (currentPressedID == id) //pressed
+			shader2D.setUniform("u_Color", 20.0f / 255.0f, 120.0f / 255.0f, 180.0f / 255.0f, 1);
+		else if (currentHoveredID == id) //hovering
+			shader2D.setUniform("u_Color", 80.0f / 255.0f, 210.0f / 255.0f, 255.0f / 255.0f, 1);
+		else //normal
+			shader2D.setUniform("u_Color", 40.0f / 255.0f, 190.0f / 255.0f, 255.0f / 255.0f, 1);
+		square.draw();
+	}
+};
+
+
+//STRUCTS CON TEXTURAS Y E ICONOS PARA MINIMIZAR Y CERRAR
 
 
 //all Buttons of the program
@@ -54,23 +154,30 @@ struct Buttons
 	Text shipText, courseText;
 	Lines2D shipLine, courseLine;
 
+	TextField fieldRudder, fieldSail;
+
+	DragBar barRudder;
+
 	//each loop it looks if we are over a button
 	ButtonID currentHoveredID = None;
 	ButtonID currentPressedID = None;
 
 
-	Buttons()
+	Buttons(float& rudderAngle, float& sailAngle)
 		: tbh(20)
 		, buttonClose(Close, p2{ windowWidth - 20 * (float)sqrt2, windowHeight - tbh }, p2{ windowWidth, windowHeight })
 		, buttonMinimize(Minimize, p2{ windowWidth - 40 * (float)sqrt2, windowHeight - tbh }, p2{ windowWidth - 20 * (float)sqrt2, windowHeight })
-		, buttonDrag(Drag, p2{ 0, windowHeight - tbh }, p2{ windowWidth, windowHeight }) //can be full width because hitBox check goes after the other buttons
+		, buttonDrag(WindowDrag, p2{ 0, windowHeight - tbh }, p2{ windowWidth, windowHeight }) //can be full width because hitBox check goes after the other buttons
 		, buttonShip(Ship, p2{ 0,windowHeight - tbh - 30 }, p2{ 100, windowHeight - tbh })
 		, buttonCourse(RouteID, p2{ 100,windowHeight - tbh - 30 }, p2{ 200, windowHeight - tbh })
+		, fieldRudder(RudderText, p2{ 50,500 }, p2{ 140,536 }, rudderAngle)
+		, fieldSail(SailText, p2{ 50,600 }, p2{ 140,636 }, sailAngle)
+		, barRudder(RudderBar, p2{ 250,518 })
 	{
 
 
 		windowName.createAtlas(17);
-		windowName.addCenteredText({ {windowWidth/2, windowHeight - 17}, "Telemetry Lourdes" });
+		windowName.addCenteredText({ {windowWidth / 2, windowHeight - 17}, "Telemetry Lourdes" });
 
 		shipText.createAtlas(15);
 		shipText.addCenteredText({ {50, windowHeight - tbh - 30 + 8}, "Ship" });
@@ -100,6 +207,10 @@ struct Buttons
 	{
 
 		transparent();
+
+		//fieldRudder.drawTextField(shader2D, shaderText, currentPressedID, currentHoveredID);
+
+
 		shader2D.bind();
 		shader2D.setUniform("u_Model", identityMatrix);
 
@@ -116,7 +227,19 @@ struct Buttons
 		minimizeLines.draw();
 		closeLines.draw();
 
+		//rudder
+		colorButton(fieldRudder, shader2D);
+		fieldRudder.drawTextField(shaderText);
+		shader2D.bind();
 
+		barRudder.draw(shader2D, currentPressedID, currentHoveredID);
+
+		//sail
+		colorButton(fieldSail, shader2D);
+		fieldSail.drawTextField(shaderText);
+		shader2D.bind();
+
+		//Ship and course
 		colorButton(buttonShip, shader2D);
 		colorButton(buttonCourse, shader2D);
 		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
@@ -139,6 +262,9 @@ struct Buttons
 		if (isInsideHitBox(buttonDrag, m)) return buttonDrag.id;
 		if (isInsideHitBox(buttonShip, m)) return buttonShip.id;
 		if (isInsideHitBox(buttonCourse, m)) return buttonCourse.id;
+		if (isInsideHitBox(fieldRudder, m)) return fieldRudder.id;
+		if (isInsideHitBox(fieldSail, m)) return fieldSail.id;
+		if (isInsideHitBox(barRudder, m)) return barRudder.id;
 
 		return None;
 	}
@@ -149,21 +275,28 @@ struct Buttons
 			&& m.y > b.hitBoxSquare[0].y && m.y < b.hitBoxSquare[2].y);
 	}
 
+	bool isInsideHitBox(const DragBar& b, const p2& m)
+	{
+		return (
+			m.x > b.squareCenter.x - 18 &&
+			m.x < b.squareCenter.x + 18 &&
+			m.y > b.squareCenter.y - 18 &&
+			m.y < b.squareCenter.y + 18
+			);
+	}
+
 	//changes the color if we are hovering, pressing or none to a button
 	//In a hardcoced way, maybe it will be more customizable in the future 
 	void colorButton(Button& b, Shader& shader2D)
 	{
-		if (currentPressedID == b.id)
+		if (currentPressedID == b.id) //pressed
 			shader2D.setUniform("u_Color", 0.35f, 0.35f, 0.35f, 1.0f);
-		else if (currentHoveredID == b.id)
+		else if (currentHoveredID == b.id) //hovering
 			shader2D.setUniform("u_Color", 0.219f, 0.219f, 0.219f, 1);
-		else
-			shader2D.setUniform("u_Color", 0.121f, 0.121f, 0.121f, 1);
+		else //normal state
+			shader2D.setUniform("u_Color", grey, 1);
 
 		b.draw();
-
-		
-
 	}
 
 

@@ -32,56 +32,6 @@ struct Control
         sailAnglePerPulse = 360.0f / (motorStepsPerRevolution * microsteps * gearRatio);
     }
 
-        
-    //void update()
-    //{
-    //    //updateSail();
-    //    //updateRudder();
-
-    //    gpio.write(sailStepPin, true);
-    //    int pulse = 1500;
-    //    usleep(pulse);
-
-
-    //    gpio.write(sailStepPin, 0);
-    //    usleep(20000-pulse);
-
-    //}
-    
-    //void update()
-    //{
-    //    //updateSail();
-    //    //updateRudder();
-    //    int diff = 0;
-    //    gpio.write(sailStepPin, true);
-    //    int pulse = 1500+diff;
-
-    //    usleep(pulse);
-
-
-    //    gpio.write(sailStepPin, 0);
-    //    usleep(20000-pulse);
-
-    //    diff++;
-
-    //}
-
-    //void update()
-    //{
-    //    //updateSail();
-    //    //updateRudder();
-    //    int pulse = 100000;
-    //    gpio.write(sailStepPin, 1);
-
-    //    usleep(pulse);
-
-
-    //    gpio.write(sailStepPin, 0);
-    //    usleep(pulse);
-
-
-    //}
-    
     void update()
     {
         static int pulse = 1000;   // us
@@ -135,19 +85,16 @@ struct Control
     //    }
     //}
 
-    //void updateSail()
-    //{
-    //    float difference = p.sailAngle - p.currentSailAngle;
+    void updateSail()
+    {
+        float difference = p.sailAngle - p.currentSailAngle;
+        
+        bool direction = (difference > 0.0f) ? 1 : 0;//1 CCW, 0 CW
+            
+        sendPulse(sailDirectionPin,sailStepPin,direction);
 
-    //    /*if (abs(difference) < sailAnglePerPulse)
-    //        return;*/
-    //    
-    //    bool direction = (difference > 0.0f) ? 1 : 0;//1 CCW, 0 CW
-    //        
-    //    sendPulse(sailDirectionPin,sailStepPin,direction);
-
-    //    p.currentSailAngle += (direction * sailAnglePerPulse);
-    //}
+        p.currentSailAngle += (direction * sailAnglePerPulse);
+    }
 
     //void sendPulse(int gpioDirectionPin, int gpioStepPin, int direction)
     //{

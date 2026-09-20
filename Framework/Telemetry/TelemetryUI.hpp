@@ -99,14 +99,14 @@ struct DataRoute
 };
 
 
-struct DataShip
+struct Plots
 {
 	Overlay2D overlay;
 	PlotTime plotSail;
 	PlotTime plotRudder;
 	ProgressBar pb;
 
-	DataShip(Telemetry& t)
+	Plots(Telemetry& t)
 	{
 		pb.createPB(&t.battery, p2{ 1350,700 }, "Battery");
 		plotSail.createPlot(&t.sailAngle, &t.tm.currentTime, { 1350,50 }, "sailAngle");
@@ -127,6 +127,49 @@ struct DataShip
 
 };
 
+#include "LoRa.hpp"
+
+struct LoRaUI
+{
+	LoRa& lora;
+
+	Text loraStatus;
+	Polygons2D outerBox, innerBox;
+
+	LoRaUI(LoRa& lora_)
+		:lora(lora_)
+	{
+		loraStatus.createAtlas(36, "resources/Glyphs/Helvetica/Helvetica.otf");
+		outerBox.addRectangle({ 0,0 }, { 450,200 });
+		innerBox.addRectangle({ 40,90 }, { 400,136 });
+		
+	}
+
+	void draw(Shader& shader2D,Shader& shaderText)
+	{
+
+		transparent();
+		shader2D.bind();
+		shader2D.setUniform("u_Color", grey, 1);
+		outerBox.draw();
+
+		if(lora.state==0)
+			shader2D.setUniform("u_Color", red, 0.5);
+		if (lora.state == 1)
+			shader2D.setUniform("u_Color", grey, 1);
+		if (lora.state == 2)
+			shader2D.setUniform("u_Color", green, 0.2);
+		innerBox.draw();
+
+
+		shaderText.bind();
+		TextEntry textEntry({ 50,100 }, lora.lastMessage);
+		loraStatus.addDynamicText({ textEntry });
+		loraStatus.draw();
+	}
+
+};
+
 struct TelemetryUI
 {
 	Shader& shader3D;
@@ -140,6 +183,7 @@ struct TelemetryUI
 	Telemetry& t;
 
 	Buttons& buttons;
+	LoRa& lora;
 
 	Lourdes3DModel lourdesModel;
 	AuxVisual3D water;
@@ -147,9 +191,11 @@ struct TelemetryUI
 
 	FpsCounter fpsCounter;
 
+	LoRaUI loraUI;
+
 	//ship
 	CenterCross centerCross;
-	DataShip dataShip;
+	Plots plots;
 	Axis axis;
 
 	//Route
@@ -158,9 +204,9 @@ struct TelemetryUI
 	Ship2DIcon icon;
 
 
-	TelemetryUI(Telemetry& telemetry_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Shader& shaderText3D_, Shader& shaderWater_, Camera& camera_, Buttons& buttons_)
+	TelemetryUI(Telemetry& telemetry_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Shader& shaderText3D_, Shader& shaderWater_, Camera& camera_, Buttons& buttons_, LoRa& lora_)
 		:t(telemetry_), shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), shaderText3D(shaderText3D_), shaderWater(shaderWater_), camera(camera_), buttons(buttons_)
-		, lourdesModel(t), fpsCounter(t.tm), dataRoute(t), dataShip(t), water(t)
+		, lourdesModel(t), fpsCounter(t.tm), dataRoute(t), plots(t), water(t), lora(lora_), loraUI(lora)
 	{
 		//Ship
 		
@@ -179,8 +225,10 @@ struct TelemetryUI
 			//axis.draw(shader3D);
 			lourdesModel.draw(shader3D);
 			water.draw(shader3D, shaderText3D,shaderWater);
-			dataShip.draw(shader2D, shader2DInstanced, shaderText);
 			sun.draw(shader3D);
+
+			plots.draw(shader2D, shader2DInstanced, shaderText);
+			loraUI.draw(shader2D,shaderText);
 
 			centerCross.draw(shader2D);
 		}

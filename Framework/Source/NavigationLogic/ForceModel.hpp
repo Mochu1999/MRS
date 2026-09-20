@@ -9,7 +9,7 @@
 
 void forceModel(Telemetry& t)
 {
-	t.calculateVariables();
+	//t.calculateVariables();
 	
 
 

@@ -6,7 +6,7 @@ struct InputGLFW
 {
 	GLFWwindow* window;
 	Camera* camera;
-	Telemetry* telemetry;
+	Telemetry* t;
 	Buttons* buttons;
 	TelemetryUI* ui;
 
@@ -28,8 +28,8 @@ struct InputGLFW
 	bool isDraggingWindow = false;
 
 
-	InputGLFW(GLFWwindow* window_, Camera* camera_, Telemetry* telemetry_, TelemetryUI* ui_, Buttons* buttons_)
-		:window(window_), camera(camera_), telemetry(telemetry_), ui(ui_), buttons(buttons_)
+	InputGLFW(GLFWwindow* window_, Camera* camera_, Telemetry* t_, TelemetryUI* ui_, Buttons* buttons_)
+		:window(window_), camera(camera_), t(t_), ui(ui_), buttons(buttons_)
 	{
 		glfwSetWindowUserPointer(window, this); //Stores a pointer to this specific InputGLFW instance inside the GLFWwindow
 
@@ -39,7 +39,7 @@ struct InputGLFW
 	}
 
 	//customPolls implicitly has the "this" pointer available, as it is a normal member function
-	//so camera and telemetry instances like camera->cameraPos are actually this->camera->cameraPos
+	//so camera and t instances like camera->cameraPos are actually this->camera->cameraPos
 	//but that function is the only one that isn't a GLFW callback
 	//GLFW callback functions expect a function pointer, meaning it must have those parameters and nothing more.
 	//And standard non-static member functions need a "this" (all of them, even if it isn't specified)
@@ -190,14 +190,16 @@ struct InputGLFW
 		//--- --- ---
 		// Telemetry keyboard
 		//--- --- ---
-		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && telemetry->sailAngle >= -60)
-			telemetry->sailAngle -= telemetry->sailIncrease;
-		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && telemetry->sailAngle <= 60)
-			telemetry->sailAngle += telemetry->sailIncrease;
-		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && telemetry->rudderAngle <= 40)
-			telemetry->rudderAngle -= telemetry->rudderIncrease;
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && telemetry->rudderAngle >= -40)
-			telemetry->rudderAngle += telemetry->rudderIncrease;
+		//
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && t->sailAngle >= -90)
+			t->sailAngle -= t->sailIncrease;
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && t->sailAngle <= 90)
+			t->sailAngle += t->sailIncrease;
+
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && t->rudderAngle >= -90)
+			t->rudderAngle -= t->rudderIncrease;
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && t->rudderAngle <= 90)
+			t->rudderAngle += t->rudderIncrease;
 
 	}
 
@@ -212,8 +214,70 @@ struct InputGLFW
 
 		if (action == GLFW_PRESS)
 		{
+			/////////////////////////////////////////////////////7
+			TextField* field = nullptr;
+
+			if (self->buttons->fieldRudder.state == 1)
+				field = &self->buttons->fieldRudder;
+			else if (self->buttons->fieldSail.state == 1)
+				field = &self->buttons->fieldSail;
+
+			if (field != nullptr)
+			{
+				if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9)
+				{
+					int number = key - GLFW_KEY_0;
+
+					if (!field->decimal)
+					{
+						if (field->negative)
+							field->newValue = field->newValue * 10 - number;
+						else
+							field->newValue = field->newValue * 10 + number;
+					}
+					else
+					{
+						if (field->negative)
+							field->newValue -= number * field->decimalFactor;
+						else
+							field->newValue += number * field->decimalFactor;
+
+						field->decimalFactor *= 0.1f;
+					}
+
+					return;
+				}
+
+				if (key == GLFW_KEY_PERIOD)
+				{
+					field->decimal = true;
+					return;
+				}
+
+				if (key == GLFW_KEY_MINUS || key == GLFW_KEY_KP_SUBTRACT)
+				{
+					field->negative = true;
+					field->newValue = -abs(field->newValue);
+					return;
+				}
+
+				if (key == GLFW_KEY_ENTER)
+				{
+					field->state = 2;
+					return;
+				}
+
+				if (key == GLFW_KEY_ESCAPE)
+				{
+					field->state = 0;
+					field->newValue = 0;
+					return;
+				}
+			}
+			/////////////////////////////////////////////////////7
+
 			//CTRL
-			if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+			else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 			{
 				switch (key)
 				{
@@ -283,8 +347,28 @@ struct InputGLFW
 			if (self->buttons->currentHoveredID != None)
 			{
 				self->buttons->currentPressedID = self->buttons->currentHoveredID;
+
+				if (self->buttons->currentPressedID == RudderText)
+				{
+					self->buttons->fieldRudder.state = 1;
+					self->buttons->fieldRudder.newValue = 0;
+
+					self->buttons->fieldRudder.decimal = false;
+					self->buttons->fieldRudder.decimalFactor = 0.1f;
+					self->buttons->fieldRudder.negative = false;
+				}
+				else if (self->buttons->currentPressedID == SailText)
+				{
+					self->buttons->fieldSail.state = 1;
+					self->buttons->fieldSail.newValue = 0;
+					self->buttons->fieldSail.decimal = false;
+					self->buttons->fieldSail.decimalFactor = 0.1f;
+					self->buttons->fieldSail.negative = false;
+
+					self->buttons->fieldRudder.state = 0;
+				}
 			}
-			if (self->buttons->currentPressedID == Drag)
+			if (self->buttons->currentPressedID == WindowDrag)
 			{
 				self->isDraggingWindow = true;
 				self->lastLMBPos = mPos;
@@ -296,7 +380,7 @@ struct InputGLFW
 			self->isLMBPressed = 0;
 
 			//Close and minimize actions are here because we need access to window
-			// As buttons have access to functionality of telemetry, they should also be here
+			// As buttons have access to functionality of t, they should also be here
 			if (self->buttons->currentPressedID == Close)
 			{
 				glfwSetWindowShouldClose(window, GLFW_TRUE);

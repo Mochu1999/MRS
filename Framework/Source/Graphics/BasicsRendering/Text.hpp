@@ -125,11 +125,18 @@ struct Text
 
 	void draw();
 
+	//incompleto
+	void clear()
+	{
+		textPosition.clear();
+		textToDraw.clear();
+	}
+
 	~Text();
 };
 
 /* Usage example
-text.createAtlas("resources/Glyphs/Helvetica/Helvetica.otf", 16);
+text.createAtlas(16, "resources/Glyphs/Helvetica/Helvetica.otf");
 
 TextEntry textEntry({ 50,100}, "algo");
 text.addDynamicText({ textEntry });

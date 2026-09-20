@@ -1,15 +1,16 @@
 
 //
+// 
 
 
 //To do
+// Buttons en UI
+// Bugs lineas plot, visualización de tiempos altos
 //fijar dataroute en algún sitio definitivo(y círculos, icono, líneas. Cambiar nombre para que lo refleje), mediterranean map corner fix, safe zones fix
 //visual speed water proportional to the ship's speed 
 // Anemómetro, flechas 3D
-// Simulation parts integration
 //Change rendering values menu, change telemetry values with the mouse
-//Settings: CameraSensivity value, water
-//Power consumed, solar panels
+//Power consumed
 
 
 //Caso límite muchos mensajes acumulados en el serial, solo procesar de ";" a ";"
@@ -43,14 +44,14 @@ int main()
 	Camera camera;
 	initializeCameraLocations(shader3D, shader2D, shader2DInstanced, shaderText, shaderText3D, shaderWater, camera);
 
-	Buttons buttons;
 
-	Telemetry telemetry;
-	TelemetryUI ui(telemetry, shader3D, shader2D, shader2DInstanced, shaderText, shaderText3D, shaderWater, camera, buttons);
-	//LoRa lora(telemetry);
+	Telemetry t;
+	LoRa lora(t);
+	Buttons buttons(t.rudderAngle, t.sailAngle);
+	TelemetryUI ui(t, shader3D, shader2D, shader2DInstanced, shaderText, shaderText3D, shaderWater, camera, buttons, lora);
 
 	Settings settings(camera);
-	InputGLFW inputGLFW(window, &camera, &telemetry, &ui, &buttons);
+	InputGLFW inputGLFW(window, &camera, &t, &ui, &buttons);
 
 	//return 0;
 	while (!glfwWindowShouldClose(window))
@@ -62,11 +63,11 @@ int main()
 			buttons.update();
 
 			//program's logic
-			telemetry.update();
+			t.update();
 			//program's rendering
 			ui.draw();
 			//sends message if value is updated
-			//lora.update();
+			lora.update();
 
 			inputGLFW.customPolls();
 			camera.updateCamera();

@@ -11,19 +11,24 @@ If it isn't at COM5 change the variable portName
 //Sends bytes from a string
 // On first iteration they are angle of rudder and angle of sail
 
-using Clock = std::chrono::steady_clock; //NEEDS TO BE UNIFIED
+using Clock = std::chrono::steady_clock; //TO BE UNIFIED
+
+//Needed to find the CH340 port
+#include <setupapi.h>
+#include <devguid.h>
+#pragma comment(lib, "setupapi.lib")
 
 struct LoRa
 {
 	Telemetry& t;
 
 	//Currently, name must be manually set
-	const char* portName = "\\\\.\\COM5";
+	string portName;
 	//serial is Window's ID of the serial port
 	HANDLE serial = INVALID_HANDLE_VALUE;
 
 	string message; //it will update as soon as one of its parameters change
-	bool isMessageNew = 0;
+	bool isMessageNew = 0; //signals that a message must be sent to the ESP
 
 	//Variables to be messaged
 	//Currently these copies track if there are changes and the need to send a new message
@@ -32,13 +37,19 @@ struct LoRa
 
 
 	//variables to control if a confirmation message has been received in the waitingConfirmationTime
-	std::chrono::duration<long long, std::milli> waitingConfirmationTime = std::chrono::milliseconds(3000);
+	std::chrono::duration<long long, std::milli> waitingConfirmationTime = std::chrono::milliseconds(1500);
 	bool isReceivingMssgPending = false;
 	Clock::time_point lastSentMessageTime = Clock::now();
+
+	//for debugging purposes
+	int state = 0; //0-closed serial //1-sent message //2-confirmed message
+	string lastMessage = "Closed serial!";
+
 
 	LoRa(Telemetry& telemetry_)
 		:t(telemetry_)
 	{
+
 		lastRudderAngle = t.rudderAngle;
 		lastSailAngle = t.sailAngle;
 
@@ -56,7 +67,7 @@ struct LoRa
 	//Checks if one of the telemetry values have changed, if so, it sends a message with the new values
 	void update()
 	{
-		//Checking if variables have changed
+		//Checking if variables have changed to modify message
 		if (lastRudderAngle != t.rudderAngle || lastSailAngle != t.sailAngle)
 		{
 			isMessageNew = true;
@@ -65,14 +76,8 @@ struct LoRa
 			lastSailAngle = t.sailAngle;
 
 			message = createMessage();
+
 		}
-
-
-		//always sees if there's data available in the serial
-		readSerial();
-
-
-
 
 		//updates counterUpdateTransmitter, will only write on the serial if enough time has elapsed
 		t.tm.updateTransmitter();
@@ -92,6 +97,16 @@ struct LoRa
 			}
 		}
 
+
+		
+		//always sees if there's data available in the serial
+		readSerial();
+
+
+
+
+		
+
 		//No confirmation message arrived, so we are sending the message again
 		if (isReceivingMssgPending && Clock::now() - lastSentMessageTime >= waitingConfirmationTime)
 		{
@@ -103,23 +118,26 @@ struct LoRa
 				isMessageNew = false;
 			}
 		}
+		
 	}
 
 
 	std::string createMessage()
 	{
 		std::ostringstream ss;
-		ss << t.rudderAngle << " " << t.sailAngle << "; ";
+		ss << round2d(t.rudderAngle) << " " << round2d(t.sailAngle) << "; ";
 		return ss.str();
 	}
-
+	
 
 	void openSerial()
 	{
+		portName = findLoRaPort();
+
 		//In windows everything is treated like a file
 		//A handle is windows internal reference to the opened resource, this rewrites it
 		serial = CreateFileA(
-			portName,
+			portName.c_str(),
 			GENERIC_READ | GENERIC_WRITE, //Permission to read and write
 			0, //do not allow other programs to access COM5 simultaneously
 			nullptr, //default security configuration
@@ -197,6 +215,9 @@ struct LoRa
 		{
 			CloseHandle(serial);
 			serial = INVALID_HANDLE_VALUE;
+
+			lastMessage = "Closed LoRa serial!";
+			state = 0;
 		}
 	}
 
@@ -247,9 +268,12 @@ struct LoRa
 
 		
 
-		//notify if not all bytes have been sent
+		//notifies if not all bytes have been sent
 		if (bytesWritten / float(strlen(mssg)) != 1)
 			std::cout << "Error sending the message. Percentage of successful written bytes: " << bytesWritten / float(strlen(mssg)) * 100 << "%\n";
+
+		state = 1;
+		lastMessage = "Sent:          " + message;
 		return 1;
 
 	}
@@ -271,13 +295,7 @@ struct LoRa
 
 		DWORD bytesRead = 0;
 
-		BOOL received = ReadFile(
-			serial,
-			buffer,
-			sizeof(buffer) - 1,
-			&bytesRead,
-			nullptr
-		);
+		BOOL received = ReadFile( serial, buffer, sizeof(buffer) - 1, &bytesRead, nullptr );
 
 		if (!received)
 		{
@@ -299,11 +317,11 @@ struct LoRa
 
 	void processConfirmationMessage(char buffer[256])
 	{
-		// Raspberry Pi signature must be the first character
-		if (buffer[0] != 'r')
+		// ESP's c for confirmation must be the first character
+		if (buffer[0] != 'c')
 		{
 			isMessageNew = true;
-			cout << "incorrect raspberry signature in confirmation mssg. Sending message again...\n";
+			cout << "incorrect ESP signature in confirmation mssg. Sending message again...\n";
 			return;
 		}
 
@@ -311,11 +329,11 @@ struct LoRa
 		float receivedSailAngle;
 		char endCharacter;
 
-		// Skip the initial 'r' and extract both values
+		// Skip the initial 'c'
 		std::istringstream ss(buffer + 1);
 
 		//checking that the format is correct
-		if (!(ss >> receivedRudderAngle >> receivedSailAngle >> endCharacter))
+		if (!(ss >> receivedRudderAngle >> receivedSailAngle >> endCharacter) || endCharacter != ';')
 		{
 			isMessageNew = true;
 			cout << "incorrect format in confirmation mssg. Sending message again...\n";
@@ -323,14 +341,6 @@ struct LoRa
 			return;
 		}
 
-		// Message must finish its values with ";" or the message is incomplete
-		if (endCharacter != ';')
-		{
-			isMessageNew = true;
-			cout << "lacking ';' at the end of confirmation mssg. Sending message again...\n";
-
-			return;
-		}
 
 		//comparison of the values
 		//There might be floating errors in the comparison, using eps
@@ -348,5 +358,54 @@ struct LoRa
 
 		//confirmation received so we cancel the order of triggering a message because none arrived
 		isReceivingMssgPending = false;
+
+		state = 2;
+		lastMessage = "Confirmed: " + message;
+
+	}
+
+	std::string findLoRaPort()
+	{
+		HDEVINFO devices = SetupDiGetClassDevs(
+			&GUID_DEVCLASS_PORTS,
+			nullptr,
+			nullptr,
+			DIGCF_PRESENT
+		);
+
+		SP_DEVINFO_DATA deviceInfo{};
+		deviceInfo.cbSize = sizeof(deviceInfo);
+
+		char name[256];
+
+		for (DWORD i = 0; SetupDiEnumDeviceInfo(devices, i, &deviceInfo); i++)
+		{
+			if (SetupDiGetDeviceRegistryPropertyA(
+				devices,
+				&deviceInfo,
+				SPDRP_FRIENDLYNAME,
+				nullptr,
+				reinterpret_cast<PBYTE>(name),
+				sizeof(name),
+				nullptr))
+			{
+				std::string deviceName = name;
+
+				if (deviceName.find("CH340") != std::string::npos)
+				{
+					size_t start = deviceName.find("(COM");
+					size_t end = deviceName.find(')', start);
+
+					std::string com = deviceName.substr(start + 1, end - start - 1);
+
+					SetupDiDestroyDeviceInfoList(devices);
+
+					return "\\\\.\\" + com;
+				}
+			}
+		}
+
+		SetupDiDestroyDeviceInfoList(devices);
+		return "";
 	}
 };

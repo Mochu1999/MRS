@@ -235,6 +235,7 @@ struct AuxVisual3D
 			shaderWater.bind();
 			shaderWater.setUniform("u_CropRadius", waterRadius);
 			matrix4x4 waterMatrix = identityMatrix;
+			rotate3DModelMatrix(waterMatrix, t.headingAngle, { 0,1,0 });
 			translate3DModelMatrix(waterMatrix, { waterPos,0,-5 });
 
 			waterPos -= 0.01;

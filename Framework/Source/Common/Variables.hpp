@@ -45,6 +45,7 @@ inline p2 mPos = { 0,0 };
 inline p3 white = { 1,1,1 };
 inline p3 almostWhite = { 0.9,0.9,0.9 }; //to better appreciate shades
 inline p3 deepGrey = { 0.1, 0.1, 0.1 };
+inline p3 grey = { 0.121f, 0.121f, 0.121f };
 inline p3 garnet = { 137.0f / 255.0f, 18.0f / 255.0f, 18.0f / 255.0f };
 inline p3 lightBlue = { 40.0f / 255.0f, 189.9f / 255.0f, 255.0f / 255.0f };
 
