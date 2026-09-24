@@ -1,5 +1,5 @@
 
-//
+// OnBoard arduino implementation. CMake configuration for release. Rudder and Sail control with text fields and drag bars. Small changes to the UI. Working Release folder for whatever pc with VC_redist.x64. Deleted OpenCascade references
 // 
 
 

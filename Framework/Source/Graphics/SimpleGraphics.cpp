@@ -59,6 +59,8 @@ void loadIcon(GLFWwindow* window)
 //specific version where you set the window's height and name
 GLFWwindow* initialize(float windowWidth_, float windowHeight_, const char* windowName)
 {
+	ShowWindow(GetConsoleWindow(), SW_HIDE); //A console is created at the start, but it is later removed. There are options to never create it at all
+
 	windowWidth = windowWidth_;
 	//-1 to access Windows' bottom bar
 	if (windowHeight_ == windowHeight)

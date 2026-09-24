@@ -55,6 +55,14 @@ struct InputGLFW
 		// Mouse movement 
 		//--- --- ---
 
+		/////////////////
+		if (isLMBPressed && buttons->currentPressedID == RudderBar)
+			buttons->barRudder.drag(mPos.x);
+		if (isLMBPressed && buttons->currentPressedID == SailBar)
+			buttons->barSail.drag(mPos.x);
+		/////////////////////
+
+
 
 		mPosVariation = lastMPos - mPos;
 		lMBPosVariation = lastLMBPos - mPos;

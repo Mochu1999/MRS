@@ -33,9 +33,9 @@ set_property(TARGET Telemetry PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CU
 # Sets Telemetry as the startup project (the one that runs with F5)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Telemetry)
 
-set_target_properties(Telemetry PROPERTIES MSVC_RUNTIME_LIBRARY "$<$<CONFIG:Debug>:MultiThreadedDebugDLL>")
+set_target_properties(Telemetry PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
-set_target_properties(Telemetry PROPERTIES COMPILE_DEFINITIONS "_DEBUG;_CONSOLE;GLEW_STATIC")
+target_compile_definitions(Telemetry PRIVATE $<$<CONFIG:Debug>:_DEBUG> _CONSOLE GLEW_STATIC)
 
 target_include_directories(Telemetry PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Source"
@@ -50,7 +50,7 @@ target_include_directories(Telemetry PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Resources/External/Includes"
 )
 
-target_compile_options(Telemetry PRIVATE /W3 /sdl)
+target_compile_options(Telemetry PRIVATE /W0 /sdl)
 target_compile_options(Telemetry PRIVATE $<$<CONFIG:Debug>:/Zi>)
 set_property(TARGET Telemetry PROPERTY VS_GLOBAL_SupportJustMyCodeDebugging "true")
 
@@ -68,11 +68,11 @@ string(REPLACE ";" ";" _EXTRA_LIBS_LIST "${_EXTRA_LIBS}")
 target_link_libraries(Telemetry PRIVATE ${_EXTRA_LIBS_LIST})
 
 
-#Copies external DLLs to output build dir
+#Copies external DLLs and the Resource folder in the output build dir
 add_custom_command(TARGET Telemetry POST_BUILD
 COMMAND ${CMAKE_COMMAND} -E copy_if_different ${EXTERNAL_DLLS} $<TARGET_FILE_DIR:Telemetry>
+COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/../Resources" "$<TARGET_FILE_DIR:Telemetry>/Resources"
 )
-
 set(build_root "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
 #Puts build outputs (.exe, .dll, .lib) in build/release or build/debug

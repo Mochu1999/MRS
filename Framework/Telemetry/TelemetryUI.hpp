@@ -19,6 +19,8 @@
 #include "World.hpp"
 #include "Icons.hpp"
 
+
+
 struct DataRoute
 {
 	Telemetry& t;
@@ -140,7 +142,7 @@ struct LoRaUI
 		:lora(lora_)
 	{
 		loraStatus.createAtlas(36, "resources/Glyphs/Helvetica/Helvetica.otf");
-		outerBox.addRectangle({ 0,0 }, { 450,200 });
+		outerBox.addRectangle({ 0,70 }, { 450,156 });
 		innerBox.addRectangle({ 40,90 }, { 400,136 });
 		
 	}
@@ -155,10 +157,10 @@ struct LoRaUI
 
 		if(lora.state==0)
 			shader2D.setUniform("u_Color", red, 0.5);
-		if (lora.state == 1)
+		else if (lora.state == 1)
 			shader2D.setUniform("u_Color", grey, 1);
-		if (lora.state == 2)
-			shader2D.setUniform("u_Color", green, 0.2);
+		else if (lora.state == 2)
+			shader2D.setUniform("u_Color", lightBlue, 0.2);
 		innerBox.draw();
 
 
@@ -169,6 +171,43 @@ struct LoRaUI
 	}
 
 };
+
+
+struct ControlRudderSailUI
+{
+	Text text;
+	Polygons2D outerBox;
+
+	ControlRudderSailUI()
+	{
+		text.createAtlas(25, "resources/Glyphs/Helvetica/Helvetica.otf");
+		outerBox.addRectangle({ 0, 490 }, { 450,680 });
+	}
+
+	void draw(Shader& shader2D, Shader& shaderText)
+	{
+		transparent();
+		shader2D.bind();
+		shader2D.setUniform("u_Color", grey, 1);
+		outerBox.draw();
+
+
+		shaderText.bind();
+		shaderText.setUniform("u_Color", lightBlue);
+
+		text.addDynamicText({ 
+			{ { 10,650 }, "Sail" },
+			{ { 10,550 }, "Rudder" }
+			});
+		text.draw();
+
+		shaderText.setUniform("u_Color", white);
+
+	}
+
+
+};
+
 
 struct TelemetryUI
 {
@@ -197,6 +236,7 @@ struct TelemetryUI
 	CenterCross centerCross;
 	Plots plots;
 	Axis axis;
+	ControlRudderSailUI controlRudderSail;
 
 	//Route
 	World world;
@@ -229,6 +269,7 @@ struct TelemetryUI
 
 			plots.draw(shader2D, shader2DInstanced, shaderText);
 			loraUI.draw(shader2D,shaderText);
+			controlRudderSail.draw(shader2D, shaderText);
 
 			centerCross.draw(shader2D);
 		}

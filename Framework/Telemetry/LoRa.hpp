@@ -43,7 +43,7 @@ struct LoRa
 
 	//for debugging purposes
 	int state = 0; //0-closed serial //1-sent message //2-confirmed message
-	string lastMessage = "Closed serial!";
+	string lastMessage = "Closed LoRa serial!";
 
 
 	LoRa(Telemetry& telemetry_)

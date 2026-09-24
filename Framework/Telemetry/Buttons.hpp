@@ -96,17 +96,17 @@ struct DragBar
 
 	p2 barCenter; //fixed
 	p2 squareCenter; //moves
-	float squareWidth = 18; //fixed
+	float squareWidth = 18;
 
-	float distance = 50; //bar goes distance left/right
+	float distance = 100; //bar goes distance left/right
 
-	int state = 0; //0 normal, 1 being dragged
+	float& value;
 
 	Polygons2D square;
 	Polygons2D bar;
 
-	DragBar(ButtonID id_, p2 center_)
-		: id(id_), barCenter(center_), squareCenter(center_)
+	DragBar(ButtonID id_, p2 center_, float& value_)
+		: id(id_), barCenter(center_), squareCenter(center_), value(value_)
 	{
 		square.addRectangle(
 			{ squareCenter.x - squareWidth, squareCenter.y - squareWidth },
@@ -117,24 +117,54 @@ struct DragBar
 			{ barCenter.x + distance, barCenter.y + 3 });
 	}
 
+	void drag(float mouseX)
+	{
+		float newX = mouseX;
+
+		if (newX < barCenter.x - distance)
+			newX = barCenter.x - distance;
+		else if (newX > barCenter.x + distance)
+			newX = barCenter.x + distance;
+
+		float movement = newX - squareCenter.x;
+		squareCenter.x = newX;
+
+		for (p2& p : square.positions)
+			p.x += movement;
+
+		// left = -90º, center = 0º, right = +90º
+		value = 90.0f * (squareCenter.x - barCenter.x) / distance;
+	}
+
 	void draw(Shader& shader2D, ButtonID currentPressedID, ButtonID currentHoveredID)
 	{
 		shader2D.setUniform("u_Color", almostWhite, 1);
 		bar.draw();
 
-
-		if (currentPressedID == id) //pressed
+		if (currentPressedID == id)
 			shader2D.setUniform("u_Color", 20.0f / 255.0f, 120.0f / 255.0f, 180.0f / 255.0f, 1);
-		else if (currentHoveredID == id) //hovering
+		else if (currentHoveredID == id)
 			shader2D.setUniform("u_Color", 80.0f / 255.0f, 210.0f / 255.0f, 255.0f / 255.0f, 1);
-		else //normal
+		else
 			shader2D.setUniform("u_Color", 40.0f / 255.0f, 190.0f / 255.0f, 255.0f / 255.0f, 1);
+
+		matrix4x4 modelMatrix = identityMatrix;
+		translate2DModelMatrix(modelMatrix, p2{ squareCenter.x - barCenter.x, 0 });
+
+		shader2D.setUniform("u_Model", modelMatrix);
 		square.draw();
+		shader2D.setUniform("u_Model", identityMatrix);
+
 	}
 };
 
 
 //STRUCTS CON TEXTURAS Y E ICONOS PARA MINIMIZAR Y CERRAR
+
+//Los botones deberían de vivir en UI, junto con la struct de su zona
+//Las hitboxes no deberían de comprobarse siempre, solo mientras esté visible sus botones (no mostrar si te vas a route)
+
+
 
 
 //all Buttons of the program
@@ -156,7 +186,7 @@ struct Buttons
 
 	TextField fieldRudder, fieldSail;
 
-	DragBar barRudder;
+	DragBar barRudder,barSail;
 
 	//each loop it looks if we are over a button
 	ButtonID currentHoveredID = None;
@@ -172,7 +202,8 @@ struct Buttons
 		, buttonCourse(RouteID, p2{ 100,windowHeight - tbh - 30 }, p2{ 200, windowHeight - tbh })
 		, fieldRudder(RudderText, p2{ 50,500 }, p2{ 140,536 }, rudderAngle)
 		, fieldSail(SailText, p2{ 50,600 }, p2{ 140,636 }, sailAngle)
-		, barRudder(RudderBar, p2{ 250,518 })
+		, barRudder(RudderBar, p2{ 300,518 }, rudderAngle)
+		, barSail(SailBar, p2{ 300,618 }, sailAngle)
 	{
 
 
@@ -233,6 +264,7 @@ struct Buttons
 		shader2D.bind();
 
 		barRudder.draw(shader2D, currentPressedID, currentHoveredID);
+		barSail.draw(shader2D, currentPressedID, currentHoveredID);
 
 		//sail
 		colorButton(fieldSail, shader2D);
@@ -265,6 +297,7 @@ struct Buttons
 		if (isInsideHitBox(fieldRudder, m)) return fieldRudder.id;
 		if (isInsideHitBox(fieldSail, m)) return fieldSail.id;
 		if (isInsideHitBox(barRudder, m)) return barRudder.id;
+		if (isInsideHitBox(barSail, m)) return barSail.id;
 
 		return None;
 	}
