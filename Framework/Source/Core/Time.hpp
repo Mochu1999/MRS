@@ -3,9 +3,9 @@
 #include <chrono>
 using namespace std::chrono;
 
+#include "Common.hpp"
 
-
-//if isRunning = 0 the counter keeps summing, if you want to stop it create a variable pausedTime that only adds time if paused and is always been rest from the sum
+//Tener todos los relojes de una aplicación compleja por separado no es viable. Estudiar meter la funcionalidad en common y implementar dentro de las que sean necesario
 
 struct TimeStruct 
 {
@@ -81,6 +81,6 @@ struct TimeCounter
 	{
 		lastTime = high_resolution_clock::now();
 		endTime = duration_cast<duration<double>>(lastTime - currentTime).count();
-		std::cout << "Elapsed time: " << endTime << "s" << endl;
+		std::cout << "Elapsed time: " << endTime << "s" << std::endl;
 	}
 };

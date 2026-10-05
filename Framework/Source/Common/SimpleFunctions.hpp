@@ -53,3 +53,11 @@ inline float msToKn(float ms)
 {
 	return ms * 1.943844;
 }
+
+//it solves the point yt from y = y0 + m*(x-x0), where x is the point you are trying to get y from
+inline void linearInterpolator(float x0, float x1, float y0, float y1, float x, float& y)
+{
+	float m = (y1 - y0) / (x1 - x0);
+	y = y0 + m * (x - x0);
+}
+

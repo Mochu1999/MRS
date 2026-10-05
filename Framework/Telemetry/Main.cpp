@@ -1,5 +1,5 @@
 
-// OnBoard arduino implementation. CMake configuration for release. Rudder and Sail control with text fields and drag bars. Small changes to the UI. Working Release folder for whatever pc with VC_redist.x64. Deleted OpenCascade references
+// Force Model implementation. Addition of hull resistances. Linear interpotalor function.
 // 
 
 
@@ -13,14 +13,12 @@
 //Power consumed
 
 
-//Caso límite muchos mensajes acumulados en el serial, solo procesar de ";" a ";"
-//Icono de que hay o no hay antena
-
 #include "Common.hpp"
 #include "Graphics.hpp"
 
 #include "SettingsTelemetry.hpp"
 
+#include "Parameters.hpp"
 #include "TelemetryUI.hpp"
 
 #include "LoRa.hpp"
@@ -45,15 +43,15 @@ int main()
 	initializeCameraLocations(shader3D, shader2D, shader2DInstanced, shaderText, shaderText3D, shaderWater, camera);
 
 
-	Telemetry t;
-	LoRa lora(t);
-	Buttons buttons(t.rudderAngle, t.sailAngle);
-	TelemetryUI ui(t, shader3D, shader2D, shader2DInstanced, shaderText, shaderText3D, shaderWater, camera, buttons, lora);
+	Parameters p;
+	LoRa lora(p);
+	Buttons buttons(p.rudderAngle, p.sailAngle);
+	TelemetryUI ui(p, shader3D, shader2D, shader2DInstanced, shaderText, shaderText3D, shaderWater, camera, buttons, lora);
 
 	Settings settings(camera);
-	InputGLFW inputGLFW(window, &camera, &t, &ui, &buttons);
+	InputGLFW inputGLFW(window, &camera, &p, &ui, &buttons);
 
-	//return 0;
+	return 0;
 	while (!glfwWindowShouldClose(window))
 	{
 		inputGLFW.getPos(window, mPos);
@@ -63,7 +61,7 @@ int main()
 			buttons.update();
 
 			//program's logic
-			t.update();
+			p.update();
 			//program's rendering
 			ui.draw();
 			//sends message if value is updated

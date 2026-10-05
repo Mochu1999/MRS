@@ -20,7 +20,7 @@ using Clock = std::chrono::steady_clock; //TO BE UNIFIED
 
 struct LoRa
 {
-	Telemetry& t;
+	Parameters& p;
 
 	//Currently, name must be manually set
 	string portName;
@@ -46,12 +46,12 @@ struct LoRa
 	string lastMessage = "Closed LoRa serial!";
 
 
-	LoRa(Telemetry& telemetry_)
-		:t(telemetry_)
+	LoRa(Parameters& p_)
+		:p(p_)
 	{
 
-		lastRudderAngle = t.rudderAngle;
-		lastSailAngle = t.sailAngle;
+		lastRudderAngle = p.rudderAngle;
+		lastSailAngle = p.sailAngle;
 
 		openSerial();
 
@@ -68,23 +68,23 @@ struct LoRa
 	void update()
 	{
 		//Checking if variables have changed to modify message
-		if (lastRudderAngle != t.rudderAngle || lastSailAngle != t.sailAngle)
+		if (lastRudderAngle != p.rudderAngle || lastSailAngle != p.sailAngle)
 		{
 			isMessageNew = true;
 
-			lastRudderAngle = t.rudderAngle;
-			lastSailAngle = t.sailAngle;
+			lastRudderAngle = p.rudderAngle;
+			lastSailAngle = p.sailAngle;
 
 			message = createMessage();
 
 		}
 
 		//updates counterUpdateTransmitter, will only write on the serial if enough time has elapsed
-		t.tm.updateTransmitter();
+		p.tm.updateTransmitter();
 
-		if (t.tm.counterUpdateTransmitter)
+		if (p.tm.counterUpdateTransmitter)
 		{
-			t.tm.counterUpdateTransmitter = 0; //resetting the counter
+			p.tm.counterUpdateTransmitter = 0; //resetting the counter
 
 			//there's a message to be transmited
 			if (isMessageNew)
@@ -125,7 +125,7 @@ struct LoRa
 	std::string createMessage()
 	{
 		std::ostringstream ss;
-		ss << round2d(t.rudderAngle) << " " << round2d(t.sailAngle) << "; ";
+		ss << round2d(p.rudderAngle) << " " << round2d(p.sailAngle) << "; ";
 		return ss.str();
 	}
 	
@@ -344,8 +344,8 @@ struct LoRa
 
 		//comparison of the values
 		//There might be floating errors in the comparison, using eps
-		if (std::abs(receivedRudderAngle - t.rudderAngle) > 0.01 ||
-			std::abs(receivedSailAngle - t.sailAngle) > 0.01)
+		if (std::abs(receivedRudderAngle - p.rudderAngle) > 0.01 ||
+			std::abs(receivedSailAngle - p.sailAngle) > 0.01)
 		{
 			isMessageNew = true;
 			cout << "incorrect variables received from confirmation mssg. Sending message again...\n";

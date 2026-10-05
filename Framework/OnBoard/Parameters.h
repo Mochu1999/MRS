@@ -1,15 +1,28 @@
+
 struct Parameters
 {
   // --- --- ---
 	// Configuration variables
 	// --- --- ---
+
+  //i2c
+  int pinSDA = 16;
+  int pinSCL = 17;
+
+  //Servo
   int pinServo = 13;
 
+  //Stepper
   int pinDir = 32;
   int pinStep = 33;
 
-  int pinLoRaRX = 15;
-  int pinLoRaTX = 2;
+  //LoRa
+  int pinLoRaRX = 22;
+  int pinLoRaTX = 23;
+
+  //GPS uart
+  int pinGPSRX = 15;
+  int pinGPSTX = 2;
 
 
 
@@ -20,11 +33,13 @@ struct Parameters
 	float rudderAngle = 0;
 
 
+  float gpsTimeMultiplier = 0.1;
 
   Parameters()
   {
-    pinMode(pinDir, OUTPUT);
-    pinMode(pinStep, OUTPUT);
+    //setting common i2c
+    Wire.begin(pinSDA, pinSCL);
+
   }
   
 };

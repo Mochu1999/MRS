@@ -128,3 +128,58 @@ void stlToSimplePolyhedra(const std::string& inputLocalPath, const std::string& 
 	writeSimplePolyhedra(outputLocalPath, positions, normals, indices);
 }
 // stlToBinary("pendulum1.stl", "pendulum1.bin");
+
+
+
+bool readEntryMatrixText(string& path, unsigned int row, unsigned int column, float& value)
+{
+	std::ifstream file(path);
+
+	if (!file.is_open())
+		return false;
+
+	std::string line;
+
+	for (unsigned int r = 0; r <= row; r++)
+	{
+		if (!std::getline(file, line))
+			return false;
+	}
+
+	std::istringstream stream(line);
+	float entry;
+
+	for (unsigned int c = 0; c <= column; c++)
+	{
+		if (!(stream >> entry))
+			return false;
+	}
+
+	value = entry;
+	return true;
+}
+
+
+void readResistancesText(string path, vector<pair<float, float>>& hullResistances)
+{
+	//I wasn't been able of reading the txt bc of encoding, this chatgpt implementation works
+
+	ifstream file(path, ios::binary);
+
+	if (!file)
+	{
+		cout << "Error opening resistance file: " << path << endl;
+		return;
+	}
+
+	string text((istreambuf_iterator<char>(file)), {});
+	text.erase(remove(text.begin(), text.end(), '\0'), text.end());
+	text.erase(0, 2); // UTF-16 BOM
+
+	istringstream stream(text);
+
+	float knots, velocity, froude, resistance;
+
+	while (stream >> knots >> velocity >> froude >> resistance)
+		hullResistances.push_back({ velocity, resistance });
+}

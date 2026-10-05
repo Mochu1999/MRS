@@ -3,10 +3,10 @@
 
 struct Route
 {
-	Telemetry& t;
+	Parameters& p;
 
-	Route(Telemetry& t_)
-		:t(t_)
+	Route(Parameters& p_)
+		:p(p_)
 	{
 
 	}

@@ -6,7 +6,7 @@ struct InputGLFW
 {
 	GLFWwindow* window;
 	Camera* camera;
-	Telemetry* t;
+	Parameters* p;
 	Buttons* buttons;
 	TelemetryUI* ui;
 
@@ -28,8 +28,8 @@ struct InputGLFW
 	bool isDraggingWindow = false;
 
 
-	InputGLFW(GLFWwindow* window_, Camera* camera_, Telemetry* t_, TelemetryUI* ui_, Buttons* buttons_)
-		:window(window_), camera(camera_), t(t_), ui(ui_), buttons(buttons_)
+	InputGLFW(GLFWwindow* window_, Camera* camera_, Parameters* p_, TelemetryUI* ui_, Buttons* buttons_)
+		:window(window_), camera(camera_), p(p_), ui(ui_), buttons(buttons_)
 	{
 		glfwSetWindowUserPointer(window, this); //Stores a pointer to this specific InputGLFW instance inside the GLFWwindow
 
@@ -199,15 +199,17 @@ struct InputGLFW
 		// Telemetry keyboard
 		//--- --- ---
 		//
-		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && t->sailAngle >= -90)
-			t->sailAngle -= t->sailIncrease;
-		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && t->sailAngle <= 90)
-			t->sailAngle += t->sailIncrease;
+		float sailIncrease = 0.4; //how much it changes by pressing the keyboard
+		float rudderIncrease = 0.4; //how much it changes by pressing the keyboard
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && p->sailAngle >= -90)
+			p->sailAngle -= sailIncrease;
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && p->sailAngle <= 90)
+			p->sailAngle += sailIncrease;
 
-		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && t->rudderAngle >= -90)
-			t->rudderAngle -= t->rudderIncrease;
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && t->rudderAngle <= 90)
-			t->rudderAngle += t->rudderIncrease;
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && p->rudderAngle >= -90)
+			p->rudderAngle -= rudderIncrease;
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && p->rudderAngle <= 90)
+			p->rudderAngle += rudderIncrease;
 
 	}
 

@@ -1,5 +1,4 @@
 #pragma once
-#include "Telemetry.hpp"
 
 struct Ship2DIcon
 {
@@ -25,11 +24,11 @@ struct Ship2DIcon
 		polyhedraTo2D(interm, timon2D);
 	}
 
-	void draw(World& world, Telemetry& t, Shader& shader2D)
+	void draw(World& world, Parameters& p, Shader& shader2D)
 	{
 		//Only for visual projection because the one from 
-		p2 finish = lonLatToMercator(t.finishPoint);
-		p2 current = lonLatToMercator(t.position);
+		p2 finish = lonLatToMercator(p.finishPoint);
+		p2 current = lonLatToMercator(p.position);
 
 		p2 delta = finish - current;
 		float headingAngleProjection = degrees(atan2(delta.y, delta.x));
@@ -46,14 +45,14 @@ struct Ship2DIcon
 		matrix4x4 ship2DMatrix = identityMatrix;
 		translate2DModelMatrix(ship2DMatrix, world.translationModel);
 		scale2DModelMatrix(ship2DMatrix, world.scaleModel);
-		translate2DModelMatrix(ship2DMatrix, lonLatToMercator(t.position));
+		translate2DModelMatrix(ship2DMatrix, lonLatToMercator(p.position));
 		rotate2DModelMatrix(ship2DMatrix, headingAngleProjection);
 		scale2DModelMatrix(ship2DMatrix, 100000); //Arbitrary so the icon gets big
 
 		//We build and draw the rudder matrix first as its drawing goes under
 		matrix4x4 rudderMatrix = ship2DMatrix;
 
-		rotate2DModelMatrix(rudderMatrix, t.rudderAngle);
+		rotate2DModelMatrix(rudderMatrix, p.rudderAngle);
 		scale2DModelMatrix(rudderMatrix, 4); //Otherwise the rudder is not seen from above
 		shader2D.setUniform("u_Model", rudderMatrix);
 		shader2D.setUniform("u_Color", 1, 1, 1, 1.0f);
@@ -77,8 +76,8 @@ struct Ship2DIcon
 		//Sail model matrix
 		matrix4x4 sail2DMatrix = ship2DMatrix;
 
-		translate2DModelMatrix(ship2DMatrix, { t.sailPositionVisual.x,t.sailPositionVisual.z });
-		rotate2DModelMatrix(ship2DMatrix, t.sailAngle);
+		translate2DModelMatrix(ship2DMatrix, { p.sailPositionVisual.x,p.sailPositionVisual.z });
+		rotate2DModelMatrix(ship2DMatrix, p.sailAngle);
 		shader2D.setUniform("u_Model", ship2DMatrix);
 		shader2D.setUniform("u_Color", 1, 1, 1, 1.0f);
 		vela2D.draw();

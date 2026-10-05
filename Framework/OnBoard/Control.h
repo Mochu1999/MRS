@@ -21,6 +21,9 @@ struct Control
   Control(Parameters& p_)
     : p(p_)
   {
+    pinMode(p.pinDir, OUTPUT);
+    pinMode(p.pinStep, OUTPUT);
+
     servo1.attach(p.pinServo);
     servo1.write(90); //forcing it to start at 0
   }

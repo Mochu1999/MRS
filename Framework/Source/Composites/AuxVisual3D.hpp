@@ -8,7 +8,7 @@ struct AuxVisual3D
 {
 	float waterRadius = 2;
 
-	Telemetry& t;
+	Parameters& p;
 
 	Polyhedra water;
 
@@ -43,7 +43,7 @@ struct AuxVisual3D
 	//Lines
 	Lines3D headingLine, shipSpeedLine, sailLine, rudderLine;
 
-	AuxVisual3D(Telemetry& t_) :t(t_)
+	AuxVisual3D(Parameters& p_) :p(p_)
 	{
 
 		createWaterMesh();
@@ -235,7 +235,7 @@ struct AuxVisual3D
 			shaderWater.bind();
 			shaderWater.setUniform("u_CropRadius", waterRadius);
 			matrix4x4 waterMatrix = identityMatrix;
-			rotate3DModelMatrix(waterMatrix, t.headingAngle, { 0,1,0 });
+			rotate3DModelMatrix(waterMatrix, p.headingAngle, { 0,1,0 });
 			translate3DModelMatrix(waterMatrix, { waterPos,0,-5 });
 
 			waterPos -= 0.01;
@@ -252,7 +252,7 @@ struct AuxVisual3D
 
 		shader3D.bind();
 		matrix4x4 headingMatrix = identityMatrix;
-		rotate3DModelMatrix(headingMatrix, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(headingMatrix, p.headingAngle, { 0,1,0 });
 
 
 
@@ -260,7 +260,7 @@ struct AuxVisual3D
 		opaque();
 		shader3D.setUniform("u_Color", white, 1);
 		matrix4x4 modelText = identityMatrix;
-		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(modelText, p.headingAngle, { 0,1,0 });
 		shader3D.setUniform("u_Model", modelText);
 		compassLines.draw();
 
@@ -269,48 +269,48 @@ struct AuxVisual3D
 		shaderText3D.bind();
 
 		modelText = identityMatrix;
-		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(modelText, p.headingAngle, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		n.draw();
 
 		modelText = identityMatrix;
-		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(modelText, p.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 315, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		ne.draw();
 
 		modelText = identityMatrix;
-		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(modelText, p.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 270, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		e.draw();
 
 		modelText = identityMatrix;
-		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(modelText, p.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 225, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		se.draw();
 
 		modelText = identityMatrix;
-		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(modelText, p.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 180, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		s.draw();
 
 		modelText = identityMatrix;
-		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(modelText, p.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 135, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		sw.draw();
 
 		modelText = identityMatrix;
-		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(modelText, p.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 90, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		w.draw();
 
 		modelText = identityMatrix;
-		rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(modelText, p.headingAngle, { 0,1,0 });
 		rotate3DModelMatrix(modelText, 45, { 0,1,0 });
 		shaderText3D.setUniform("u_Model", modelText);
 		nw.draw();
@@ -320,7 +320,7 @@ struct AuxVisual3D
 		for (size_t i = 0; i < anglesCount; i++)
 		{
 			modelText = identityMatrix;
-			rotate3DModelMatrix(modelText, t.headingAngle, { 0,1,0 });
+			rotate3DModelMatrix(modelText, p.headingAngle, { 0,1,0 });
 			rotate3DModelMatrix(modelText, -currentAngle, { 0,1,0 });
 			shaderText3D.setUniform("u_Model", modelText);
 			angles[i].draw();
@@ -334,12 +334,12 @@ struct AuxVisual3D
 		shader3D.setUniform("u_fragmentMode", 1);
 
 		//sail is already at O
-		translate3DModelMatrix(linesModelMatrix, t.shipHeave);
+		translate3DModelMatrix(linesModelMatrix, p.shipHeave);
 		shader3D.setUniform("u_Model", linesModelMatrix);
 		shader3D.setUniform("u_Color", green, 1);
 		sailLine.draw();
 
-		translate3DModelMatrix(linesModelMatrix, -t.sailPositionVisual); //shipHeave still applied
+		translate3DModelMatrix(linesModelMatrix, -p.sailPositionVisual); //shipHeave still applied
 		shader3D.setUniform("u_Model", linesModelMatrix);
 		rudderLine.draw();
 
@@ -350,7 +350,7 @@ struct AuxVisual3D
 		shader3D.setUniform("u_Model", linesModelMatrix);
 		headingLine.draw();
 
-		rotate3DModelMatrix(linesModelMatrix, t.headingAngle, { 0,1,0 });
+		rotate3DModelMatrix(linesModelMatrix, p.headingAngle, { 0,1,0 });
 		shader3D.setUniform("u_Model", linesModelMatrix);
 		shader3D.setUniform("u_Color", blue, 1);
 		shipSpeedLine.draw();

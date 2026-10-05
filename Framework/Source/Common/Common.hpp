@@ -49,7 +49,7 @@ constexpr double inv3 = 1.0 / 3.0;
 constexpr double inv180 = 1.0 / 180.0;
 constexpr double sqrt2 = 1.41421356237;
 
-constexpr double rho = 1025.0;
+constexpr double rhoWater = 1025.0;
 constexpr double g = 9.80665;
 constexpr double eps = 1e-6;
 

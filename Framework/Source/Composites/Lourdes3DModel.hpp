@@ -8,11 +8,11 @@ struct Lourdes3DModel
 
 	Polyhedra casco, patines, vela, orza, soportes, timon;
 
-	Telemetry& t;
+	Parameters& p;
 
 
-	Lourdes3DModel(Telemetry& t_)
-		:t(t_)
+	Lourdes3DModel(Parameters& p_)
+		:p(p_)
 	{
 		/*stlToSimplePolyhedra("casco.stl", "casco.bin");
 		stlToSimplePolyhedra("patines.stl", "patines.bin");
@@ -39,9 +39,9 @@ struct Lourdes3DModel
 		{
 			std::array<float, 16> shipModelMatrix = identityMatrix;
 
-			//rotate3DModelMatrix(shipModelMatrix, t.headingAngle, { 0,1,0 });
-			translate3DModelMatrix(shipModelMatrix, -t.sailPositionVisual);
-			translate3DModelMatrix(shipModelMatrix, t.shipHeave);
+			//rotate3DModelMatrix(shipModelMatrix, p.headingAngle, { 0,1,0 });
+			translate3DModelMatrix(shipModelMatrix, -p.sailPositionVisual);
+			translate3DModelMatrix(shipModelMatrix, p.shipHeave);
 			shader3D.setUniform("u_Model", shipModelMatrix);
 
 
@@ -62,10 +62,10 @@ struct Lourdes3DModel
 		{
 			std::array<float, 16> rudderMatrix = identityMatrix;
 
-			//rotate3DModelMatrix(rudderMatrix, t.headingAngle, { 0,1,0 });
-			translate3DModelMatrix(rudderMatrix, -t.sailPositionVisual);
-			rotate3DModelMatrix(rudderMatrix, t.rudderAngle, { 0,1,0 });
-			translate3DModelMatrix(rudderMatrix, t.shipHeave);
+			//rotate3DModelMatrix(rudderMatrix, p.headingAngle, { 0,1,0 });
+			translate3DModelMatrix(rudderMatrix, -p.sailPositionVisual);
+			rotate3DModelMatrix(rudderMatrix, p.rudderAngle, { 0,1,0 });
+			translate3DModelMatrix(rudderMatrix, p.shipHeave);
 
 			shader3D.setUniform("u_Model", rudderMatrix);
 			shader3D.setUniform("u_Color", deepGrey, 1.0f);
@@ -79,10 +79,10 @@ struct Lourdes3DModel
 
 			std::array<float, 16> sailMatrix = identityMatrix;
 
-			//rotate3DModelMatrix(sailMatrix, t.headingAngle, { 0,1,0 });
-			//translate3DModelMatrix(sailMatrix, t.sailPositionVisual);
-			rotate3DModelMatrix(sailMatrix, t.sailAngle, { 0,1,0 });
-			translate3DModelMatrix(sailMatrix, t.shipHeave);
+			//rotate3DModelMatrix(sailMatrix, p.headingAngle, { 0,1,0 });
+			//translate3DModelMatrix(sailMatrix, p.sailPositionVisual);
+			rotate3DModelMatrix(sailMatrix, p.sailAngle, { 0,1,0 });
+			translate3DModelMatrix(sailMatrix, p.shipHeave);
 
 
 			shader3D.setUniform("u_Model", sailMatrix);

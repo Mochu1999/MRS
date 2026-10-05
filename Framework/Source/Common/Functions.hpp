@@ -81,6 +81,32 @@ void print_(const string& name, const vector<T>& items) {
 	cout << ss.str() << endl << endl;
 }
 
+//pair<T1,T2>
+template<typename T1, typename T2>
+void print_(const string& name, const pair<T1, T2>& item) {
+	stringstream ss;
+	ss << name << ": ";
+	ss << "{" << item.first << "," << item.second << "}";
+	cout << ss.str() << endl << endl;
+}
+
+//vector<pair<T1,T2>>
+template<typename T1, typename T2>
+void print_(const string& name, const vector<pair<T1, T2>>& items) {
+	stringstream ss;
+	ss << name << ": {";
+
+	for (size_t i = 0; i < items.size(); ++i) {
+		ss << "{" << items[i].first << "," << items[i].second << "}";
+
+		if (i != items.size() - 1) {
+			ss << ",";
+		}
+	}
+
+	cout << ss.str() << "}" << endl << endl;
+}
+
 //Armadillo
 //#include <armadillo>
 //inline void print_(const std::string& name, const arma::vec& v)

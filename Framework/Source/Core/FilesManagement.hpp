@@ -105,3 +105,7 @@ inline void writeVectorOfVectorsAscii(const std::vector<std::vector<p2>>& model)
 	outFile.close();
 }
 
+bool readEntryMatrixText(string& path, unsigned int row, unsigned int column, float& value);
+
+//reads the specific format from resistencia_jorge_ms.txt
+void readResistancesText(string path, vector<pair<float, float>>& hullResistances);

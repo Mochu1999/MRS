@@ -1,6 +1,6 @@
 #pragma once
 #include "Graphics.hpp"
-#include "Telemetry.hpp"
+#include "Parameters.hpp"
 
 #include "Route.hpp"
 #include "Axis.hpp"
@@ -23,7 +23,7 @@
 
 struct DataRoute
 {
-	Telemetry& t;
+	Parameters& p;
 
 	//box
 	Polygons2D box;
@@ -36,16 +36,16 @@ struct DataRoute
 	Lines2D courseLine;
 
 
-	DataRoute(Telemetry& t_) : t(t_)
+	DataRoute(Parameters& p_) : p(p_)
 	{
 		boxText.createAtlas(36, "resources/Glyphs/Helvetica/Helvetica.otf");
 		boxOutline.addSet(createRoundedSquare({ 80,370 }, 600, 380, 30));
 		box.addSet(createRoundedSquare({ 80,370 }, 600, 380, 30));
 
-		vector<p2> nodes = { t.position };
-		nodes.push_back(t.finishPoint);
+		vector<p2> nodes = { p.position };
+		nodes.push_back(p.finishPoint);
 		circlesNodes.addCircle(2500, lonLatToMercator(nodes), 100);
-		circleFinish.addCircle(5000, lonLatToMercator(t.finishPoint), 100);
+		circleFinish.addCircle(5000, lonLatToMercator(p.finishPoint), 100);
 		courseLine.addSet(lonLatToMercator(nodes));
 
 	}
@@ -66,14 +66,14 @@ struct DataRoute
 		shaderText.bind();
 		//ETA SHOULD USE AN AVERAGE shipSpeed
 		float eta;
-		if (magnitude2(t.shipSpeed) == 0) eta = std::numeric_limits<float>::quiet_NaN();
-		else eta = round1d(t.totalDistance / magnitude2(t.shipSpeed) / 3600);
+		if (magnitude2(p.shipSpeed) == 0) eta = std::numeric_limits<float>::quiet_NaN();
+		else eta = round1d(p.totalDistance / magnitude2(p.shipSpeed) / 3600);
 
 
 		boxText.addDynamicText({
-			{{ 100,700 }, "Ship coordinates:  ", lonLatToString(t.position)},
-			{ { 100,650 }, "Distance left:  ", round1d(t.totalDistance / 1000)," km"},
-			{ { 100,600 }, "shipSpeed: ", round1d(meterSecondToKnot(magnitude2(t.shipSpeed))) ,"  knots"},
+			{{ 100,700 }, "Ship coordinates:  ", lonLatToString(p.position)},
+			{ { 100,650 }, "Distance left:  ", round1d(p.totalDistance / 1000)," km"},
+			{ { 100,600 }, "shipSpeed: ", round1d(meterSecondToKnot(magnitude2(p.shipSpeed))) ,"  knots"},
 			{ { 100,550 }, "Estimated time left: ",eta," hours"},
 			{ { 100,500 }, "Errors:  N/A"}
 			});
@@ -108,11 +108,11 @@ struct Plots
 	PlotTime plotRudder;
 	ProgressBar pb;
 
-	Plots(Telemetry& t)
+	Plots(Parameters& p)
 	{
-		pb.createPB(&t.battery, p2{ 1350,700 }, "Battery");
-		plotSail.createPlot(&t.sailAngle, &t.tm.currentTime, { 1350,50 }, "sailAngle");
-		plotRudder.createPlot(&t.rudderAngle, &t.tm.currentTime, { 1350,350 }, "rudderAngle");
+		pb.createPB(&p.battery, p2{ 1350,700 }, "Battery");
+		plotSail.createPlot(&p.sailAngle, &p.tm.currentTime, { 1350,50 }, "sailAngle");
+		plotRudder.createPlot(&p.rudderAngle, &p.tm.currentTime, { 1350,350 }, "rudderAngle");
 
 	}
 
@@ -219,7 +219,7 @@ struct TelemetryUI
 	Shader& shaderWater;
 	Camera& camera;
 
-	Telemetry& t;
+	Parameters& p;
 
 	Buttons& buttons;
 	LoRa& lora;
@@ -244,9 +244,9 @@ struct TelemetryUI
 	Ship2DIcon icon;
 
 
-	TelemetryUI(Telemetry& telemetry_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Shader& shaderText3D_, Shader& shaderWater_, Camera& camera_, Buttons& buttons_, LoRa& lora_)
-		:t(telemetry_), shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), shaderText3D(shaderText3D_), shaderWater(shaderWater_), camera(camera_), buttons(buttons_)
-		, lourdesModel(t), fpsCounter(t.tm), dataRoute(t), plots(t), water(t), lora(lora_), loraUI(lora)
+	TelemetryUI(Parameters& p_, Shader& shader3D_, Shader& shader2D_, Shader& shader2DInstanced_, Shader& shaderText_, Shader& shaderText3D_, Shader& shaderWater_, Camera& camera_, Buttons& buttons_, LoRa& lora_)
+		:p(p_), shader3D(shader3D_), shader2D(shader2D_), shader2DInstanced(shader2DInstanced_), shaderText(shaderText_), shaderText3D(shaderText3D_), shaderWater(shaderWater_), camera(camera_), buttons(buttons_)
+		, lourdesModel(p), fpsCounter(p.tm), dataRoute(p), plots(p), water(p), lora(lora_), loraUI(lora)
 	{
 		//Ship
 		
@@ -277,7 +277,7 @@ struct TelemetryUI
 		{
 			world.draw(shader2D);
 			dataRoute.draw(world, shader2D, shaderText);
-			icon.draw(world, t, shader2D);
+			icon.draw(world, p, shader2D);
 		}
 		fpsCounter.draw(shaderText);
 
