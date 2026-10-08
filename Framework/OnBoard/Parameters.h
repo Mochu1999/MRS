@@ -1,4 +1,6 @@
 
+
+
 struct Parameters
 {
   // --- --- ---
@@ -8,6 +10,9 @@ struct Parameters
   //i2c
   int pinSDA = 16;
   int pinSCL = 17;
+  
+  //IMU
+  uint8_t addressIMU = 0x68;
 
   //Servo
   int pinServo = 13;
@@ -20,10 +25,9 @@ struct Parameters
   int pinLoRaRX = 22;
   int pinLoRaTX = 23;
 
-  //GPS uart
+  //GPS 
   int pinGPSRX = 15;
   int pinGPSTX = 2;
-
 
 
   // --- --- ---
@@ -33,7 +37,6 @@ struct Parameters
 	float rudderAngle = 0;
 
 
-  float gpsTimeMultiplier = 0.1;
 
   Parameters()
   {

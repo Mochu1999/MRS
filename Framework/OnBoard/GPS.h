@@ -1,7 +1,8 @@
 
 #include <Adafruit_GPS.h>
 
-//GGA updates things like HDOP/satellites while RMC updates speed/course, so you're currently potentially scoring a mixture of values from two different sentences.
+//Currently it doesn't distinguises between GGA (position, satellites, hdop) and RMC (speed and angle) from the nmea string
+//The criteria for deciding if  
 struct GPS
 {
   Parameters& p;
@@ -10,8 +11,8 @@ struct GPS
   Adafruit_GPS handle; 
 
 
-  //Variables are only stored as member variables when they score above the previous saved score accounting for how old it is
-  float score = 0; //from 0 to 1, ranks how good a saved set is 
+  //Variables are only stored as member variables when they score above the previous saved score*timeMultiplier
+  float score = 0; //from 0 to 1, ranks how good a saved set of data is
 
   unsigned long lastMeasureTime = 0;
   unsigned long elapsedTime = 0;
@@ -21,13 +22,13 @@ struct GPS
   float longitude = 0; //degrees
   float latitude = 0;
   float speed = 0; //GPS O DOPPLER?
-  float angle = 0; //RUTA O COMPASS?
+  float angle = 0; //RUTA O BRUJULA?
 
   //DEBUG VARIABLES TO IMPROVE THE ALGORITHM. TO COMMENT IN FINAL VERSION
   uint8_t satellites = 0;
   float hdop = 0;
 
-  //Variables to determine score
+  //Variables to determine score:
   //bool handle.fix: is the measurement valid
   //uint8_t handle.satellites: available satellites
   //uint8_t fixQuality: 0 no fix, 1 fix, 2 fix improved with external reference systems
