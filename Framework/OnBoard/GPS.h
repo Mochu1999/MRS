@@ -16,7 +16,7 @@ struct GPS
 
   unsigned long lastMeasureTime = 0;
   unsigned long elapsedTime = 0;
-  float timeHalfLife = 15000; //ms //for the timeMultiplier, which will be 1 if elapsed time is 0; 0.5 if it is timeHalfLife
+  float timeHalfLife = 30000; //ms //for the timeMultiplier, which will be 1 if elapsed time is 0; 0.5 if it is timeHalfLife
 
   //These 4 variables are the ones we are interested on processing
   float longitude = 0; //degrees
@@ -62,10 +62,14 @@ struct GPS
   GPS(Parameters& p_)
     :p(p_), serialPort(2), handle(&serialPort)
   {
-    serialPort.begin(9600, SERIAL_8N1, p.pinGPSRX, p.pinGPSTX);
-    handle.begin(9600);
+    begin();
   }
 
+  void begin()
+  {
+    serialPort.begin(9600, SERIAL_8N1, p.pinGPSRX, -1); //only input
+    handle.begin(9600);
+  }
   void update()
   {
     elapsedTime = millis() - lastMeasureTime;
@@ -74,29 +78,30 @@ struct GPS
     //Trying to constantly read the serial NMEA buffer is the intended implementation
     while(serialPort.available()) 
     {
+      handle.read();
       if(handle.newNMEAreceived())
+      {
+        if(handle.parse(handle.lastNMEA()))
         {
-          if(handle.parse(handle.lastNMEA()))
+          float newScore =calculateNewScore();
+          float timeMultiplier = pow(0.5f, elapsedTime / timeHalfLife);
+
+          if (newScore > score*timeMultiplier)
           {
-            float newScore =calculateNewScore();
-            float timeMultiplier = pow(0.5f, elapsedTime / timeHalfLife);
+            score = newScore;
+            lastMeasureTime = millis();
+            elapsedTime = 0;
 
-            if (newScore > score*timeMultiplier)
-              {
-                score = newScore;
-                lastMeasureTime = millis();
-                elapsedTime = 0;
+            longitude = handle.longitudeDegrees;
+            latitude = handle.latitudeDegrees;
+            speed = handle.speed * 0.514444f;
+            angle = handle.angle;
 
-                longitude = handle.longitudeDegrees;
-                latitude = handle.latitudeDegrees;
-                speed = handle.speed * 0.514444f;
-                angle = handle.angle;
-
-                satellites = handle.satellites;
-                hdop = handle.HDOP;
-            }
+            satellites = handle.satellites;
+            hdop = handle.HDOP;
           }
         }
+      }
     }
   }
 

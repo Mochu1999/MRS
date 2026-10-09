@@ -26,8 +26,7 @@ struct Parameters
   int pinLoRaTX = 23;
 
   //GPS 
-  int pinGPSRX = 15;
-  int pinGPSTX = 2;
+  int pinGPSRX = 34;
 
 
   // --- --- ---
